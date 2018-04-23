@@ -35,6 +35,11 @@ public class CommonMethods {
 		return String.format("%s.%s.%s.%s", ip[0] & 0x00FF, ip[1] & 0x00FF, ip[2] & 0x00FF, ip[3] & 0x00FF);
 	}
 
+	/**
+	 * ip转换为int
+	 * @param ip
+	 * @return
+	 */
 	public static int ipStringToInt(String ip) {
 		String[] arrayStrings = ip.split("\\.");
 		int r = (Integer.parseInt(arrayStrings[0]) << 24)

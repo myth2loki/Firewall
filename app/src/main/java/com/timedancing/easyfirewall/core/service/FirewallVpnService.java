@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.VpnService;
 import android.os.Handler;
 import android.os.ParcelFileDescriptor;
+import android.util.Log;
 
 import com.timedancing.easyfirewall.activity.MainActivity;
 import com.timedancing.easyfirewall.builder.HtmlBlockingInfoBuilder;
@@ -61,6 +62,7 @@ public class FirewallVpnService extends VpnService implements Runnable {
 		ID++;
 		mHandler = new Handler();
 		mPacket = new byte[20000];
+		//ip, tcp, dns共享mPacket数组
 		mIPHeader = new IPHeader(mPacket, 0);
 		//Offset = ip报文头部长度
 		mTCPHeader = new TCPHeader(mPacket, 20);
@@ -129,13 +131,20 @@ public class FirewallVpnService extends VpnService implements Runnable {
 				}
 				onIPPacketReceived(mIPHeader, size);
 			}
+			//非阻塞模式，休眠已节约电量
 			Thread.sleep(100);
 		}
 		in.close();
 		disconnectVPN();
 	}
 
-	void onIPPacketReceived(IPHeader ipHeader, int size) throws IOException {
+	/**
+	 * 收到IP包
+	 * @param ipHeader
+	 * @param size
+	 * @throws IOException
+	 */
+	private void onIPPacketReceived(IPHeader ipHeader, int size) throws IOException {
 
 		switch (ipHeader.getProtocol()) {
 			case IPHeader.TCP:
@@ -226,6 +235,11 @@ public class FirewallVpnService extends VpnService implements Runnable {
 		}
 	}
 
+	/**
+	 * 建立VPN服务
+	 * @return
+	 * @throws Exception
+	 */
 	private ParcelFileDescriptor establishVPN() throws Exception {
 		Builder builder = new Builder();
 		builder.setMtu(ProxyConfig.Instance.getMTU());
@@ -285,7 +299,9 @@ public class FirewallVpnService extends VpnService implements Runnable {
 
 			waitUntilPrepared();
 
+			//设置黑名单
 			ProxyConfig.Instance.setDomainFilter(new BlackListFilter());
+			//设置网页内容过滤
 			ProxyConfig.Instance.setBlockingInfoBuilder(new HtmlBlockingInfoBuilder());
 			ProxyConfig.Instance.prepare();
 
@@ -297,10 +313,13 @@ public class FirewallVpnService extends VpnService implements Runnable {
 			mDnsProxy.start();
 			DebugLog.i("DnsProxy started.\n");
 
+			//回调vpn启动
 			ProxyConfig.Instance.onVpnStart(this);
-			while (IsRunning) {
+			//TODO 多余
+//			while (IsRunning) {
 				runVPN();
-			}
+//			}
+			//回调vpn停止
 			ProxyConfig.Instance.onVpnEnd(this);
 
 		} catch (InterruptedException e) {

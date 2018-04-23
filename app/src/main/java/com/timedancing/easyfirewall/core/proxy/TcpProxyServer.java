@@ -21,20 +21,20 @@ import java.util.Iterator;
  * Created by zengzheying on 15/12/30.
  */
 public class TcpProxyServer implements Runnable {
+	private static final String TAG = "TcpProxyServer";
 
 	public boolean Stopped;
 	public short Port;
 
-	Selector mSelector;
-	ServerSocketChannel mServerSocketChannel;
-	Thread mServerThread;
+	private Selector mSelector;
+	private ServerSocketChannel mServerSocketChannel;
 
 	public TcpProxyServer(int port) throws IOException {
 		mSelector = Selector.open();
 		mServerSocketChannel = ServerSocketChannel.open();
 		mServerSocketChannel.configureBlocking(false);
 		mServerSocketChannel.socket().bind(new InetSocketAddress(port));
-		mServerSocketChannel.register(mSelector, SelectionKey.OP_ACCEPT);
+		mServerSocketChannel.register(mSelector, SelectionKey.OP_ACCEPT, mServerSocketChannel);
 		this.Port = (short) mServerSocketChannel.socket().getLocalPort();
 
 		DebugLog.i("AsyncTcpServer listen on %s:%d success.\n", mServerSocketChannel.socket().getInetAddress()
@@ -45,7 +45,7 @@ public class TcpProxyServer implements Runnable {
 	 * 启动TcpProxyServer线程
 	 */
 	public void start() {
-		mServerThread = new Thread(this, "TcpProxyServerThread");
+		Thread mServerThread = new Thread(this, "TcpProxyServerThread");
 		mServerThread.start();
 	}
 
@@ -77,6 +77,11 @@ public class TcpProxyServer implements Runnable {
 		}
 	}
 
+	/**
+	 * 04-22 02:48:31.518 24379-24428/com.timedancing.easyfirewall D/TcpProxyServer: run: onAccepted
+	 * 04-22 02:48:31.523 24379-24428/com.timedancing.easyfirewall D/TcpProxyServer: run: onConnectable
+	 * 04-22 02:48:31.524 24379-24428/com.timedancing.easyfirewall D/TcpProxyServer: run: onReadable
+	 */
 
 	@Override
 	public void run() {
@@ -89,12 +94,16 @@ public class TcpProxyServer implements Runnable {
 					if (key.isValid()) {
 						try {
 							if (key.isReadable()) {
+//								Log.d(TAG, "run: onReadable");
 								((Tunnel) key.attachment()).onReadable(key);
 							} else if (key.isWritable()) {
+//								Log.d(TAG, "run: onWritable");
 								((Tunnel) key.attachment()).onWritable(key);
 							} else if (key.isConnectable()) {
+//								Log.d(TAG, "run: onConnectable");
 								((Tunnel) key.attachment()).onConnectable();
 							} else if (key.isAcceptable()) {
+//								Log.d(TAG, "run: onAccepted");
 								onAccepted(key);
 							}
 						} catch (Exception ex) {
@@ -121,11 +130,11 @@ public class TcpProxyServer implements Runnable {
 		}
 	}
 
-	InetSocketAddress getDestAddress(SocketChannel localChannel) {
+	private InetSocketAddress getDestAddress(SocketChannel localChannel) {
 		short portKey = (short) localChannel.socket().getPort();
 		NatSession session = NatSessionManager.getSession(portKey);
 		if (session != null) {
-			if (ProxyConfig.Instance.needProxy(session.RemoteHost, session.RemoteIP)) {
+			if (ProxyConfig.Instance.filter(session.RemoteHost, session.RemoteIP)) {
 				//TODO 完成跟具体的拦截策略？？？
 				DebugLog.i("%d/%d:[BLOCK] %s=>%s:%d\n", NatSessionManager.getSessionCount(), Tunnel.SessionCount,
 						session.RemoteHost,
@@ -139,10 +148,16 @@ public class TcpProxyServer implements Runnable {
 		return null;
 	}
 
-	void onAccepted(SelectionKey key) {
+	/**
+	 * 连接成功
+	 * @param key
+	 */
+	private void onAccepted(SelectionKey key) {
 		Tunnel localTunnel = null;
 		try {
-			SocketChannel localChannel = mServerSocketChannel.accept();
+			//获取local server的通道
+//			SocketChannel localChannel = mServerSocketChannel.accept();
+			SocketChannel localChannel = ((ServerSocketChannel) key.attachment()).accept();
 			localTunnel = TunnelFactory.wrap(localChannel, mSelector);
 
 			InetSocketAddress destAddress = getDestAddress(localChannel);

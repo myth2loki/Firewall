@@ -38,7 +38,7 @@ public class NatSessionManager {
 	/**
 	 * 清除过期的会话
 	 */
-	static void clearExpiredSessions() {
+	private static void clearExpiredSessions() {
 		long now = System.nanoTime();
 		for (int i = Sessions.size() - 1; i >= 0; i--) {
 			NatSession session = Sessions.valueAt(i);

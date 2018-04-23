@@ -22,16 +22,16 @@ public class ProxyConfig {
 	public final static int FAKE_NETWORK_MASK = CommonMethods.ipStringToInt("255.255.0.0");
 	public final static int FAKE_NETWORK_IP = CommonMethods.ipStringToInt("10.231.0.0");
 
-	ArrayList<IPAddress> mIpList;
-	ArrayList<IPAddress> mDnsList;
-	ArrayList<IPAddress> mRouteList;
-	int mDnsTtl;
+	private ArrayList<IPAddress> mIpList;
+	private ArrayList<IPAddress> mDnsList;
+	private ArrayList<IPAddress> mRouteList;
+	private int mDnsTtl;
 
 //	HashMap<String, Boolean> mDomainMap;
-	String mSessionName;
-	int mMtu;
-	DomainFilter mDomainFilter;
-	BlockingInfoBuilder mBlockingInfoBuilder;
+	private String mSessionName;
+	private int mMtu;
+	private DomainFilter mDomainFilter;
+	private BlockingInfoBuilder mBlockingInfoBuilder;
 	private VpnStatusListener mVpnStatusListener;
 
 
@@ -99,7 +99,13 @@ public class ProxyConfig {
 		}
 	}
 
-	public boolean needProxy(String host, int ip) {
+	/**
+	 * 过滤地址
+	 * @param host 主机地址
+	 * @param ip ip地址
+	 * @return true代表被过滤，否则false
+	 */
+	public boolean filter(String host, int ip) {
 		boolean filter = mDomainFilter != null && mDomainFilter.needFilter(host, ip);
 		DebugLog.iWithTag("Debug", String.format("host %s ip %s %s", host, CommonMethods.ipIntToString(ip), filter));
 		return filter || isFakeIP(ip);
