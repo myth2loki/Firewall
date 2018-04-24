@@ -38,19 +38,19 @@ public class DnsHeader {
 	public byte[] mData;
 	public int mOffset;
 
-	public DnsHeader(byte[] data, int offset) {
+	private DnsHeader(byte[] data, int offset) {
 		mData = data;
 		mOffset = offset;
 	}
 
 	public static DnsHeader fromBytes(ByteBuffer buffer) {
 		DnsHeader header = new DnsHeader(buffer.array(), buffer.arrayOffset() + buffer.position());
-		header.ID = buffer.getShort();
+		header.ID = buffer.getShort(); // short 16bit
 		header.flags = DnsFlag.Parse(buffer.getShort());
-		header.QuestionCount = buffer.getShort();
-		header.ResourceCount = buffer.getShort();
-		header.AResourceCount = buffer.getShort();
-		header.EResourceCount = buffer.getShort();
+		header.QuestionCount = buffer.getShort(); //问题数
+		header.ResourceCount = buffer.getShort(); //资源记录数
+		header.AResourceCount = buffer.getShort(); //授权资源记录数
+		header.EResourceCount = buffer.getShort(); //额外资源记录数
 		return header;
 	}
 

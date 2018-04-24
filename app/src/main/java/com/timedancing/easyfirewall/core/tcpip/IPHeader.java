@@ -54,6 +54,9 @@ public class IPHeader {
 		mOffset = offset;
 	}
 
+	/**
+	 * 写入默认值
+	 */
 	public void Default() {
 		setHeaderLength(20);
 		setTos((byte) 0);

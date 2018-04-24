@@ -27,6 +27,9 @@ import java.util.regex.Pattern;
 public class BlackListFilter implements DomainFilter {
 
 	private Map<String, Integer> mDomainMap = new HashMap<>();
+	/**
+	 * 需过滤的ip地址集合
+	 */
 	private SparseIntArray mIpMask = new SparseIntArray();
 
 	@Override
@@ -73,31 +76,29 @@ public class BlackListFilter implements DomainFilter {
 	}
 
 	@Override
-	public boolean needFilter(String domain, int ip) {
-
-		if (domain == null) {
+	public boolean needFilter(String ipAddress, int ip) {
+		if (ipAddress == null) {
 			return false;
 		}
 
-		boolean filter = false;
-		if (mIpMask.get(ip, -1) == 1) {
-			filter = true;
+		boolean isFiltered = mIpMask.get(ip, -1) == 1;
+		ipAddress = ipAddress.trim();
+		if (Pattern.matches("\\d+\\.\\d+\\.\\d+\\.\\d+", ipAddress)) { //判断符合ip地址格式
+			int newIp = CommonMethods.ipStringToInt(ipAddress);
+			isFiltered = isFiltered || (mIpMask.get(newIp, -1) == 1);
 		}
-		if (Pattern.matches("\\d+\\.\\d+\\.\\d+\\.\\d+", domain.trim())) {
-			int newIp = CommonMethods.ipStringToInt(domain.trim());
-			filter = filter || (mIpMask.get(newIp, -1) == 1);
-		}
-		String key = domain.trim();
+		String key = ipAddress;
 		if (mDomainMap.containsKey(key)) {
-			filter = true;
+			isFiltered = true;
 			int oldIP = mDomainMap.get(key);
+			//发现域名下的新ip，保存到集合中
 			if (!ProxyConfig.isFakeIP(ip) && ip != oldIP) {
 				mDomainMap.put(key, ip);
 				mIpMask.put(ip, 1);
 			}
 		}
 
-		return filter;
+		return isFiltered;
 	}
 
 	private InputStream getHostInputStream() {

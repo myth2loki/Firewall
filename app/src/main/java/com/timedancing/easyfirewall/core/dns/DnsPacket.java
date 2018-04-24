@@ -42,6 +42,11 @@ public class DnsPacket {
 
 	public int Size;
 
+	/**
+	 * 构造DnsPacket实例
+	 * @param buffer 用于构造的数据
+	 * @return DnsPacket实例 或者 null如果buffer大小 < 12 or > 512
+	 */
 	public static DnsPacket fromBytes(ByteBuffer buffer) {
 		if (buffer.limit() < 12) {
 			return null;
@@ -60,6 +65,7 @@ public class DnsPacket {
 			return null;
 		}
 
+		//申请记录问题和资源数的数组空间
 		packet.Questions = new Question[packet.Header.QuestionCount];
 		packet.Resources = new Resource[packet.Header.ResourceCount];
 		packet.AResources = new Resource[packet.Header.AResourceCount];

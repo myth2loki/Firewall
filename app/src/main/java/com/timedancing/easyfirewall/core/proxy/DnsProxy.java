@@ -30,6 +30,9 @@ public class DnsProxy implements Runnable {
 	private static final ConcurrentHashMap<Integer, String> IPDomainMaps = new ConcurrentHashMap<>();
 	private static final ConcurrentHashMap<String, Integer> DomainIPMaps = new ConcurrentHashMap<>();
 	private final long QUERY_TIMEOUT_NS = 10 * 1000 * 1000 * 1000L;
+	/**
+	 * 保存dns查询状态
+	 */
 	private final SparseArray<QueryState> mQueryArray;
 	public boolean Stopped;
 	private DatagramSocket mClient;
@@ -75,26 +78,28 @@ public class DnsProxy implements Runnable {
 	@Override
 	public void run() {
 		try {
-			byte[] RECEIVE_BUFFER = new byte[20000];
-			IPHeader ipHeader = new IPHeader(RECEIVE_BUFFER, 0);
+			byte[] buff = new byte[20000];
+			IPHeader ipHeader = new IPHeader(buff, 0);
 			ipHeader.Default();
 			int ipHeaderLength = 20;
-			UDPHeader udpHeader = new UDPHeader(RECEIVE_BUFFER, ipHeaderLength);
+			UDPHeader udpHeader = new UDPHeader(buff, ipHeaderLength);
 
 			int udpHeaderLenght = 8;
-			ByteBuffer dnsBuffer = ByteBuffer.wrap(RECEIVE_BUFFER);
+			ByteBuffer dnsBuffer = ByteBuffer.wrap(buff);
 			dnsBuffer.position(ipHeaderLength + udpHeaderLenght);
-			dnsBuffer = dnsBuffer.slice();
+			dnsBuffer = dnsBuffer.slice(); //去除ip和udp头部
 
-			DatagramPacket packet = new DatagramPacket(RECEIVE_BUFFER, 28, RECEIVE_BUFFER.length - (ipHeaderLength +
+			//不包含头部信息
+			DatagramPacket packet = new DatagramPacket(buff, 28, buff.length - (ipHeaderLength +
 					udpHeaderLenght));
 
 			while (mClient != null && !mClient.isClosed()) {
-				packet.setLength(RECEIVE_BUFFER.length - (ipHeaderLength + udpHeaderLenght));
-				mClient.receive(packet);
+				//不包含头部信息，减去ip和udp头部长度
+				packet.setLength(buff.length - (ipHeaderLength + udpHeaderLenght));
+				mClient.receive(packet); //获取udp数据
 
 				dnsBuffer.clear();
-				dnsBuffer.limit(packet.getLength());
+				dnsBuffer.limit(packet.getLength()); //设置dnsBuffer的长度
 				try {
 					DnsPacket dnsPacket = DnsPacket.fromBytes(dnsBuffer);
 					if (dnsPacket != null) {
@@ -136,6 +141,12 @@ public class DnsProxy implements Runnable {
 		return 0;
 	}
 
+	/**
+	 * 构造dns response信息
+	 * @param rawPacket dns数据
+	 * @param dnsPacket dns packet
+	 * @param newIP 返回的ip地址
+	 */
 	private void tamperDnsResponse(byte[] rawPacket, DnsPacket dnsPacket, int newIP) {
 		Question question = dnsPacket.Questions[0]; //DNS的一个问题
 
@@ -150,6 +161,7 @@ public class DnsProxy implements Runnable {
 		// 其实在DNS查询的时候，这里的rawPacket时LocalVpnService的m_Packet数组的空间
 		// 在DNS回复的时候，这里的rawPacket其实是本类run方法的RECEIVE_BUFFER数组的空间
 		// 两者的空间都足够大，所以不用增加数组空间
+		//TODO 单纯的写入数据，为何另外创建一个类
 		ResourcePointer resourcePointer = new ResourcePointer(rawPacket, question.Offset() + question.Length());
 		resourcePointer.setDomain((short) 0xC00C); //指针，指向问题区的域名
 		resourcePointer.setType(question.Type);
@@ -196,8 +208,10 @@ public class DnsProxy implements Runnable {
 			Question question = dnsPacket.Questions[0];
 			if (question.Type == 1) {
 				int realIP = getFirstIP(dnsPacket);
+				//过滤
 				if (ProxyConfig.Instance.filter(question.Domain, realIP)) {
 					int fakeIP = getOrCreateFakeIP(question.Domain);
+					//使用fakeIp
 					tamperDnsResponse(rawPacket, dnsPacket, fakeIP);
 
 					DebugLog.i("FakeDns: %s=>%s(%s)\n", question.Domain, CommonMethods.ipIntToString(realIP),
@@ -241,6 +255,8 @@ public class DnsProxy implements Runnable {
 			udpHeader.setTotalLength(8 + dnsPacket.Size);
 
 			VpnServiceHelper.sendUDPPacket(ipHeader, udpHeader);
+		} else {
+			throw new IllegalStateException("can not get state from mQueryArray");
 		}
 	}
 
@@ -328,7 +344,7 @@ public class DnsProxy implements Runnable {
 
 			synchronized (mQueryArray) {
 				clearExpiredQueries(); //清空过期的查询，减少内存消耗
-				mQueryArray.put(mQueryID, state);  //关联数据
+				mQueryArray.put(mQueryID, state);  //保存关联数据
 			}
 
 			//应该是DNS服务器的地址和端口
