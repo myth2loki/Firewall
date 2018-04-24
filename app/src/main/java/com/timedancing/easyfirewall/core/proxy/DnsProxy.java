@@ -317,7 +317,7 @@ public class DnsProxy implements Runnable {
 	private void clearExpiredQueries() {
 		long now = System.nanoTime();
 		for (int i = mQueryArray.size() - 1; i >= 0; i--) {
-			QueryState state = mQueryArray.valueAt(i);
+//			QueryState state = mQueryArray.valueAt(i);
 			if ((now - System.nanoTime()) > QUERY_TIMEOUT_NS) {
 				mQueryArray.removeAt(i);
 			}
@@ -331,14 +331,14 @@ public class DnsProxy implements Runnable {
 		if (!interceptDns(ipHeader, udpHeader, dnsPacket)) {
 			//转发DNS
 			QueryState state = new QueryState();
-			state.mClientQueryID = dnsPacket.Header.ID;
+			state.mClientQueryID = dnsPacket.Header.ID; //标示
 			state.mQueryNanoTime = System.nanoTime();
-			state.mClientIP = ipHeader.getSourceIP();
-			state.mClientPort = udpHeader.getSourcePort();
-			state.mRemoteIP = ipHeader.getDestinationIP();
-			state.mRemotePort = udpHeader.getDestinationPort();
+			state.mClientIP = ipHeader.getSourceIP(); //源ip
+			state.mClientPort = udpHeader.getSourcePort(); //源端口
+			state.mRemoteIP = ipHeader.getDestinationIP(); //目的ip
+			state.mRemotePort = udpHeader.getDestinationPort(); //目的端口
 
-			//转换QueryID
+			//转换QueryID //TODO 溢出
 			mQueryID++;
 			dnsPacket.Header.setID(mQueryID);
 
@@ -355,6 +355,7 @@ public class DnsProxy implements Runnable {
 			packet.setSocketAddress(remoteAddress);
 
 			try {
+				//TODO 保护socket不被vpn拦截
 				if (VpnServiceHelper.protect(mClient)) {
 					//使用DatagramSocket发送DatagramPacket，读取也是用该DatagramSocket
 					mClient.send(packet);
