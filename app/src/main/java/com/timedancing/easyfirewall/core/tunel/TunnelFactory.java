@@ -17,7 +17,7 @@ public class TunnelFactory {
 		Tunnel tunnel = new RawTunnel(channel, selector);
 		NatSession session = NatSessionManager.getSession((short) channel.socket().getPort());
 		if (session != null) {
-			tunnel.setIsHttpsRequest(session.IsHttpsSession);
+			tunnel.setIsHttpsRequest(session.isHttpsSession);
 		}
 		return tunnel;
 	}

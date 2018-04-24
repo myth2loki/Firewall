@@ -39,6 +39,7 @@ import de.greenrobot.event.EventBus;
  * Created by zengzheying on 15/12/28.
  */
 public class FirewallVpnService extends VpnService implements Runnable {
+	private static final String TAG = "FirewallVpnService";
 
 	private static int ID;
 	private static int LOCAL_IP;
@@ -125,7 +126,7 @@ public class FirewallVpnService extends VpnService implements Runnable {
 		int size = 0;
 		while (size != -1 && IsRunning) {
 			while ((size = in.read(mPacket)) > 0 && IsRunning) {
-				if (mDnsProxy.Stopped || mTcpProxyServer.Stopped) {
+				if (mDnsProxy.isStopped() || mTcpProxyServer.isStopped()) {
 					in.close();
 					throw new Exception("LocalServer stopped.");
 				}
@@ -150,12 +151,12 @@ public class FirewallVpnService extends VpnService implements Runnable {
 			case IPHeader.TCP:
 				TCPHeader tcpHeader = mTCPHeader;
 				tcpHeader.mOffset = ipHeader.getHeaderLength(); //矫正TCPHeader里的偏移量，使它指向真正的TCP数据地址
-				if (tcpHeader.getSourcePort() == mTcpProxyServer.Port) {
+				if (tcpHeader.getSourcePort() == mTcpProxyServer.getPort()) { //来自tcp proxy的接收包
 
 					NatSession session = NatSessionManager.getSession(tcpHeader.getDestinationPort());
 					if (session != null) {
 						ipHeader.setSourceIP(ipHeader.getDestinationIP());
-						tcpHeader.setSourcePort(session.RemotePort);
+						tcpHeader.setSourcePort(session.remotePort);
 						ipHeader.setDestinationIP(LOCAL_IP);
 
 						CommonMethods.ComputeTCPChecksum(ipHeader, tcpHeader);
@@ -169,38 +170,41 @@ public class FirewallVpnService extends VpnService implements Runnable {
 
 					//添加端口映射
 					int portKey = tcpHeader.getSourcePort();
+					if (portKey == 53) {
+						Log.d(TAG, "onIPPacketReceived: tcp port = " + portKey);
+					}
 					NatSession session = NatSessionManager.getSession(portKey);
-					if (session == null || session.RemoteIP != ipHeader.getDestinationIP() || session.RemotePort
+					if (session == null || session.remoteIP != ipHeader.getDestinationIP() || session.remotePort
 							!= tcpHeader.getDestinationPort()) {
 						session = NatSessionManager.createSession(portKey, ipHeader.getDestinationIP(), tcpHeader
 								.getDestinationPort());
 					}
 
-					session.LastNanoTime = System.nanoTime();
-					session.PacketSent++; //注意顺序
+					session.lastNanoTime = System.nanoTime();
+					session.packetSent++; //注意顺序
 
 					int tcpDataSize = ipHeader.getDataLength() - tcpHeader.getHeaderLength();
-					if (session.PacketSent == 2 && tcpDataSize == 0) {
-						return; //丢弃tcp握手的第二个ACK报文。因为客户端发数据的时候也会带上ACK，这样可以在服务器Accept之前分析出HOST信息。
-					}
+//					if (session.packetSent == 2 && tcpDataSize == 0) {
+//						return; //丢弃tcp握手的第二个ACK报文。因为客户端发数据的时候也会带上ACK，这样可以在服务器Accept之前分析出HOST信息。
+//					}
 
 					//分析数据，找到host
-					if (session.BytesSent == 0 && tcpDataSize > 10) {
+					if (session.bytesSent == 0 && tcpDataSize > 10) {
 						int dataOffset = tcpHeader.mOffset + tcpHeader.getHeaderLength();
 						HttpRequestHeaderParser.parseHttpRequestHeader(session, tcpHeader.mData, dataOffset,
 								tcpDataSize);
-						DebugLog.i("Host: %s\n", session.RemoteHost);
-						DebugLog.i("Request: %s %s\n", session.Method, session.RequestUrl);
+						DebugLog.i("Host: %s\n", session.remoteHost);
+						DebugLog.i("Request: %s %s\n", session.method, session.requestUrl);
 					}
 
 					//转发给本地TCP服务器
 					ipHeader.setSourceIP(ipHeader.getDestinationIP());
 					ipHeader.setDestinationIP(LOCAL_IP);
-					tcpHeader.setDestinationPort(mTcpProxyServer.Port);
+					tcpHeader.setDestinationPort(mTcpProxyServer.getPort());
 
 					CommonMethods.ComputeTCPChecksum(ipHeader, tcpHeader);
 					mVPNOutputStream.write(ipHeader.mData, ipHeader.mOffset, size);
-					session.BytesSent += tcpDataSize; //注意顺序
+					session.bytesSent += tcpDataSize; //注意顺序
 					mSentBytes += size;
 				}
 				break;

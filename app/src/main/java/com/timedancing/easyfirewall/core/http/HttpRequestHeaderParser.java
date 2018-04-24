@@ -1,6 +1,7 @@
 package com.timedancing.easyfirewall.core.http;
 
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.timedancing.easyfirewall.constant.AppDebug;
 import com.timedancing.easyfirewall.core.nat.NatSession;
@@ -13,6 +14,7 @@ import java.util.Locale;
  * Created by zengzheying on 15/12/30.
  */
 public class HttpRequestHeaderParser {
+	private static final String TAG = "HttpRequestHeaderParser";
 
 	public static void parseHttpRequestHeader(NatSession session, byte[] buffer, int offset, int count) {
 		try {
@@ -28,7 +30,8 @@ public class HttpRequestHeaderParser {
 					getHttpHostAndRequestUrl(session, buffer, offset, count);
 					break;
 				case 0x16: //SSL
-					session.RemoteHost = getSNI(session, buffer, offset, count);
+					session.remoteHost = getSNI(session, buffer, offset, count);
+					Log.d(TAG, "parseHttpRequestHeader: ssl host = " + session.remoteHost);
 					break;
 			}
 		} catch (Exception ex) {
@@ -39,19 +42,31 @@ public class HttpRequestHeaderParser {
 		}
 	}
 
-	public static void getHttpHostAndRequestUrl(NatSession session, byte[] buffer, int offset, int count) {
-		session.IsHttpsSession = false;
+	/**
+	 * 解析http host, 请求url和method
+	 * @param session
+	 * @param buffer
+	 * @param offset
+	 * @param count
+	 */
+	private static void getHttpHostAndRequestUrl(NatSession session, byte[] buffer, int offset, int count) {
+		session.isHttpsSession = false;
 		String headerString = new String(buffer, offset, count);
 		String[] headerLines = headerString.split("\\r\\n");
 		String host = getHttpHost(headerLines);
+		Log.d(TAG, "getHttpHostAndRequestUrl: host = " + host);
 		if (!TextUtils.isEmpty(host)) {
-			session.RemoteHost = host;
+			session.remoteHost = host;
 		}
 		paresRequestLine(session, headerLines[0]);
 	}
 
-	public static String getHttpHost(String[] headerLines) {
-
+	/**
+	 * 解析http host
+	 * @param headerLines
+	 * @return
+	 */
+	private static String getHttpHost(String[] headerLines) {
 		String requestLine = headerLines[0];
 		if (requestLine.startsWith("GET") || requestLine.startsWith("POST") || requestLine.startsWith("HEAD")
 				|| requestLine.startsWith("OPTIONS")) {
@@ -69,21 +84,35 @@ public class HttpRequestHeaderParser {
 		return null;
 	}
 
-	public static void paresRequestLine(NatSession session, String requestLine) {
+	/**
+	 * 解析method，请求url
+	 * @param session
+	 * @param requestLine
+	 */
+	private static void paresRequestLine(NatSession session, String requestLine) {
 		String[] parts = requestLine.trim().split(" ");
 		if (parts.length == 3) {
-			session.Method = parts[0];
+			session.method = parts[0];
 			String url = parts[1];
 			if (url.startsWith("/")) {
-				session.RequestUrl = session.RemoteHost + url;
+				session.requestUrl = session.remoteHost + url;
 			} else {
-				session.RequestUrl = url;
+				session.requestUrl = url;
 			}
 		}
 	}
 
-	public static String getSNI(NatSession session, byte[] buffer, int offset, int count) {
+	//offset为tcp包的开始位置 https://blog.csdn.net/makenothing/article/details/53292335
+	//https://blog.csdn.net/hpp205/article/details/48995235
+	private static String getSNI(NatSession session, byte[] buffer, int offset, int count) {
 		int limit = offset + count;
+		/**
+		 0x14	20	ChangeCipherSpec
+		 0x15	21	Alert
+		 0x16	22	Handshake
+		 0x17	23	Application
+		 0x18	24	Heartbeat
+		 */
 		if (count > 43 && buffer[offset] == 0x16) { //TLS Client Hello
 			offset += 43; //Skip 43 byte header
 
@@ -140,7 +169,7 @@ public class HttpRequestHeaderParser {
 					}
 					String serverName = new String(buffer, offset, length);
 					DebugLog.i("SNI: %s\n", serverName);
-					session.IsHttpsSession = true;
+					session.isHttpsSession = true;
 					return serverName;
 				} else {
 					offset += length;

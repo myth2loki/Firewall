@@ -23,8 +23,8 @@ import java.util.Iterator;
 public class TcpProxyServer implements Runnable {
 	private static final String TAG = "TcpProxyServer";
 
-	public boolean Stopped;
-	public short Port;
+	private boolean mStopped;
+	private short mPort;
 
 	private Selector mSelector;
 	private ServerSocketChannel mServerSocketChannel;
@@ -35,10 +35,10 @@ public class TcpProxyServer implements Runnable {
 		mServerSocketChannel.configureBlocking(false);
 		mServerSocketChannel.socket().bind(new InetSocketAddress(port));
 		mServerSocketChannel.register(mSelector, SelectionKey.OP_ACCEPT, mServerSocketChannel);
-		this.Port = (short) mServerSocketChannel.socket().getLocalPort();
+		this.mPort = (short) mServerSocketChannel.socket().getLocalPort();
 
 		DebugLog.i("AsyncTcpServer listen on %s:%d success.\n", mServerSocketChannel.socket().getInetAddress()
-				.toString(), this.Port & 0xFFFF);
+				.toString(), this.mPort & 0xFFFF);
 	}
 
 	/**
@@ -50,7 +50,7 @@ public class TcpProxyServer implements Runnable {
 	}
 
 	public void stop() {
-		this.Stopped = true;
+		this.mStopped = true;
 		if (mSelector != null) {
 			try {
 				mSelector.close();
@@ -134,15 +134,15 @@ public class TcpProxyServer implements Runnable {
 		short portKey = (short) localChannel.socket().getPort();
 		NatSession session = NatSessionManager.getSession(portKey);
 		if (session != null) {
-			if (ProxyConfig.Instance.filter(session.RemoteHost, session.RemoteIP)) {
+			if (ProxyConfig.Instance.filter(session.remoteHost, session.remoteIP)) {
 				//TODO 完成跟具体的拦截策略？？？
 				DebugLog.i("%d/%d:[BLOCK] %s=>%s:%d\n", NatSessionManager.getSessionCount(), Tunnel.SessionCount,
-						session.RemoteHost,
-						CommonMethods.ipIntToString(session.RemoteIP), session.RemotePort & 0xFFFF);
+						session.remoteHost,
+						CommonMethods.ipIntToString(session.remoteIP), session.remotePort & 0xFFFF);
 
 				return null;
 			} else {
-				return new InetSocketAddress(localChannel.socket().getInetAddress(), session.RemotePort & 0xFFFF);
+				return new InetSocketAddress(localChannel.socket().getInetAddress(), session.remotePort & 0xFFFF);
 			}
 		}
 		return null;
@@ -172,9 +172,9 @@ public class TcpProxyServer implements Runnable {
 				short portKey = (short) localChannel.socket().getPort();
 				NatSession session = NatSessionManager.getSession(portKey);
 				if (session != null) {
-					DebugLog.i("Have block a request to %s=>%s:%d", session.RemoteHost, CommonMethods.ipIntToString
-									(session.RemoteIP),
-							session.RemotePort & 0xFFFF);
+					DebugLog.i("Have block a request to %s=>%s:%d", session.remoteHost, CommonMethods.ipIntToString
+									(session.remoteIP),
+							session.remotePort & 0xFFFF);
 					localTunnel.sendBlockInformation();
 				} else {
 					DebugLog.i("Error: socket(%s:%d) have no session.", localChannel.socket().getInetAddress()
@@ -194,5 +194,13 @@ public class TcpProxyServer implements Runnable {
 				localTunnel.dispose();
 			}
 		}
+	}
+
+	public boolean isStopped() {
+		return mStopped;
+	}
+
+	public short getPort() {
+		return mPort;
 	}
 }

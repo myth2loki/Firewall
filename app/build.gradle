@@ -36,59 +36,59 @@ android {
 			proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
 			signingConfig signingConfigs.release
 
-			applicationVariants.all { variant ->
-				variant.outputs.each { output ->
-					def outputFile = output.outputFile
-					if (outputFile != null && outputFile.name.endsWith('.apk')) {
-						def fileName = "网页防火墙_${rootProject.ext.versionName}_${variant.productFlavors[0].name}.apk"
-						output.outputFile = new File(outputFile.parent, fileName)
-					}
-				}
-			}
+//			applicationVariants.all { variant ->
+//				variant.outputs.each { output ->
+//					def outputFile = output.outputFile
+//					if (outputFile != null && outputFile.name.endsWith('.apk')) {
+//						def fileName = "网页防火墙_${rootProject.ext.versionName}_${variant.productFlavors[0].name}.apk"
+//						output.outputFile = new File(outputFile.parent, fileName)
+//					}
+//				}
+//			}
 		}
 	}
 
-	productFlavors {
-		DebugChannel {
-			manifestPlaceholders = [CHANNEL_NAME: "DebugChannel"]
-		}
-		ThreeSixZero {
-			manifestPlaceholders = [CHANNEL_NAME: "360Market"]
-		}
-		Baidu {
-			manifestPlaceholders = [CHANNEL_NAME: "Baidu"]
-		}
-		NineOneMobile {
-			manifestPlaceholders = [CHANNEL_NAME: "91Market"]
-		}
-		AndroidMarket {
-			manifestPlaceholders = [CHANNEL_NAME: "AndroidMarket"]
-		}
-		Meizu {
-			manifestPlaceholders = [CHANNEL_NAME: "Meizu"]
-		}
-		ShouGou {
-			manifestPlaceholders = [CHANNEL_NAME: "ShouGou"]
-		}
-		WanDouJia {
-			manifestPlaceholders = [CHANNEL_NAME: "WanDouJia"]
-		}
-		XiaoMi {
-			manifestPlaceholders = [CHANNEL_NAME: "XiaoMi"]
-		}
-		YingYongBao {
-			manifestPlaceholders = [CHANNEL_NAME: "YingYongBao"]
-		}
-		ThreeGMenHu {
-			manifestPlaceholders = [CHANNEL_NAME: "3GMenHu"]
-		}
-		AnZhiMarket {
-			manifestPlaceholders = [CHANNEL_NAME: "AnZhiMarket"]
-		}
-		Nduo {
-			manifestPlaceholders = [CHANNEL_NAME: "Nduo"]
-		}
-	}
+//	productFlavors {
+//		DebugChannel {
+//			manifestPlaceholders = [CHANNEL_NAME: "DebugChannel"]
+//		}
+//		ThreeSixZero {
+//			manifestPlaceholders = [CHANNEL_NAME: "360Market"]
+//		}
+//		Baidu {
+//			manifestPlaceholders = [CHANNEL_NAME: "Baidu"]
+//		}
+//		NineOneMobile {
+//			manifestPlaceholders = [CHANNEL_NAME: "91Market"]
+//		}
+//		AndroidMarket {
+//			manifestPlaceholders = [CHANNEL_NAME: "AndroidMarket"]
+//		}
+//		Meizu {
+//			manifestPlaceholders = [CHANNEL_NAME: "Meizu"]
+//		}
+//		ShouGou {
+//			manifestPlaceholders = [CHANNEL_NAME: "ShouGou"]
+//		}
+//		WanDouJia {
+//			manifestPlaceholders = [CHANNEL_NAME: "WanDouJia"]
+//		}
+//		XiaoMi {
+//			manifestPlaceholders = [CHANNEL_NAME: "XiaoMi"]
+//		}
+//		YingYongBao {
+//			manifestPlaceholders = [CHANNEL_NAME: "YingYongBao"]
+//		}
+//		ThreeGMenHu {
+//			manifestPlaceholders = [CHANNEL_NAME: "3GMenHu"]
+//		}
+//		AnZhiMarket {
+//			manifestPlaceholders = [CHANNEL_NAME: "AnZhiMarket"]
+//		}
+//		Nduo {
+//			manifestPlaceholders = [CHANNEL_NAME: "Nduo"]
+//		}
+//	}
 }
 
 File propFile = file("sign.properties");

@@ -34,7 +34,7 @@ public class DnsProxy implements Runnable {
 	 * 保存dns查询状态
 	 */
 	private final SparseArray<QueryState> mQueryArray;
-	public boolean Stopped;
+	private boolean mStopped;
 	private DatagramSocket mClient;
 	private Thread mReceivedThread;
 	private short mQueryID;
@@ -67,7 +67,7 @@ public class DnsProxy implements Runnable {
 	 * 停止线程
 	 */
 	public void stop() {
-		Stopped = true;
+		mStopped = true;
 		if (mClient != null) {
 			mClient.close();
 			mClient = null;
@@ -371,6 +371,10 @@ public class DnsProxy implements Runnable {
 				DebugLog.e("Send Dns Request Package catch an exception %s\n", e);
 			}
 		}
+	}
+
+	public boolean isStopped() {
+		return mStopped;
 	}
 
 	private static class QueryState {

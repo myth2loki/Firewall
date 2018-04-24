@@ -42,7 +42,7 @@ public class NatSessionManager {
 		long now = System.nanoTime();
 		for (int i = Sessions.size() - 1; i >= 0; i--) {
 			NatSession session = Sessions.valueAt(i);
-			if (now - session.LastNanoTime > SESSION_TIME_OUT_NS) {
+			if (now - session.lastNanoTime > SESSION_TIME_OUT_NS) {
 				Sessions.removeAt(i);
 			}
 		}
@@ -62,16 +62,16 @@ public class NatSessionManager {
 		}
 
 		NatSession session = new NatSession();
-		session.LastNanoTime = System.nanoTime();
-		session.RemoteIP = remoteIP;
-		session.RemotePort = remotePort;
+		session.lastNanoTime = System.nanoTime();
+		session.remoteIP = remoteIP;
+		session.remotePort = remotePort;
 
 		if (ProxyConfig.isFakeIP(remoteIP)) {
-			session.RemoteHost = DnsProxy.reverseLookup(remoteIP);
+			session.remoteHost = DnsProxy.reverseLookup(remoteIP);
 		}
 
-		if (session.RemoteHost == null) {
-			session.RemoteHost = CommonMethods.ipIntToString(remoteIP);
+		if (session.remoteHost == null) {
+			session.remoteHost = CommonMethods.ipIntToString(remoteIP);
 		}
 
 		Sessions.put(portKey, session);
