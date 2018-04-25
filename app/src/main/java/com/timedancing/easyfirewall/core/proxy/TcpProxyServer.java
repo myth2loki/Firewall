@@ -159,7 +159,7 @@ public class TcpProxyServer implements Runnable {
 //			SocketChannel localChannel = mServerSocketChannel.accept();
 			SocketChannel localChannel = ((ServerSocketChannel) key.attachment()).accept();
 			//tcp代理服务器有连接进来
-			localTunnel = TunnelFactory.wrap(localChannel, mSelector); //TODO 为何要调用wrap方法？
+			localTunnel = TunnelFactory.wrap(localChannel, mSelector); //TODO 为何要调用wrap方法？ 因为需要将连接方和受vpn保护的socket配对
 
 			//有连接连进来，获取到目的地址。其实就是连接方地址
 			InetSocketAddress destAddress = getDestAddress(localChannel);

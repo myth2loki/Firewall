@@ -192,6 +192,28 @@ public abstract class Tunnel {
 		}
 	}
 
+	public void onWritable(SelectionKey key) {
+		try {
+			this.beforeSend(mSendRemainBuffer); //发送之前，先让子类处理，例如做加密等
+			if (this.write(mSendRemainBuffer, false)) { //如果剩余数据已经发送完毕
+				key.cancel();
+				if (isTunnelEstablished()) {
+					mBrotherTunnel.beginReceived(); //这边数据发送完毕，通知兄弟可以收数据了
+				} else {
+					this.beginReceived(); //开始接受代理服务器的响应数据
+				}
+			}
+		} catch (Exception ex) {
+			if (AppDebug.IS_DEBUG) {
+				ex.printStackTrace(System.err);
+			}
+
+			DebugLog.e("onWritable catch an exception: %s", ex);
+
+			this.dispose();
+		}
+	}
+
 	/**
 	 *
 	 * @param key
@@ -231,29 +253,6 @@ public abstract class Tunnel {
 			return false;
 		} else { //发送完毕了
 			return true;
-		}
-	}
-
-
-	public void onWritable(SelectionKey key) {
-		try {
-			this.beforeSend(mSendRemainBuffer); //发送之前，先让子类处理，例如做加密等
-			if (this.write(mSendRemainBuffer, false)) { //如果剩余数据已经发送完毕
-				key.cancel();
-				if (isTunnelEstablished()) {
-					mBrotherTunnel.beginReceived(); //这边数据发送完毕，通知兄弟可以收数据了
-				} else {
-					this.beginReceived(); //开始接受代理服务器的响应数据
-				}
-			}
-		} catch (Exception ex) {
-			if (AppDebug.IS_DEBUG) {
-				ex.printStackTrace(System.err);
-			}
-
-			DebugLog.e("onWritable catch an exception: %s", ex);
-
-			this.dispose();
 		}
 	}
 
