@@ -96,7 +96,7 @@ public class DnsProxy implements Runnable {
 			while (mClient != null && !mClient.isClosed()) {
 				//不包含头部信息，减去ip和udp头部长度
 				packet.setLength(buff.length - (ipHeaderLength + udpHeaderLenght));
-				mClient.receive(packet); //获取udp数据
+				mClient.receive(packet); //获取说道的udp数据报文
 
 				dnsBuffer.clear();
 				dnsBuffer.limit(packet.getLength()); //设置dnsBuffer的长度
@@ -150,9 +150,9 @@ public class DnsProxy implements Runnable {
 	private void tamperDnsResponse(byte[] rawPacket, DnsPacket dnsPacket, int newIP) {
 		Question question = dnsPacket.Questions[0]; //DNS的一个问题
 
-		dnsPacket.Header.setResourceCount((short) 1);
-		dnsPacket.Header.setAResourceCount((short) 0);
-		dnsPacket.Header.setEResourceCount((short) 0);
+		dnsPacket.Header.setResourceCount((short) 1); //有ip返回
+		dnsPacket.Header.setAResourceCount((short) 0); //无信息
+		dnsPacket.Header.setEResourceCount((short) 0); //无信息
 
 		// 这里会有个疑问，在DNS报文中，只有头部是固定的，其他部分不一定，这个方法在DNS查询、回复中都有用到，
 		// 理论上应该出现数组控件不足的情况吧（查询的DNS包只有头部部分）
@@ -161,12 +161,34 @@ public class DnsProxy implements Runnable {
 		// 其实在DNS查询的时候，这里的rawPacket时LocalVpnService的m_Packet数组的空间
 		// 在DNS回复的时候，这里的rawPacket其实是本类run方法的RECEIVE_BUFFER数组的空间
 		// 两者的空间都足够大，所以不用增加数组空间
-		//TODO 单纯的写入数据，为何另外创建一个类
+		//TODO 详细解释 http://www.cnblogs.com/cobbliu/archive/2013/04/02/2996333.html
 		ResourcePointer resourcePointer = new ResourcePointer(rawPacket, question.Offset() + question.Length());
-		resourcePointer.setDomain((short) 0xC00C); //指针，指向问题区的域名
+		/**
+		 域名字段（不定长或2字节）：记录中资源数据对应的名字，它的格式和查询名字段格式相同。当报文中域名重复出现时，
+		 就需要使用2字节的偏移指针来替换。例如，在资源记录中，域名通常是查询问题部分的域名的重复，
+		 就需要用指针指向查询问题部分的域名。关于指针怎么用，TCP/IP详解里面有，即2字节的指针，最签名的两个高位是11，
+		 用于识别指针。其他14位从报文开始处计数（从0开始），指出该报文中的相应字节数。注意，DNS报文的第一个字节是字节0，
+		 第二个报文是字节1。一般响应报文中，资源部分的域名都是指针C00C(1100000000001100)，刚好指向请求部分的域名。
+
+		 请求的域名。需要注意的是，此处的域名有两种类型的标示防范，一是上面提到的元信息标示方法；二是指针法。
+		 指针法中请求的域名由一个16位的地址标示，该地址指向请求部分中的域名，它的地址是请求部分中域名距离消息开头的偏移量
+		 */
+		resourcePointer.setDomain((short) 0xC00C); //指针类型，指向问题区的域名
+		/**
+		 类型TYPE 2个字节表示资源记录的类型，指出RDATA数据的含义
+		 */
 		resourcePointer.setType(question.Type);
+		/**
+		 类CLASS 2个字节表示RDATA的类
+		 */
 		resourcePointer.setClass(question.Class);
+		/**
+		 生存时间TTL 4字节无符号整数表示资源记录可以缓存的时间。0代表只能被传输，但是不能被缓存。
+		 */
 		resourcePointer.setTTL(ProxyConfig.Instance.getDnsTTL());
+		/**
+		 资源数据长度（2字节）：表示资源数据的长度（以字节为单位，如果资源数据为IP则为0004）
+		 */
 		resourcePointer.setDataLength((short) 4);
 		resourcePointer.setIP(newIP);
 
@@ -206,7 +228,18 @@ public class DnsProxy implements Runnable {
 	private boolean dnsPollution(byte[] rawPacket, DnsPacket dnsPacket) {
 		if (dnsPacket.Header.ResourceCount > 0) {
 			Question question = dnsPacket.Questions[0];
-			if (question.Type == 1) {
+			/**
+			 名字	数值 	描述
+			 A		（1） 	期望获得查询名的IP地址。
+			 NS 	（2） 	一个授权的域名服务器。
+			 CNAME 	（5） 	规范名称。
+			 PTR 	（12） 	指针记录。
+			 HINFO 	（13） 	主机信息。
+			 MX 	（15） 	邮件交换记录。
+			 AXFR 	（252） 	对区域转换的请求。
+			 ANY 	（255） 	对所有记录的请求。
+			 */
+			if (question.Type == 1) { //希望获取域名的ip
 				int realIP = getFirstIP(dnsPacket);
 				//过滤
 				if (ProxyConfig.Instance.filter(question.Domain, realIP)) {
@@ -241,9 +274,10 @@ public class DnsProxy implements Runnable {
 				DebugLog.i("Real IP: %s ==> %s", dnsPacket.Questions[0].Domain, CommonMethods.ipIntToString(getFirstIP
 						(dnsPacket)));
 			}
-			//DNS污染
+			//DNS污染，如果在过滤清单里会填充虚假ip
 			dnsPollution(udpHeader.mData, dnsPacket);
 
+			//伪造应答packet
 			dnsPacket.Header.setID(state.mClientQueryID);
 			ipHeader.setSourceIP(state.mRemoteIP);
 			ipHeader.setDestinationIP(state.mClientIP);
@@ -254,6 +288,7 @@ public class DnsProxy implements Runnable {
 			udpHeader.setDestinationPort(state.mClientPort);
 			udpHeader.setTotalLength(8 + dnsPacket.Size);
 
+			//输出到请求发起者
 			VpnServiceHelper.sendUDPPacket(ipHeader, udpHeader);
 		} else {
 			throw new IllegalStateException("can not get state from mQueryArray");
