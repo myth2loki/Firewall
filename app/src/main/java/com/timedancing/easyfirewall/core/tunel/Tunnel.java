@@ -18,11 +18,14 @@ import java.nio.channels.SocketChannel;
  */
 public abstract class Tunnel {
 
-	final static ByteBuffer GL_BUFFER = ByteBuffer.allocate(20000);
+	/**
+	 * 用于保存数据，因为是单线程所以可以共用一个缓存
+	 */
+	private final static ByteBuffer GL_BUFFER = ByteBuffer.allocate(20000);
 	public static long SessionCount;
-	protected InetSocketAddress mDestAddress;
-	protected boolean isRemoteTunnel = false;
-	private SocketChannel mInnerChannel; //自己的Channel
+	private InetSocketAddress mDestAddress;
+	boolean isRemoteTunnel = false;
+	private SocketChannel mInnerChannel; //自己的Channel，受保护的，用于真正向外发送和接收数据
 	private ByteBuffer mSendRemainBuffer; //发送数据缓存
 	private Selector mSelector;
 	private HttpResponse mHttpResponse; //http报文
@@ -41,10 +44,16 @@ public abstract class Tunnel {
 		SessionCount++;
 	}
 
+	/**
+	 * 创建tunnel
+	 * @param serverAddress 要连接的服务器地址
+	 * @param selector
+	 * @throws IOException
+	 */
 	public Tunnel(InetSocketAddress serverAddress, Selector selector) throws IOException {
-		SocketChannel innerChannel = SocketChannel.open();
-		innerChannel.configureBlocking(false);
-		this.mInnerChannel = innerChannel;
+		SocketChannel innerChannel = SocketChannel.open(); //开启SocketChannel
+		innerChannel.configureBlocking(false); //设置为非阻塞模式
+		this.mInnerChannel = innerChannel; //此channel为真正向外请求的socket
 		this.mSelector = selector;
 		this.mServerEP = serverAddress;
 		SessionCount++;
@@ -70,10 +79,13 @@ public abstract class Tunnel {
 		this.mBrotherTunnel = brotherTunnel;
 	}
 
-
-	public void connect(InetSocketAddress destAddress) throws Exception {
+	/**
+	 * 连接到真实服务器
+	 * @throws Exception
+	 */
+	public void connect() throws Exception {
 		if (VpnServiceHelper.protect(mInnerChannel.socket())) { //保护socket不走VPN
-			mDestAddress = destAddress;
+//			mDestAddress = destAddress;
 			mInnerChannel.register(mSelector, SelectionKey.OP_CONNECT, this); //注册连接事件
 			mInnerChannel.connect(mServerEP);
 			DebugLog.i("Connecting to %s", mServerEP);
@@ -84,13 +96,17 @@ public abstract class Tunnel {
 
 	public void onConnectable() {
 		try {
-			if (mInnerChannel.finishConnect()) {
-				onConnected(GL_BUFFER); //通知子类TCP已连接，子类可以根据协议实现握手等
-				DebugLog.i("Connected to %s", mServerEP);
-			} else {
-				DebugLog.e("Connect to %s failed.", mServerEP);
-				this.dispose();
+//			if (mInnerChannel.finishConnect()) {
+//				onConnected(GL_BUFFER); //通知子类TCP已连接，子类可以根据协议实现握手等
+//				DebugLog.i("Connected to %s", mServerEP);
+//			} else {
+//				DebugLog.e("Connect to %s failed.", mServerEP);
+//				this.dispose();
+//			}
+			while (!mInnerChannel.finishConnect()) {
+				Thread.sleep(500); //如果没有连接成功，则休眠500毫秒
 			}
+			onConnected(GL_BUFFER);
 		} catch (Exception e) {
 			if (AppDebug.IS_DEBUG) {
 				e.printStackTrace(System.err);
@@ -171,22 +187,28 @@ public abstract class Tunnel {
 			if (AppDebug.IS_DEBUG) {
 				ex.printStackTrace(System.err);
 			}
-			DebugLog.e("onReadable catch an exception: %s", ex);
+			DebugLog.e("onReadable catch an exception: %s, " + mInnerChannel.socket().getInetAddress(), ex);
 			this.dispose();
 		}
 	}
 
-	protected void sendToBrother(SelectionKey key, ByteBuffer buffer) throws Exception {
+	/**
+	 *
+	 * @param key
+	 * @param buffer
+	 * @throws Exception
+	 */
+	private void sendToBrother(SelectionKey key, ByteBuffer buffer) throws Exception {
 		if (isTunnelEstablished() && buffer.hasRemaining()) { //将读到的数据，转发给兄弟
 			mBrotherTunnel.beforeSend(buffer); //发送之前，先让子类处理，例如做加密等。
 			if (!mBrotherTunnel.write(buffer, true)) {
 				key.cancel(); //兄弟吃不消，就取消读取事件
-				DebugLog.w("%s can not read more.\n", mServerEP);
+				DebugLog.w("%s can not write more.\n", mServerEP);
 			}
 		}
 	}
 
-	protected boolean write(ByteBuffer buffer, boolean copyRemainData) throws Exception {
+	private boolean write(ByteBuffer buffer, boolean copyRemainData) throws Exception {
 		int byteSent;
 		while (buffer.hasRemaining()) {
 			byteSent = mInnerChannel.write(buffer);
@@ -244,7 +266,7 @@ public abstract class Tunnel {
 		disposeInternal(true);
 	}
 
-	void disposeInternal(boolean disposeBrother) {
+	private void disposeInternal(boolean disposeBrother) {
 		if (!mDisposed) {
 			try {
 				mInnerChannel.close();

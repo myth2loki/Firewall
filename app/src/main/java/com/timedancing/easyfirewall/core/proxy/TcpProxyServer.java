@@ -158,16 +158,19 @@ public class TcpProxyServer implements Runnable {
 			//获取local server的通道
 //			SocketChannel localChannel = mServerSocketChannel.accept();
 			SocketChannel localChannel = ((ServerSocketChannel) key.attachment()).accept();
-			localTunnel = TunnelFactory.wrap(localChannel, mSelector);
+			//tcp代理服务器有连接进来
+			localTunnel = TunnelFactory.wrap(localChannel, mSelector); //TODO 为何要调用wrap方法？
 
+			//有连接连进来，获取到目的地址。其实就是连接方地址
 			InetSocketAddress destAddress = getDestAddress(localChannel);
 			if (destAddress != null) {
+				//创建远程tunnel，受vpn protect
 				Tunnel remoteTunnel = TunnelFactory.createTunnelByConfig(destAddress, mSelector);
 				//关联兄弟
 				remoteTunnel.setIsHttpsRequest(localTunnel.isHttpsRequest());
 				remoteTunnel.setBrotherTunnel(localTunnel);
 				localTunnel.setBrotherTunnel(remoteTunnel);
-				remoteTunnel.connect(destAddress); //开始连接
+				remoteTunnel.connect(); //开始连接
 			} else {
 				short portKey = (short) localChannel.socket().getPort();
 				NatSession session = NatSessionManager.getSession(portKey);
