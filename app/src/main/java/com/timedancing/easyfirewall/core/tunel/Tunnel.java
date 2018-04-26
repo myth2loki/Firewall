@@ -23,7 +23,7 @@ public abstract class Tunnel {
 	 */
 	private final static ByteBuffer GL_BUFFER = ByteBuffer.allocate(20000);
 	public static long SessionCount;
-	boolean isRemoteTunnel = false;
+	private boolean isRemoteTunnel = false;
 	private SocketChannel mInnerChannel; //自己的Channel，受保护的，用于真正向外发送和接收数据
 	private ByteBuffer mSendRemainBuffer; //发送数据缓存
 	private Selector mSelector;
@@ -38,11 +38,11 @@ public abstract class Tunnel {
 	private InetSocketAddress mServerEP;
 
 	/**
-	 * 构建
+	 * 创建tunnel
 	 * @param innerChannel 内部channel，受vpn protect
 	 * @param selector
 	 */
-	public Tunnel(SocketChannel innerChannel, Selector selector) {
+	Tunnel(SocketChannel innerChannel, Selector selector) {
 		mInnerChannel = innerChannel;
 		mSelector = selector;
 		SessionCount++;
@@ -54,13 +54,17 @@ public abstract class Tunnel {
 	 * @param selector
 	 * @throws IOException
 	 */
-	public Tunnel(InetSocketAddress serverAddress, Selector selector) throws IOException {
+	Tunnel(InetSocketAddress serverAddress, Selector selector) throws IOException {
 		SocketChannel innerChannel = SocketChannel.open(); //开启SocketChannel
 		innerChannel.configureBlocking(false); //设置为非阻塞模式
 		this.mInnerChannel = innerChannel; //此channel为真正向外请求的socket
 		this.mSelector = selector;
 		this.mServerEP = serverAddress;
 		SessionCount++;
+	}
+
+	protected void setRemoteTunnel(boolean enabled) {
+		isRemoteTunnel = enabled;
 	}
 
 	/**
@@ -176,7 +180,7 @@ public abstract class Tunnel {
 						sendToBrother(key, buffer);
 					}
 				} else {
-					sendToBrother(key, buffer);
+					sendToBrother(key, buffer); //直接转发
 				}
 
 			} else if (bytesRead < 0) {

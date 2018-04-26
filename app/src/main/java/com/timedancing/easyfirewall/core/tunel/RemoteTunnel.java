@@ -11,11 +11,11 @@ import java.nio.channels.SocketChannel;
 public class RemoteTunnel extends RawTunnel {
 	public RemoteTunnel(SocketChannel innerChannel, Selector selector) {
 		super(innerChannel, selector);
-		isRemoteTunnel = true;
+		setRemoteTunnel(true);
 	}
 
 	public RemoteTunnel(InetSocketAddress serverAddress, Selector selector) throws IOException {
 		super(serverAddress, selector);
-		isRemoteTunnel = true;
+		setRemoteTunnel(true);
 	}
 }

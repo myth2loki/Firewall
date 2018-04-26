@@ -29,11 +29,16 @@ public class TcpProxyServer implements Runnable {
 	private Selector mSelector;
 	private ServerSocketChannel mServerSocketChannel;
 
+	/**
+	 * 构造TcpProxyServer实例
+	 * @param port 端口
+	 * @throws IOException
+	 */
 	public TcpProxyServer(int port) throws IOException {
 		mSelector = Selector.open();
 		mServerSocketChannel = ServerSocketChannel.open();
 		mServerSocketChannel.configureBlocking(false);
-		mServerSocketChannel.socket().bind(new InetSocketAddress(port));
+		mServerSocketChannel.socket().bind(new InetSocketAddress(port)); //绑定端口
 		mServerSocketChannel.register(mSelector, SelectionKey.OP_ACCEPT, mServerSocketChannel);
 		this.mPort = (short) mServerSocketChannel.socket().getLocalPort();
 
@@ -49,40 +54,11 @@ public class TcpProxyServer implements Runnable {
 		mServerThread.start();
 	}
 
-	public void stop() {
-		this.mStopped = true;
-		if (mSelector != null) {
-			try {
-				mSelector.close();
-				mSelector = null;
-			} catch (Exception ex) {
-				if (AppDebug.IS_DEBUG) {
-					ex.printStackTrace(System.err);
-				}
-				DebugLog.e("TcpProxyServer mSelector.close() catch an exception: %s", ex);
-			}
-		}
-
-		if (mServerSocketChannel != null) {
-			try {
-				mServerSocketChannel.close();
-				mServerSocketChannel = null;
-			} catch (Exception ex) {
-				if (AppDebug.IS_DEBUG) {
-					ex.printStackTrace(System.err);
-				}
-
-				DebugLog.e("TcpProxyServer mServerSocketChannel.close() catch an exception: %s", ex);
-			}
-		}
-	}
-
 	/**
 	 * 04-22 02:48:31.518 24379-24428/com.timedancing.easyfirewall D/TcpProxyServer: run: onAccepted
 	 * 04-22 02:48:31.523 24379-24428/com.timedancing.easyfirewall D/TcpProxyServer: run: onConnectable
 	 * 04-22 02:48:31.524 24379-24428/com.timedancing.easyfirewall D/TcpProxyServer: run: onReadable
 	 */
-
 	@Override
 	public void run() {
 		try {
@@ -130,6 +106,34 @@ public class TcpProxyServer implements Runnable {
 		}
 	}
 
+	public void stop() {
+		this.mStopped = true;
+		if (mSelector != null) {
+			try {
+				mSelector.close();
+				mSelector = null;
+			} catch (Exception ex) {
+				if (AppDebug.IS_DEBUG) {
+					ex.printStackTrace(System.err);
+				}
+				DebugLog.e("TcpProxyServer mSelector.close() catch an exception: %s", ex);
+			}
+		}
+
+		if (mServerSocketChannel != null) {
+			try {
+				mServerSocketChannel.close();
+				mServerSocketChannel = null;
+			} catch (Exception ex) {
+				if (AppDebug.IS_DEBUG) {
+					ex.printStackTrace(System.err);
+				}
+
+				DebugLog.e("TcpProxyServer mServerSocketChannel.close() catch an exception: %s", ex);
+			}
+		}
+	}
+
 	private InetSocketAddress getDestAddress(SocketChannel localChannel) {
 		short portKey = (short) localChannel.socket().getPort();
 		NatSession session = NatSessionManager.getSession(portKey);
@@ -149,7 +153,7 @@ public class TcpProxyServer implements Runnable {
 	}
 
 	/**
-	 * 连接成功
+	 * 连接成功，绑定
 	 * @param key
 	 */
 	private void onAccepted(SelectionKey key) {
@@ -165,7 +169,7 @@ public class TcpProxyServer implements Runnable {
 			InetSocketAddress destAddress = getDestAddress(localChannel);
 			if (destAddress != null) {
 				//创建远程tunnel，受vpn protect
-				Tunnel remoteTunnel = TunnelFactory.createTunnelByConfig(destAddress, mSelector);
+				Tunnel remoteTunnel = TunnelFactory.wrap(destAddress, mSelector);
 				//关联兄弟
 				remoteTunnel.setIsHttpsRequest(localTunnel.isHttpsRequest());
 				remoteTunnel.setBrotherTunnel(localTunnel);

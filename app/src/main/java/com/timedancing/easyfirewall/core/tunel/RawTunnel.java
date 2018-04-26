@@ -11,11 +11,11 @@ import java.nio.channels.SocketChannel;
  */
 public class RawTunnel extends Tunnel {
 
-	public RawTunnel(SocketChannel innerChannel, Selector selector) {
+	RawTunnel(SocketChannel innerChannel, Selector selector) {
 		super(innerChannel, selector);
 	}
 
-	public RawTunnel(InetSocketAddress serverAddress, Selector selector) throws IOException {
+	RawTunnel(InetSocketAddress serverAddress, Selector selector) throws IOException {
 		super(serverAddress, selector);
 	}
 

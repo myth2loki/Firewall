@@ -50,26 +50,26 @@ public class FirewallVpnService extends VpnService implements Runnable {
 	private DnsProxy mDnsProxy;
 	private FileOutputStream mVPNOutputStream;
 
-	private byte[] mPacket;
-	private IPHeader mIPHeader;
-	private TCPHeader mTCPHeader;
-	private UDPHeader mUDPHeader;
-	private ByteBuffer mDNSBuffer;
-	private Handler mHandler;
+//	private byte[] mPacket;
+//	private IPHeader mIPHeader;
+//	private TCPHeader mTCPHeader;
+//	private UDPHeader mUDPHeader;
+//	private ByteBuffer mDNSBuffer;
+//	private Handler mHandler;
 	private long mSentBytes;
 	private long mReceivedBytes;
 
 	public FirewallVpnService() {
 		ID++;
-		mHandler = new Handler();
-		mPacket = new byte[20000];
+//		mHandler = new Handler();
+//		mPacket = new byte[20000];
 		//ip, tcp, dns共享mPacket数组
-		mIPHeader = new IPHeader(mPacket, 0);
+//		mIPHeader = new IPHeader(mPacket, 0);
 		//Offset = ip报文头部长度
-		mTCPHeader = new TCPHeader(mPacket, 20);
-		mUDPHeader = new UDPHeader(mPacket, 20);
+//		mTCPHeader = new TCPHeader(mPacket, 20);
+//		mUDPHeader = new UDPHeader(mPacket, 20);
 		//Offset = ip报文头部长度 + udp报文头部长度 = 28
-		mDNSBuffer = ((ByteBuffer) ByteBuffer.wrap(mPacket).position(28)).slice();
+//		mDNSBuffer = ((ByteBuffer) ByteBuffer.wrap(mPacket).position(28)).slice();
 
 		VpnServiceHelper.onVpnServiceCreated(this);
 
@@ -85,6 +85,53 @@ public class FirewallVpnService extends VpnService implements Runnable {
 		setVpnRunningStatus(true);
 		notifyStatus(new VPNEvent(VPNEvent.Status.STARTING));
 		super.onCreate();
+	}
+
+	@Override
+	public void run() {
+		try {
+			DebugLog.i("VPNService(%s) work thread is Running...\n", ID);
+
+			waitUntilPrepared();
+
+			//设置黑名单
+			ProxyConfig.Instance.setDomainFilter(new BlackListFilter());
+			//设置网页内容过滤
+			ProxyConfig.Instance.setBlockingInfoBuilder(new HtmlBlockingInfoBuilder());
+			ProxyConfig.Instance.prepare();
+
+			//启动TCP代理服务
+			mTcpProxyServer = new TcpProxyServer(0);
+			mTcpProxyServer.start();
+
+			//启动dns代理服务
+			mDnsProxy = new DnsProxy();
+			mDnsProxy.start();
+			DebugLog.i("DnsProxy started.\n");
+
+			//回调vpn启动
+			ProxyConfig.Instance.onVpnStart(this);
+			//TODO 多余
+//			while (IsRunning) {
+			runVPN();
+//			}
+			//回调vpn停止
+			ProxyConfig.Instance.onVpnEnd(this);
+
+		} catch (InterruptedException e) {
+			if (AppDebug.IS_DEBUG) {
+				e.printStackTrace();
+			}
+			DebugLog.e("VpnService run catch an exception %s.\n", e);
+		} catch (Exception e) {
+			if (AppDebug.IS_DEBUG) {
+				e.printStackTrace();
+			}
+			DebugLog.e("VpnService run catch an exception %s.\n", e);
+		} finally {
+			DebugLog.i("VpnService terminated");
+			dispose();
+		}
 	}
 
 	//只设置IsRunning = true;
@@ -104,7 +151,7 @@ public class FirewallVpnService extends VpnService implements Runnable {
 		super.onDestroy();
 	}
 
-	//发送UDP数据报
+	//发送UDP数据报到应用
 	public void sendUDPPacket(IPHeader ipHeader, UDPHeader udpHeader) {
 		try {
 			CommonMethods.ComputeUDPChecksum(ipHeader, udpHeader);
@@ -124,13 +171,15 @@ public class FirewallVpnService extends VpnService implements Runnable {
 		this.mVPNOutputStream = new FileOutputStream(mVPNInterface.getFileDescriptor());
 		FileInputStream in = new FileInputStream(mVPNInterface.getFileDescriptor());
 		int size = 0;
+		byte[] mPacket = new byte[20000];
 		while (size != -1 && IsRunning) {
+			//读取到来自vpn的数据，也就是来自拦截的对外请求的数据报文
 			while ((size = in.read(mPacket)) > 0 && IsRunning) {
 				if (mDnsProxy.isStopped() || mTcpProxyServer.isStopped()) {
 					in.close();
 					throw new Exception("LocalServer stopped.");
 				}
-				onIPPacketReceived(mIPHeader, size);
+				onIPPacketReceived(mPacket, size);
 			}
 			//非阻塞模式，休眠已节约电量
 			Thread.sleep(100);
@@ -140,16 +189,17 @@ public class FirewallVpnService extends VpnService implements Runnable {
 	}
 
 	/**
-	 * 收到IP包
-	 * @param ipHeader
-	 * @param size
+	 * 收到数据
+	 * @param buff 数据
+	 * @param size IP报文大小
 	 * @throws IOException
 	 */
-	private void onIPPacketReceived(IPHeader ipHeader, int size) throws IOException {
-
+	private void onIPPacketReceived(byte[] buff, int size) throws IOException {
+		IPHeader ipHeader = new IPHeader(buff, 0);
 		switch (ipHeader.getProtocol()) {
 			case IPHeader.TCP:
-				TCPHeader tcpHeader = mTCPHeader;
+//				TCPHeader tcpHeader = mTCPHeader;
+				TCPHeader tcpHeader = new TCPHeader(buff, 20);
 				tcpHeader.mOffset = ipHeader.getHeaderLength(); //矫正TCPHeader里的偏移量，使它指向真正的TCP数据地址
 				if (tcpHeader.getSourcePort() == mTcpProxyServer.getPort()) { //来自tcp proxy的接收包
 
@@ -203,16 +253,18 @@ public class FirewallVpnService extends VpnService implements Runnable {
 					tcpHeader.setDestinationPort(mTcpProxyServer.getPort());
 
 					CommonMethods.ComputeTCPChecksum(ipHeader, tcpHeader);
-					mVPNOutputStream.write(ipHeader.mData, ipHeader.mOffset, size);
+					mVPNOutputStream.write(ipHeader.mData, ipHeader.mOffset, size); //将结果发到应用
 					session.bytesSent += tcpDataSize; //注意顺序
 					mSentBytes += size;
 				}
 				break;
 			case IPHeader.UDP:
-				UDPHeader udpHeader = mUDPHeader;
+//				UDPHeader udpHeader = mUDPHeader;
+				UDPHeader udpHeader = new UDPHeader(buff, 0);
 				udpHeader.mOffset = ipHeader.getHeaderLength();
 				if (ipHeader.getSourceIP() == LOCAL_IP && udpHeader.getDestinationPort() == 53) {
-					mDNSBuffer.clear();
+//					mDNSBuffer.clear();
+					ByteBuffer mDNSBuffer = ((ByteBuffer) ByteBuffer.wrap(buff).position(28)).slice();
 					mDNSBuffer.limit(udpHeader.getTotalLength() - 8);
 					DnsPacket dnsPacket = DnsPacket.fromBytes(mDNSBuffer);
 					if (dnsPacket != null && dnsPacket.Header.QuestionCount > 0) {
@@ -294,52 +346,6 @@ public class FirewallVpnService extends VpnService implements Runnable {
 		ParcelFileDescriptor pfdDescriptor = builder.establish();
 		notifyStatus(new VPNEvent(VPNEvent.Status.ESTABLISHED));
 		return pfdDescriptor;
-	}
-
-	@Override
-	public void run() {
-		try {
-			DebugLog.i("VPNService(%s) work thread is Running...\n", ID);
-
-			waitUntilPrepared();
-
-			//设置黑名单
-			ProxyConfig.Instance.setDomainFilter(new BlackListFilter());
-			//设置网页内容过滤
-			ProxyConfig.Instance.setBlockingInfoBuilder(new HtmlBlockingInfoBuilder());
-			ProxyConfig.Instance.prepare();
-
-			//启动TCP代理服务
-			mTcpProxyServer = new TcpProxyServer(0);
-			mTcpProxyServer.start();
-
-			mDnsProxy = new DnsProxy();
-			mDnsProxy.start();
-			DebugLog.i("DnsProxy started.\n");
-
-			//回调vpn启动
-			ProxyConfig.Instance.onVpnStart(this);
-			//TODO 多余
-//			while (IsRunning) {
-				runVPN();
-//			}
-			//回调vpn停止
-			ProxyConfig.Instance.onVpnEnd(this);
-
-		} catch (InterruptedException e) {
-			if (AppDebug.IS_DEBUG) {
-				e.printStackTrace();
-			}
-			DebugLog.e("VpnService run catch an exception %s.\n", e);
-		} catch (Exception e) {
-			if (AppDebug.IS_DEBUG) {
-				e.printStackTrace();
-			}
-			DebugLog.e("VpnService run catch an exception %s.\n", e);
-		} finally {
-			DebugLog.i("VpnService terminated");
-			dispose();
-		}
 	}
 
 	public void disconnectVPN() {
