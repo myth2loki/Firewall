@@ -12,9 +12,9 @@ import com.timedancing.easyfirewall.core.tcpip.CommonMethods;
  */
 public class NatSessionManager {
 
-	static final int MAX_SESSION_COUNT = 64; //会话保存的最大个数
-	static final long SESSION_TIME_OUT_NS = 60 * 1000 * 1000 * 1000L; //会话保存时间
-	static final SparseArray<NatSession> Sessions = new SparseArray<>();
+	private static final int MAX_SESSION_COUNT = 64; //会话保存的最大个数
+	private static final long SESSION_TIME_OUT_NS = 60 * 1000 * 1000 * 1000L; //会话保存时间
+	private static final SparseArray<NatSession> sSessions = new SparseArray<>();
 
 	/**
 	 * 通过本地端口获取会话信息
@@ -23,7 +23,7 @@ public class NatSessionManager {
 	 * @return 会话信息
 	 */
 	public static NatSession getSession(int portKey) {
-		return Sessions.get(portKey);
+		return sSessions.get(portKey);
 	}
 
 	/**
@@ -32,7 +32,7 @@ public class NatSessionManager {
 	 * @return 会话个数
 	 */
 	public static int getSessionCount() {
-		return Sessions.size();
+		return sSessions.size();
 	}
 
 	/**
@@ -40,10 +40,10 @@ public class NatSessionManager {
 	 */
 	private static void clearExpiredSessions() {
 		long now = System.nanoTime();
-		for (int i = Sessions.size() - 1; i >= 0; i--) {
-			NatSession session = Sessions.valueAt(i);
+		for (int i = sSessions.size() - 1; i >= 0; i--) {
+			NatSession session = sSessions.valueAt(i);
 			if (now - session.lastNanoTime > SESSION_TIME_OUT_NS) {
-				Sessions.removeAt(i);
+				sSessions.removeAt(i);
 			}
 		}
 	}
@@ -57,7 +57,7 @@ public class NatSessionManager {
 	 * @return NatSession对象
 	 */
 	public static NatSession createSession(int portKey, int remoteIP, short remotePort) {
-		if (Sessions.size() > MAX_SESSION_COUNT) {
+		if (sSessions.size() > MAX_SESSION_COUNT) {
 			clearExpiredSessions(); //清除过期的会话
 		}
 
@@ -74,7 +74,7 @@ public class NatSessionManager {
 			session.remoteHost = CommonMethods.ipIntToString(remoteIP);
 		}
 
-		Sessions.put(portKey, session);
+		sSessions.put(portKey, session);
 		return session;
 	}
 

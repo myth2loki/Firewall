@@ -134,6 +134,29 @@ public class FirewallVpnService extends VpnService implements Runnable {
 		}
 	}
 
+	//建立VPN，同时监听出口流量
+	private void runVPN() throws Exception {
+		this.mVPNInterface = establishVPN();
+		this.mVPNOutputStream = new FileOutputStream(mVPNInterface.getFileDescriptor());
+		FileInputStream in = new FileInputStream(mVPNInterface.getFileDescriptor());
+		int size = 0;
+		byte[] mPacket = new byte[20000];
+		while (size != -1 && IsRunning) {
+			//读取到来自vpn的数据，也就是来自拦截的对外请求的数据报文
+			while ((size = in.read(mPacket)) > 0 && IsRunning) {
+				if (mDnsProxy.isStopped() || mTcpProxyServer.isStopped()) {
+					in.close();
+					throw new Exception("LocalServer stopped.");
+				}
+				onIPPacketReceived(mPacket, size);
+			}
+			//非阻塞模式，休眠已节约电量
+			Thread.sleep(100);
+		}
+		in.close();
+		disconnectVPN();
+	}
+
 	//只设置IsRunning = true;
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
@@ -165,29 +188,6 @@ public class FirewallVpnService extends VpnService implements Runnable {
 		}
 	}
 
-	//建立VPN，同时监听出口流量
-	private void runVPN() throws Exception {
-		this.mVPNInterface = establishVPN();
-		this.mVPNOutputStream = new FileOutputStream(mVPNInterface.getFileDescriptor());
-		FileInputStream in = new FileInputStream(mVPNInterface.getFileDescriptor());
-		int size = 0;
-		byte[] mPacket = new byte[20000];
-		while (size != -1 && IsRunning) {
-			//读取到来自vpn的数据，也就是来自拦截的对外请求的数据报文
-			while ((size = in.read(mPacket)) > 0 && IsRunning) {
-				if (mDnsProxy.isStopped() || mTcpProxyServer.isStopped()) {
-					in.close();
-					throw new Exception("LocalServer stopped.");
-				}
-				onIPPacketReceived(mPacket, size);
-			}
-			//非阻塞模式，休眠已节约电量
-			Thread.sleep(100);
-		}
-		in.close();
-		disconnectVPN();
-	}
-
 	/**
 	 * 收到数据
 	 * @param buff 数据
@@ -203,6 +203,7 @@ public class FirewallVpnService extends VpnService implements Runnable {
 				tcpHeader.mOffset = ipHeader.getHeaderLength(); //矫正TCPHeader里的偏移量，使它指向真正的TCP数据地址
 				if (tcpHeader.getSourcePort() == mTcpProxyServer.getPort()) { //来自tcp proxy的接收包
 
+					//从session中取出缓存的请求信息，比如：目的ip、端口等
 					NatSession session = NatSessionManager.getSession(tcpHeader.getDestinationPort());
 					if (session != null) {
 						ipHeader.setSourceIP(ipHeader.getDestinationIP());
@@ -241,6 +242,7 @@ public class FirewallVpnService extends VpnService implements Runnable {
 					//分析数据，找到host
 					if (session.bytesSent == 0 && tcpDataSize > 10) {
 						int dataOffset = tcpHeader.mOffset + tcpHeader.getHeaderLength();
+						//解析http请求头，将信息存储到session中
 						HttpRequestHeaderParser.parseHttpRequestHeader(session, tcpHeader.mData, dataOffset,
 								tcpDataSize);
 						DebugLog.i("Host: %s\n", session.remoteHost);
@@ -249,11 +251,11 @@ public class FirewallVpnService extends VpnService implements Runnable {
 
 					//转发给本地TCP服务器
 					ipHeader.setSourceIP(ipHeader.getDestinationIP());
-					ipHeader.setDestinationIP(LOCAL_IP);
-					tcpHeader.setDestinationPort(mTcpProxyServer.getPort());
+					ipHeader.setDestinationIP(LOCAL_IP); //目的地址
+					tcpHeader.setDestinationPort(mTcpProxyServer.getPort()); //目的端口
 
 					CommonMethods.ComputeTCPChecksum(ipHeader, tcpHeader);
-					mVPNOutputStream.write(ipHeader.mData, ipHeader.mOffset, size); //将结果发到应用
+					mVPNOutputStream.write(ipHeader.mData, ipHeader.mOffset, size);
 					session.bytesSent += tcpDataSize; //注意顺序
 					mSentBytes += size;
 				}
