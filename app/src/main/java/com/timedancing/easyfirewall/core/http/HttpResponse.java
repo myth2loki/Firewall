@@ -18,16 +18,16 @@ import java.util.Set;
  */
 public class HttpResponse {
 
-	public static final String KEY_CONTENT_TYPE = "Content-Type";
-	public static final String KEY_CONTENT_LENGTH = "Content-Length";
-	public static final String KEY_TRANSFER_ENCODING = "Transfer-Encoding";
-	public static final String KEY_CONTENT_ENCODING = "Content-Encoding";
-	byte[] mData;
-	boolean isCompleted; //已经完整地接收了Http包
-	boolean isBlockInfo = false;
-	boolean isParsedHeader = false;
-	int limit = 40960;
-	int position = -1;
+	private  static final String KEY_CONTENT_TYPE = "Content-Type";
+	private  static final String KEY_CONTENT_LENGTH = "Content-Length";
+	private  static final String KEY_TRANSFER_ENCODING = "Transfer-Encoding";
+	private  static final String KEY_CONTENT_ENCODING = "Content-Encoding";
+	private byte[] mData;
+	private boolean isCompleted; //已经完整地接收了Http包
+	private boolean isBlockInfo;
+	private boolean isParsedHeader = false;
+	private int limit = 40960;
+	private int position = -1;
 	private String mStateLine = "";
 	private int mStateCode;
 	private String mContentType;

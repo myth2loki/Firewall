@@ -23,7 +23,6 @@ public abstract class Tunnel {
 	 */
 	private final static ByteBuffer GL_BUFFER = ByteBuffer.allocate(20000);
 	public static long SessionCount;
-	private InetSocketAddress mDestAddress;
 	boolean isRemoteTunnel = false;
 	private SocketChannel mInnerChannel; //自己的Channel，受保护的，用于真正向外发送和接收数据
 	private ByteBuffer mSendRemainBuffer; //发送数据缓存
@@ -38,6 +37,11 @@ public abstract class Tunnel {
 	private boolean mDisposed;
 	private InetSocketAddress mServerEP;
 
+	/**
+	 * 构建
+	 * @param innerChannel 内部channel，受vpn protect
+	 * @param selector
+	 */
 	public Tunnel(SocketChannel innerChannel, Selector selector) {
 		mInnerChannel = innerChannel;
 		mSelector = selector;
