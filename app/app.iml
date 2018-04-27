@@ -118,8 +118,8 @@
     <orderEntry type="library" exported="" name="__local_aars__:D.\Android\my_project\NewFirewall\app\libs\mta-android-stat-sdk-2.1.0_20160111.jar:unspecified@jar" level="project" />
     <orderEntry type="library" exported="" name="com.android.support:appcompat-v7-23.1.0" level="project" />
     <orderEntry type="library" exported="" name="com.android.support:design-23.1.0" level="project" />
-    <orderEntry type="library" exported="" name="cn.leancloud.android:fastjson:1.1.39-leancloud@jar" level="project" />
     <orderEntry type="library" exported="" name="com.nineoldandroids:library:2.4.0@jar" level="project" />
+    <orderEntry type="library" exported="" name="cn.leancloud.android:fastjson:1.1.39-leancloud@jar" level="project" />
     <orderEntry type="library" exported="" name="com.squareup.leakcanary:leakcanary-android-1.3" level="project" />
     <orderEntry type="library" exported="" name="com.squareup.leakcanary:leakcanary-analyzer:1.3@jar" level="project" />
     <orderEntry type="library" exported="" name="de.greenrobot:eventbus:2.4.0@jar" level="project" />

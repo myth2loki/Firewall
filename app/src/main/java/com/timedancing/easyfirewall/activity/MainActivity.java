@@ -6,11 +6,13 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
 
+import com.timedancing.easyfirewall.BuildConfig;
 import com.timedancing.easyfirewall.R;
 import com.timedancing.easyfirewall.animation.SupportAnimator;
 import com.timedancing.easyfirewall.animation.ViewAnimationUtils;
@@ -22,9 +24,17 @@ import com.timedancing.easyfirewall.event.VPNEvent;
 import com.timedancing.easyfirewall.network.HostHelper;
 import com.timedancing.easyfirewall.util.DebugLog;
 
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.UnknownHostException;
+
 import de.greenrobot.event.EventBus;
 
 public class MainActivity extends AppCompatActivity {
+	private static final String TAG = "MainActivity";
 
 	private View mImgStart;
 	private View mImgEnd;
@@ -111,6 +121,48 @@ public class MainActivity extends AppCompatActivity {
 		if (!VpnServiceHelper.vpnRunningStatus()) {
 			HostHelper.updateHost(this);
 		}
+
+		//TEST
+		sendUdp();
+	}
+
+	private void sendUdp() {
+		new Thread() {
+			public void run() {
+				DatagramSocket datagramSocket = null;
+				InetAddress dstAddress = null;
+				try {
+					dstAddress = InetAddress.getByName("baidu.com");
+					datagramSocket = new DatagramSocket(0);
+					datagramSocket.connect(dstAddress, 90);
+				} catch (SocketException e) {
+					e.printStackTrace();
+				} catch (UnknownHostException e) {
+					e.printStackTrace();
+				}
+				while (true) {
+					try {
+						Thread.sleep(5000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					byte[] buff = "test".getBytes();
+					int length = buff.length;
+					DatagramPacket packet = null;
+					packet = new DatagramPacket(buff, length, dstAddress, 90);
+					try {
+						datagramSocket.send(packet);
+						if (BuildConfig.DEBUG) {
+							Log.d(TAG, "run: send test udp");
+						}
+					} catch (SocketException e) {
+						e.printStackTrace();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}.start();
 	}
 
 	@Override

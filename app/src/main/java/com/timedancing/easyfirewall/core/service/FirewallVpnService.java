@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
+import com.timedancing.easyfirewall.BuildConfig;
 import com.timedancing.easyfirewall.activity.MainActivity;
 import com.timedancing.easyfirewall.builder.HtmlBlockingInfoBuilder;
 import com.timedancing.easyfirewall.constant.AppDebug;
@@ -206,6 +207,9 @@ public class FirewallVpnService extends VpnService implements Runnable {
 			case IPHeader.TCP:
 //				TCPHeader tcpHeader = mTCPHeader;
 				TCPHeader tcpHeader = new TCPHeader(buff, 20);
+				if (BuildConfig.DEBUG) {
+					Log.d(TAG, "onIPPacketReceived: just tcp packet = " + tcpHeader);
+				}
 //				tcpHeader.mOffset = ipHeader.getHeaderLength(); //矫正TCPHeader里的偏移量，使它指向真正的TCP数据地址
 				if (tcpHeader.getSourcePort() == mTcpProxyServer.getPort()) { //来自tcp proxy的接收包
 
@@ -269,6 +273,9 @@ public class FirewallVpnService extends VpnService implements Runnable {
 			case IPHeader.UDP:
 //				UDPHeader udpHeader = mUDPHeader;
 				UDPHeader udpHeader = new UDPHeader(buff, 0);
+				if (BuildConfig.DEBUG) {
+					Log.d(TAG, "onIPPacketReceived: just udp packet = " + udpHeader);
+				}
 				udpHeader.mOffset = ipHeader.getHeaderLength();
 				if (ipHeader.getSourceIP() == LOCAL_IP && udpHeader.getDestinationPort() == 53) {
 //					mDNSBuffer.clear();
@@ -282,9 +289,16 @@ public class FirewallVpnService extends VpnService implements Runnable {
 					}
 				} else {
 					//TODO 其他的udp包需要转发，创建UdpProxyServer用于转发
+					if (BuildConfig.DEBUG) {
+						Log.d(TAG, "onIPPacketReceived: old ip header = " + ipHeader + " | " + udpHeader.getSourcePort() + "->" + udpHeader.getDestinationPort());
+					}
 					ipHeader.setSourceIP(ipHeader.getDestinationIP());
 					ipHeader.setDestinationIP(LOCAL_IP); //目的地址 本机ip
 					udpHeader.setDestinationPort(mUdpProxyServer.getPort()); //目的端口 UdpProxyServer的端口
+					CommonMethods.ComputeUDPChecksum(ipHeader, udpHeader);
+					if (BuildConfig.DEBUG) {
+						Log.d(TAG, "onIPPacketReceived: new ip header = " + ipHeader + ":" + mUdpProxyServer.getPort() + " | " + udpHeader.getSourcePort() + "->" + udpHeader.getDestinationPort());
+					}
 					mVPNOutputStream.write(ipHeader.mData, ipHeader.mOffset, size);
 				}
 				break;

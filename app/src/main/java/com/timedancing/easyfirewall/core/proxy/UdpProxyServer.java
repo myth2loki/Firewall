@@ -1,12 +1,18 @@
 package com.timedancing.easyfirewall.core.proxy;
 
+import android.util.Log;
+
+import com.timedancing.easyfirewall.BuildConfig;
 import com.timedancing.easyfirewall.core.tcpip.IPHeader;
 import com.timedancing.easyfirewall.core.tcpip.UDPHeader;
 import com.timedancing.easyfirewall.core.util.VpnServiceHelper;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
+import java.net.Inet4Address;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectionKey;
@@ -28,11 +34,11 @@ public class UdpProxyServer implements Runnable {
         mServerSocketChannel.configureBlocking(false);
         mServerSocketChannel.socket().bind(new InetSocketAddress(port));
         mServerSocketChannel.register(mSelector,
-                SelectionKey.OP_READ | SelectionKey.OP_WRITE, mServerSocketChannel);
+//                SelectionKey.OP_CONNECT |
+                        SelectionKey.OP_READ, mServerSocketChannel);
         mPort = (short) mServerSocketChannel.socket().getLocalPort();
 
-
-        VpnServiceHelper.protect(mServerSocketChannel.socket());
+//        VpnServiceHelper.protect(mServerSocketChannel.socket());
 
     }
 
@@ -57,17 +63,31 @@ public class UdpProxyServer implements Runnable {
                     if (key.isValid()) {
                         if (key.isReadable()) { //有udp报文
                             ByteBuffer byteBuff = ByteBuffer.allocate(20000);
-                            int length = channel.read(byteBuff);
-                            while (length > -1) {
-                                byteBuff.limit(length);
-
+                            SocketAddress sa = channel.receive(byteBuff);
+                            if (BuildConfig.DEBUG) {
+                                Log.d(TAG, "run: sa = " + sa);
                             }
                             DatagramPacket packet = new DatagramPacket(byteBuff.array(), byteBuff.limit());
+                            InetAddress senderAddress = packet.getAddress();
+//                            SocketAddress hostAddress = packet.getSocketAddress();
                             //TODO 需要一个tunnel
+                            if (BuildConfig.DEBUG) {
+                                Log.d(TAG, "run: udp header read " + new UDPHeader(byteBuff.array(), 0));
+                                Log.d(TAG, "run: udp content read " + new String(packet.getData(), 0, packet.getLength()));
+//                                Log.d(TAG, "run: udp packet " + packet);
+                            }
                         } else if (key.isWritable()) {
+                            if (BuildConfig.DEBUG) {
+                                Log.d(TAG, "run: udp header write ");
+                            }
+                        } else if (key.isConnectable()) {
 
+                            if (BuildConfig.DEBUG) {
+                                Log.d(TAG, "run: udp header write ");
+                            }
                         }
                     }
+                    iter.remove();
                 }
             } catch (IOException e) {
                 e.printStackTrace();
