@@ -57,7 +57,7 @@ public class IPHeader {
 	/**
 	 * 写入默认值
 	 */
-	public void Default() {
+	public void defaultValue() {
 		setHeaderLength(20);
 		setTos((byte) 0);
 		setTotalLength(0);

@@ -29,14 +29,13 @@ public class DnsProxy implements Runnable {
 
 	private static final ConcurrentHashMap<Integer, String> IPDomainMaps = new ConcurrentHashMap<>();
 	private static final ConcurrentHashMap<String, Integer> DomainIPMaps = new ConcurrentHashMap<>();
-	private final long QUERY_TIMEOUT_NS = 10 * 1000 * 1000 * 1000L;
+	private static final long QUERY_TIMEOUT_NS = 10 * 1000 * 1000 * 1000L;
 	/**
 	 * 保存dns查询状态
 	 */
 	private final SparseArray<QueryState> mQueryArray;
 	private boolean mStopped;
 	private DatagramSocket mClient;
-	private Thread mReceivedThread;
 	private short mQueryID;
 
 	public DnsProxy() throws IOException {
@@ -59,8 +58,7 @@ public class DnsProxy implements Runnable {
 	 * 启动线程
 	 */
 	public void start() {
-		mReceivedThread = new Thread(this, "DnsProxyThread");
-		mReceivedThread.start();
+		new Thread(this, "DnsProxyThread").start();
 	}
 
 	/**
@@ -80,7 +78,7 @@ public class DnsProxy implements Runnable {
 		try {
 			byte[] buff = new byte[20000];
 			IPHeader ipHeader = new IPHeader(buff, 0);
-			ipHeader.Default();
+			ipHeader.defaultValue();
 			int ipHeaderLength = 20;
 			UDPHeader udpHeader = new UDPHeader(buff, ipHeaderLength);
 

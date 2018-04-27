@@ -17,6 +17,7 @@ import com.timedancing.easyfirewall.core.nat.NatSession;
 import com.timedancing.easyfirewall.core.nat.NatSessionManager;
 import com.timedancing.easyfirewall.core.proxy.DnsProxy;
 import com.timedancing.easyfirewall.core.proxy.TcpProxyServer;
+import com.timedancing.easyfirewall.core.proxy.UdpProxyServer;
 import com.timedancing.easyfirewall.core.tcpip.CommonMethods;
 import com.timedancing.easyfirewall.core.tcpip.IPHeader;
 import com.timedancing.easyfirewall.core.tcpip.TCPHeader;
@@ -47,6 +48,7 @@ public class FirewallVpnService extends VpnService implements Runnable {
 	private Thread mVPNThread;
 	private ParcelFileDescriptor mVPNInterface;
 	private TcpProxyServer mTcpProxyServer;
+	private UdpProxyServer mUdpProxyServer;
 	private DnsProxy mDnsProxy;
 	private FileOutputStream mVPNOutputStream;
 
@@ -103,6 +105,10 @@ public class FirewallVpnService extends VpnService implements Runnable {
 			//启动TCP代理服务
 			mTcpProxyServer = new TcpProxyServer(0);
 			mTcpProxyServer.start();
+
+			//启动udp代理服务
+			mUdpProxyServer = new UdpProxyServer(0);
+			mUdpProxyServer.start();
 
 			//启动dns代理服务
 			mDnsProxy = new DnsProxy();
@@ -200,7 +206,7 @@ public class FirewallVpnService extends VpnService implements Runnable {
 			case IPHeader.TCP:
 //				TCPHeader tcpHeader = mTCPHeader;
 				TCPHeader tcpHeader = new TCPHeader(buff, 20);
-				tcpHeader.mOffset = ipHeader.getHeaderLength(); //矫正TCPHeader里的偏移量，使它指向真正的TCP数据地址
+//				tcpHeader.mOffset = ipHeader.getHeaderLength(); //矫正TCPHeader里的偏移量，使它指向真正的TCP数据地址
 				if (tcpHeader.getSourcePort() == mTcpProxyServer.getPort()) { //来自tcp proxy的接收包
 
 					//从session中取出缓存的请求信息，比如：目的ip、端口等
@@ -274,6 +280,12 @@ public class FirewallVpnService extends VpnService implements Runnable {
 						DebugLog.iWithTag("DNS", "Query " + dnsPacket.Questions[0].Domain);
 						mDnsProxy.onDnsRequestReceived(ipHeader, udpHeader, dnsPacket);
 					}
+				} else {
+					//TODO 其他的udp包需要转发，创建UdpProxyServer用于转发
+					ipHeader.setSourceIP(ipHeader.getDestinationIP());
+					ipHeader.setDestinationIP(LOCAL_IP); //目的地址 本机ip
+					udpHeader.setDestinationPort(mUdpProxyServer.getPort()); //目的端口 UdpProxyServer的端口
+					mVPNOutputStream.write(ipHeader.mData, ipHeader.mOffset, size);
 				}
 				break;
 		}
