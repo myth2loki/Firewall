@@ -1,8 +1,12 @@
 package com.timedancing.easyfirewall.core.tunel;
 
+import android.util.Log;
+
+import com.timedancing.easyfirewall.BuildConfig;
 import com.timedancing.easyfirewall.constant.AppDebug;
 import com.timedancing.easyfirewall.core.ProxyConfig;
 import com.timedancing.easyfirewall.core.http.HttpResponse;
+import com.timedancing.easyfirewall.core.tcpip.IPHeader;
 import com.timedancing.easyfirewall.core.util.VpnServiceHelper;
 import com.timedancing.easyfirewall.util.DebugLog;
 
@@ -35,7 +39,7 @@ public abstract class Tunnel {
 	 */
 	private Tunnel mBrotherTunnel;
 	private boolean mDisposed;
-	private InetSocketAddress mServerEP;
+	private InetSocketAddress mServerEP; //连接方地址
 
 	/**
 	 * 创建tunnel
@@ -85,6 +89,15 @@ public abstract class Tunnel {
 
 	public void setBrotherTunnel(Tunnel brotherTunnel) {
 		this.mBrotherTunnel = brotherTunnel;
+	}
+
+	/**
+	 * 配对tunnel
+	 * @param brotherTunnel
+	 */
+	public void pair(Tunnel brotherTunnel) {
+		setBrotherTunnel(brotherTunnel);
+		brotherTunnel.setBrotherTunnel(this);
 	}
 
 	/**
@@ -139,6 +152,9 @@ public abstract class Tunnel {
 			if (bytesRead > 0) {
 				buffer.flip();
 				afterReceived(buffer); //先让子类处理，例如解密数据
+				if (BuildConfig.DEBUG) {
+					Log.d("xxx--->", "onReadable: received tcp " + "remoute = " + isRemoteTunnel + ",   " + new IPHeader(buffer.array(), buffer.limit()));
+				}
 				if (isRemoteTunnel && !isHttpsRequest) { //外网发过来的数据，需要进行内容过滤
 					if (mHttpResponse == null) {
 						//TODO 这段目测是内存消耗大户，得想办法降低内存

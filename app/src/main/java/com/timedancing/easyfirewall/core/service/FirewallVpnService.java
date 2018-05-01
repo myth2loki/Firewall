@@ -211,7 +211,7 @@ public class FirewallVpnService extends VpnService implements Runnable {
 					Log.d(TAG, "onIPPacketReceived: just tcp packet = " + tcpHeader);
 				}
 //				tcpHeader.mOffset = ipHeader.getHeaderLength(); //矫正TCPHeader里的偏移量，使它指向真正的TCP数据地址
-				if (tcpHeader.getSourcePort() == mTcpProxyServer.getPort()) { //来自tcp proxy的接收包
+				if (tcpHeader.getSourcePort() == mTcpProxyServer.getPort()) { //tcp proxy发来的报文
 
 					//从session中取出缓存的请求信息，比如：目的ip、端口等
 					NatSession session = NatSessionManager.getSession(tcpHeader.getDestinationPort());
@@ -221,7 +221,7 @@ public class FirewallVpnService extends VpnService implements Runnable {
 						ipHeader.setDestinationIP(LOCAL_IP);
 
 						CommonMethods.ComputeTCPChecksum(ipHeader, tcpHeader);
-						mVPNOutputStream.write(ipHeader.mData, ipHeader.mOffset, size);
+						mVPNOutputStream.write(ipHeader.mData, ipHeader.mOffset, size); //写到真实的应用
 						mReceivedBytes += size;
 					} else {
 						DebugLog.i("NoSession: %s %s\n", ipHeader.toString(), tcpHeader.toString());
@@ -234,6 +234,7 @@ public class FirewallVpnService extends VpnService implements Runnable {
 					if (portKey == 53) {
 						Log.d(TAG, "onIPPacketReceived: tcp port = " + portKey);
 					}
+					//获取缓存信息
 					NatSession session = NatSessionManager.getSession(portKey);
 					if (session == null || session.remoteIP != ipHeader.getDestinationIP() || session.remotePort
 							!= tcpHeader.getDestinationPort()) {
@@ -259,12 +260,15 @@ public class FirewallVpnService extends VpnService implements Runnable {
 						DebugLog.i("Request: %s %s\n", session.method, session.requestUrl);
 					}
 
-					//转发给本地TCP服务器
+					//转发给本地TCP代理服务器
 					ipHeader.setSourceIP(ipHeader.getDestinationIP());
 					ipHeader.setDestinationIP(LOCAL_IP); //目的地址
 					tcpHeader.setDestinationPort(mTcpProxyServer.getPort()); //目的端口
 
 					CommonMethods.ComputeTCPChecksum(ipHeader, tcpHeader);
+					if (BuildConfig.DEBUG) {
+						Log.d("xxx--->", "onIPPacketReceived: send tcp to proxy " + ipHeader);
+					}
 					mVPNOutputStream.write(ipHeader.mData, ipHeader.mOffset, size);
 					session.bytesSent += tcpDataSize; //注意顺序
 					mSentBytes += size;
@@ -294,6 +298,7 @@ public class FirewallVpnService extends VpnService implements Runnable {
 					}
 					ipHeader.setSourceIP(ipHeader.getDestinationIP());
 					ipHeader.setDestinationIP(LOCAL_IP); //目的地址 本机ip
+					udpHeader.setSourcePort(udpHeader.getDestinationPort());
 					udpHeader.setDestinationPort(mUdpProxyServer.getPort()); //目的端口 UdpProxyServer的端口
 					CommonMethods.ComputeUDPChecksum(ipHeader, udpHeader);
 					if (BuildConfig.DEBUG) {

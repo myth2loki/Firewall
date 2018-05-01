@@ -26,6 +26,9 @@ public class TcpProxyServer implements Runnable {
 	private boolean mStopped;
 	private short mPort;
 
+	/**
+	 * 用于接收转发来的tcp报文，通过重新设定目的地址和端口重定向过来
+	 */
 	private Selector mSelector;
 	private ServerSocketChannel mServerSocketChannel;
 
@@ -74,7 +77,7 @@ public class TcpProxyServer implements Runnable {
 								((Tunnel) key.attachment()).onReadable(key);
 							} else if (key.isWritable()) {
 //								Log.d(TAG, "run: onWritable");
-								((Tunnel) key.attachment()).onWritable(key);
+//								((Tunnel) key.attachment()).onWritable(key);
 							} else if (key.isConnectable()) {
 //								Log.d(TAG, "run: onConnectable");
 								((Tunnel) key.attachment()).onConnectable();
@@ -134,6 +137,11 @@ public class TcpProxyServer implements Runnable {
 		}
 	}
 
+	/**
+	 * 获取目的ip地址和端口，在转发的时候已经写入source中
+	 * @param localChannel
+	 * @return
+	 */
 	private InetSocketAddress getDestAddress(SocketChannel localChannel) {
 		short portKey = (short) localChannel.socket().getPort();
 		NatSession session = NatSessionManager.getSession(portKey);
@@ -162,18 +170,20 @@ public class TcpProxyServer implements Runnable {
 			//获取local server的通道
 //			SocketChannel localChannel = mServerSocketChannel.accept();
 			SocketChannel localChannel = ((ServerSocketChannel) key.attachment()).accept();
-			//tcp代理服务器有连接进来
+			//tcp代理服务器有连接进来，localChannel代表应用与代理服务器的连接
 			localTunnel = TunnelFactory.wrap(localChannel, mSelector); //TODO 为何要调用wrap方法？ 因为需要将连接方和受vpn保护的socket配对
 
-			//有连接连进来，获取到目的地址。其实就是连接方地址
+			//有连接连进来，获取到目的地址。其实就是连接方地址，因为在转发的时候已经将目的地址和端口写入到源地址和端口上
+			// dstIp = localChannel.socket().getInetAddress dstPort = localChannel.socket().getPort()
 			InetSocketAddress destAddress = getDestAddress(localChannel);
 			if (destAddress != null) {
 				//创建远程tunnel，受vpn protect
 				Tunnel remoteTunnel = TunnelFactory.wrap(destAddress, mSelector);
 				//关联兄弟
 				remoteTunnel.setIsHttpsRequest(localTunnel.isHttpsRequest());
-				remoteTunnel.setBrotherTunnel(localTunnel);
-				localTunnel.setBrotherTunnel(remoteTunnel);
+				remoteTunnel.pair(localTunnel);
+//				remoteTunnel.setBrotherTunnel(localTunnel);
+//				localTunnel.setBrotherTunnel(remoteTunnel);
 				remoteTunnel.connect(); //开始连接
 			} else {
 				short portKey = (short) localChannel.socket().getPort();

@@ -153,7 +153,7 @@ public class MainActivity extends AppCompatActivity {
 					try {
 						datagramSocket.send(packet);
 						if (BuildConfig.DEBUG) {
-							Log.d(TAG, "run: send test udp");
+							Log.d(TAG, "run: send test udp, packet = " + packet.getLength());
 						}
 					} catch (SocketException e) {
 						e.printStackTrace();
