@@ -17,7 +17,7 @@ import com.timedancing.easyfirewall.util.DebugLog;
 /**
  * Created by zengzheying on 16/1/19.
  */
-public class FeedbackActivity extends AppCompatActivity {
+public class FeedbackActivity extends BaseActivity {
 
 	private EditText mETAdvise;
 	private EditText mETConnect;

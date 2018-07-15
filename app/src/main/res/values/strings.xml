@@ -38,4 +38,7 @@
 	<string name = "about_extra_info" >注：恶意网址库来源于http://www.mwsl.org.cn</string >
 
 	<string name = "guide_start_right_now" >立即体验</string >
+    <string name="home_page">首页</string>
+	<string name="about_page">关于</string>
+	<string name="settings_page">设置</string>
 </resources >

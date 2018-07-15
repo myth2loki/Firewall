@@ -12,7 +12,7 @@ import com.timedancing.easyfirewall.util.PhoneStateUtil;
 /**
  * Created by zengzheying on 16/1/20.
  */
-public class AboutActivity extends AppCompatActivity {
+public class AboutActivity extends BaseActivity {
 
 	private TextView mTVVersion;
 	private Toolbar mToolbar;
@@ -20,7 +20,7 @@ public class AboutActivity extends AppCompatActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+		setTitle(getString(R.string.about_page));
 		setContentView(R.layout.activity_about);
 
 		mTVVersion = (TextView) findViewById(R.id.tv_version);

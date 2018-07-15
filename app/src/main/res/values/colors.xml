@@ -13,8 +13,11 @@
 
 	<color name = "tipslayout_border_color" >#ffffff</color >
 
-	<color name = "background_color" >#01131a</color >
+	<color name = "background_color" >#1E1E1E</color >
 
 	<color name = "setting_text_color" >#b1bcc0</color >
 	<color name = "setting_divider_color" >#062a34</color >
+	
+	<color name="status_bar_color">#80008080</color>
+	<color name="tool_bar_color">#008080</color>
 </resources >

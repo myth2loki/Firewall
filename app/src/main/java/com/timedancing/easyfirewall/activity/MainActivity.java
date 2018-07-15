@@ -2,14 +2,9 @@ package com.timedancing.easyfirewall.activity;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.TextView;
 
 import com.timedancing.easyfirewall.BuildConfig;
@@ -33,7 +28,7 @@ import java.net.UnknownHostException;
 
 import de.greenrobot.event.EventBus;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity {
 	private static final String TAG = "MainActivity";
 
 	private View mImgStart;
@@ -50,20 +45,7 @@ public class MainActivity extends AppCompatActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-			// clear FLAG_TRANSLUCENT_STATUS flag:
-			Window window = getWindow();
-			window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-			// add FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS flag to the window
-			window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-
-			window.setStatusBarColor(Color.parseColor("#00000000"));
-
-			window.getDecorView()
-					.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
-		}
-
+		setTitle(getString(R.string.home_page));
 		setContentView(R.layout.activity_main);
 
 		mImgEnd = findViewById(R.id.img_end);

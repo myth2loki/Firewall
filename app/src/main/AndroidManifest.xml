@@ -38,16 +38,14 @@
 		<activity
 				android:name = ".activity.MainActivity"
 				android:noHistory = "false"
-				android:screenOrientation = "portrait"
-				android:theme = "@style/AppTheme.NoActionBar" >
+				android:screenOrientation = "portrait" >
 		</activity >
 
 		<activity
 				android:name = ".activity.UnlockActivity"
 				android:noHistory = "true"
 				android:screenOrientation = "portrait"
-				android:label="@string/parent_login"
-				android:theme = "@style/AppTheme" >
+				android:label="@string/parent_login" >
 		</activity >
 
 		<activity

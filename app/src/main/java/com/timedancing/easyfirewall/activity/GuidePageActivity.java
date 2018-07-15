@@ -19,10 +19,7 @@ import com.timedancing.easyfirewall.cache.AppConfig;
 
 import me.relex.circleindicator.CircleIndicator;
 
-/**
- * Created by zengzheying on 16/1/21.
- */
-public class GuidePageActivity extends AppCompatActivity {
+public class GuidePageActivity extends BaseActivity {
 
 	private static final String ARG_POSITION = "position";
 

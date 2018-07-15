@@ -18,7 +18,7 @@ import com.timedancing.easyfirewall.view.SettingItemView;
 /**
  * Created by zengzheying on 16/1/18.
  */
-public class SettingActivity extends AppCompatActivity {
+public class SettingActivity extends BaseActivity {
 
 	private static final int REQUEST_DEVICE_MANAGER_CODE = 118;
 	private SettingItemView mSivRunWhenCompleted;
@@ -30,6 +30,7 @@ public class SettingActivity extends AppCompatActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		setTitle(getString(R.string.settings_page));
 		setContentView(R.layout.activity_setting);
 
 		mSivRunWhenCompleted = (SettingItemView) findViewById(R.id.siv_run_auto);

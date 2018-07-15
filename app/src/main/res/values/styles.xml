@@ -10,7 +10,7 @@
 	</style >
 
 	<style name="my_actionbar_style" parent="@android:style/Widget.Holo.Light.ActionBar.Solid">
-		<item name="android:background">#008080</item>
+		<item name="android:background">@color/tool_bar_color</item>
 	</style>
 	<style name="AcBar_titleStyle" parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Title">
 		<item name="android:textColor">@android:color/white</item>

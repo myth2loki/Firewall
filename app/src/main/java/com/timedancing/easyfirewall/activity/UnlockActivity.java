@@ -2,7 +2,6 @@ package com.timedancing.easyfirewall.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -18,7 +17,7 @@ import com.timedancing.easyfirewall.cache.AppConfig;
 import com.timedancing.easyfirewall.constant.AppDebug;
 import com.timedancing.easyfirewall.view.NumberKeyboard;
 
-public class UnlockActivity extends AppCompatActivity {
+public class UnlockActivity extends BaseActivity {
 	private static final int MAXIMUM_PASSWORD = 6;
 	private NumberKeyboard mNumberKeyboard;
 	private EditText mEditText;
