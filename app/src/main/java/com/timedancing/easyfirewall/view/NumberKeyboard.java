@@ -15,12 +15,9 @@ import android.widget.TextView;
 
 import com.timedancing.easyfirewall.R;
 
-/**
- * Created by zengzheying on 16/1/13.
- */
 public class NumberKeyboard extends FrameLayout implements View.OnClickListener {
 
-	private int mWidth;
+//	private int mWidth;
 	private int mTextSize;
 
 	private OnKeyboardInputListener mKeyboardInputListener;
@@ -29,7 +26,8 @@ public class NumberKeyboard extends FrameLayout implements View.OnClickListener 
 		super(context, attrs);
 
 		DisplayMetrics dm = context.getResources().getDisplayMetrics();
-		mTextSize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 24.0f, dm);
+		mTextSize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 18.0f, dm);
+//		init(context);
 	}
 
 	public NumberKeyboard(Context context) {
@@ -42,40 +40,51 @@ public class NumberKeyboard extends FrameLayout implements View.OnClickListener 
 				.MATCH_PARENT));
 		gridLayout.setColumnCount(3);
 		gridLayout.setRowCount(4);
-		for (int i = 1; i <= 10; i++) {
-			GridLayout.Spec row;
-			GridLayout.Spec col;
-			if (i == 10) {
-				row = GridLayout.spec(3);
-				col = GridLayout.spec(1);
-			} else {
-				row = GridLayout.spec((i - 1) / 3);
-				col = GridLayout.spec((i - 1) % 3);
-			}
-			GridLayout.LayoutParams lp = new GridLayout.LayoutParams(row, col);
-			lp.width = mWidth / 3;
-			lp.height = mWidth / 4;
-			TextView textView = new TextView(getContext());
-			textView.setText(String.valueOf(i % 10));
-			textView.setGravity(Gravity.CENTER);
-			textView.setClickable(true);
-			textView.setTextColor(Color.WHITE);
-			textView.setTextSize(mTextSize);
-			textView.setTypeface(Typeface.DEFAULT_BOLD);
-			textView.setBackgroundResource(R.drawable.selector_keyboard_number);
-			textView.setTag(i != 10 ? i : 0);
-			textView.setOnClickListener(this);
-			gridLayout.addView(textView, lp);
+
+		GridLayout.Spec row;
+		GridLayout.Spec col;
+		for (int i = 1; i < 10; i++) {
+			row = GridLayout.spec((i - 1) / 3);
+			col = GridLayout.spec((i - 1) % 3);
+			createButton(String.valueOf(i), i, gridLayout, row, col);
 		}
+		row = GridLayout.spec(3);
+		col = GridLayout.spec(0);
+		createButton("x", 10, gridLayout, row, col);
+		row = GridLayout.spec(3);
+		col = GridLayout.spec(1);
+		createButton("0", 11, gridLayout, row, col);
+		row = GridLayout.spec(3);
+		col = GridLayout.spec(2);
+		createButton("▶", 12, gridLayout, row, col);
+	}
+
+	private void createButton(String text, int index, GridLayout gridLayout, GridLayout.Spec row, GridLayout.Spec col) {
+		int screenWidth = gridLayout.getContext().getResources().getDisplayMetrics().widthPixels;
+		GridLayout.LayoutParams lp = new GridLayout.LayoutParams(row, col);
+		lp.width = screenWidth / 3;
+		lp.height = lp.width / 2;
+		TextView textView = new TextView(gridLayout.getContext());
+		textView.setText(text);
+		textView.setGravity(Gravity.CENTER);
+		textView.setClickable(true);
+		textView.setTextColor(Color.WHITE);
+		textView.setTextSize(mTextSize);
+//		textView.setTypeface(Typeface.DEFAULT_BOLD);
+		textView.setBackgroundResource(R.drawable.selector_keyboard_number);
+//			textView.setTag(i != 10 ? i : 0);
+		textView.setTag(text);
+		textView.setOnClickListener(this);
+		gridLayout.addView(textView, lp);
 	}
 
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-		int width = MeasureSpec.getSize(widthMeasureSpec);
-		int height = MeasureSpec.getSize(heightMeasureSpec);
-		mWidth = Math.min(width, height);
-		widthMeasureSpec = MeasureSpec.makeMeasureSpec(mWidth, MeasureSpec.EXACTLY);
-		heightMeasureSpec = MeasureSpec.makeMeasureSpec(mWidth, MeasureSpec.EXACTLY);
+//		int width = MeasureSpec.getSize(widthMeasureSpec);
+//		int height = MeasureSpec.getSize(heightMeasureSpec);
+//		mWidth = Math.min(width, height);
+//		widthMeasureSpec = MeasureSpec.makeMeasureSpec(mWidth, MeasureSpec.EXACTLY);
+//		heightMeasureSpec = MeasureSpec.makeMeasureSpec(mWidth, MeasureSpec.EXACTLY);
 		removeAllViews();
 		init(getContext());
 		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
@@ -83,7 +92,7 @@ public class NumberKeyboard extends FrameLayout implements View.OnClickListener 
 
 	@Override
 	public void onClick(View v) {
-		int number = (Integer)v.getTag();
+		String number = v.getTag() + "";
 		if (mKeyboardInputListener != null) {
 			mKeyboardInputListener.onKeyboardInput(number);
 		}
@@ -94,6 +103,6 @@ public class NumberKeyboard extends FrameLayout implements View.OnClickListener 
 	}
 
 	public interface OnKeyboardInputListener {
-		void onKeyboardInput(int number);
+		void onKeyboardInput(String number);
 	}
 }

@@ -6,7 +6,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.view.Gravity;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.tencent.stat.StatConfig;
@@ -16,21 +18,20 @@ import com.timedancing.easyfirewall.cache.AppConfig;
 import com.timedancing.easyfirewall.constant.AppDebug;
 import com.timedancing.easyfirewall.view.NumberKeyboard;
 
-/**
- * Created by zengzheying on 16/1/13.
- */
 public class UnlockActivity extends AppCompatActivity {
-
+	private static final int MAXIMUM_PASSWORD = 6;
 	private NumberKeyboard mNumberKeyboard;
 	private EditText mEditText;
 	private TextView mTvHint;
 
 	private boolean isNeedSetPassword;
 	private String mFirstPassword;
+	private TextView[] mPwdArr = new TextView[6];
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		setTitle(R.string.parent_login);
 		setContentView(R.layout.activity_lock);
 
 		mEditText = (EditText) findViewById(R.id.et_pwd);
@@ -44,9 +45,19 @@ public class UnlockActivity extends AppCompatActivity {
 	}
 
 	private void setUpViews() {
+		LinearLayout pwdCaptionLL = (LinearLayout) findViewById(R.id.pwd_caption_ll);
+		int width = 120;
+		for (int i = 0; i< 6; i++) {
+			TextView tv = new TextView(this);
+			mPwdArr[i] = tv;
+			tv.setBackgroundResource(R.drawable.rect_round);
+			LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(width, width);
+			lp.leftMargin = i > 0 ? 40 : 0;
+			tv.setGravity(Gravity.CENTER);
+			pwdCaptionLL.addView(tv, lp);
+		}
 
 		isNeedSetPassword = TextUtils.isEmpty(AppConfig.getLockPassword(this));
-
 		if (isNeedSetPassword) {
 			mTvHint.setText(R.string.set_password);
 		} else {
@@ -55,8 +66,14 @@ public class UnlockActivity extends AppCompatActivity {
 
 		mNumberKeyboard.setKeyboardInputListener(new NumberKeyboard.OnKeyboardInputListener() {
 			@Override
-			public void onKeyboardInput(int number) {
-				mEditText.append(String.valueOf(number));
+			public void onKeyboardInput(String number) {
+				if ("x".equals(number) && mEditText.length() > 0) {
+					mEditText.setText(mEditText.getText().subSequence(0, mEditText.length() - 1));
+					return;
+				} else if ("▶".equals(number)) {
+
+				}
+				mEditText.append(number);
 			}
 		});
 
@@ -73,6 +90,12 @@ public class UnlockActivity extends AppCompatActivity {
 
 			@Override
 			public void afterTextChanged(Editable s) {
+				for (TextView tv : mPwdArr) {
+					tv.setText("");
+				}
+				for (int i = 0; i < s.length(); i++) {
+					mPwdArr[i].setText("*");
+				}
 				validate(s);
 			}
 		});
@@ -80,7 +103,7 @@ public class UnlockActivity extends AppCompatActivity {
 	}
 
 	private void validate(final Editable s) {
-		if (s.length() == 4) {
+		if (s.length() == MAXIMUM_PASSWORD) {
 			if (!isNeedSetPassword && s.toString().equals(AppConfig.getLockPassword(this))) {
 				navigateToMainActivity();
 			} else {
@@ -104,7 +127,7 @@ public class UnlockActivity extends AppCompatActivity {
 				mEditText.postDelayed(new Runnable() {
 					@Override
 					public void run() {
-						s.clear();
+						mEditText.setText("");
 					}
 				}, 100);
 			}

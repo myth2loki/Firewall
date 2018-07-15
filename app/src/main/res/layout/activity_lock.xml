@@ -1,63 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout
-		xmlns:android = "http://schemas.android.com/apk/res/android"
-		xmlns:app = "http://schemas.android.com/apk/res-auto"
-		xmlns:tools = "http://schemas.android.com/tools"
+<RelativeLayout
+	xmlns:android = "http://schemas.android.com/apk/res/android"
+	android:background = "#1E1E1E"
+	android:fitsSystemWindows = "true"
+	android:layout_width = "match_parent"
+	android:layout_height = "match_parent" >
+	<TextView
+		android:id = "@+id/tv_hint"
+		android:layout_width = "wrap_content"
+		android:layout_height = "40dp"
+		android:layout_marginTop="80dp"
+		android:layout_centerHorizontal = "true"
+		android:paddingLeft="60dp"
+		android:paddingRight="60dp"
+		android:gravity = "center_vertical"
+		android:text = "@string/input_password"
+		android:background="@drawable/rect_round_gray"
+		android:textColor = "#ffffff"
+		android:textSize = "16sp" />
+	<LinearLayout
+		android:layout_below="@id/tv_hint"
+		android:gravity="center"
+		android:id="@+id/pwd_caption_ll"
+		android:layout_marginTop="30dp"
+		android:orientation="horizontal"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content" />
+	<EditText
+		android:id = "@+id/et_pwd"
 		android:layout_width = "match_parent"
-		android:layout_height = "match_parent"
-		android:background = "?attr/colorPrimary"
-		android:fitsSystemWindows = "true" >
-
-	<RelativeLayout
-			android:layout_width = "match_parent"
-			android:layout_height = "match_parent" >
-
-		<RelativeLayout
-				android:layout_width = "match_parent"
-				android:layout_height = "440dp"
-				android:layout_centerInParent = "true" >
-
-
-
-			<com.timedancing.easyfirewall.view.NumberKeyboard
-					android:id = "@+id/numberKeyboard"
-					android:layout_width = "340dp"
-					android:layout_height = "340dp"
-					android:layout_alignParentBottom = "true"
-					android:layout_centerHorizontal = "true" />
-
-			<EditText
-					android:id = "@+id/et_pwd"
-					android:layout_width = "match_parent"
-					android:layout_height = "60dp"
-					android:layout_above = "@id/numberKeyboard"
-					android:layout_alignEnd = "@id/numberKeyboard"
-					android:layout_alignLeft = "@id/numberKeyboard"
-					android:layout_alignRight = "@id/numberKeyboard"
-					android:layout_alignStart = "@id/numberKeyboard"
-					android:background = "@null"
-					android:focusable = "false"
-					android:gravity = "center"
-					android:inputType = "numberPassword"
-					android:maxLength = "4"
-					android:textColor = "#ffffff"
-					android:textSize = "20sp"
-					/>
-
-			<TextView
-					android:id = "@+id/tv_hint"
-					android:layout_width = "wrap_content"
-					android:layout_height = "40dp"
-					android:layout_above = "@id/et_pwd"
-					android:layout_centerHorizontal = "true"
-					android:gravity = "center_vertical"
-					android:text = "请输入密码"
-					android:textColor = "#ffffff"
-					android:textSize = "16sp" />
-
-		</RelativeLayout >
-
-
-	</RelativeLayout >
-
-</android.support.design.widget.CoordinatorLayout >
+		android:layout_height = "60dp"
+		android:layout_below= "@id/tv_hint"
+		android:background = "@null"
+		android:focusable = "false"
+		android:gravity = "center"
+		android:inputType = "numberPassword"
+		android:maxLength = "6"
+		android:visibility="invisible"
+		android:textColor = "#ffffff"
+		android:textSize = "20sp" />
+	<com.timedancing.easyfirewall.view.NumberKeyboard
+		android:id = "@+id/numberKeyboard"
+		android:layout_width = "match_parent"
+		android:layout_height = "wrap_content"
+		android:layout_marginBottom="30dp"
+		android:layout_alignParentBottom = "true" />
+</RelativeLayout >

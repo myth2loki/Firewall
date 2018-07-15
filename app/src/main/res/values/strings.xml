@@ -1,12 +1,13 @@
 <resources >
-	<string name = "app_name" >TD网页防火墙</string >
+	<string name = "app_name" >少儿网络助手</string >
 	<string name = "action_settings" >Settings</string >
 
-	<string name = "set_password" >请设置4位数字密码</string >
-	<string name = "confirm_password" >请确认密码</string >
+	<string name = "set_password" >请输入6位初始密码</string >
+	<string name = "confirm_password" >请再次输入6位初始密码</string >
 	<string name = "set_password_again" >两次密码不匹配，请重新设置密码</string >
-	<string name = "input_password" >请输入密码</string >
+	<string name = "input_password" >请输入6位密码</string >
 	<string name = "wrong_password" >密码错误！</string >
+	<string name = "parent_login" >家长登录</string >
 
 	<string name = "start" >开启</string >
 	<string name = "shutdown" >关闭</string >
@@ -33,7 +34,7 @@
 	<string name = "updating_config" >正在更新配置……</string >
 
 	<string name = "about_version" >当前版本：%1$s</string >
-	<string name = "about_description" >TD网页防火墙利用一个简单的VPN，深入系统层面，无论是系统内置浏览器，第三方浏览器，还是APP内置浏览器，都可以帮你拦截掉所有的恶意网址，钓鱼网站。</string >
+	<string name = "about_description" >少儿网络助手利用一个简单的VPN，深入系统层面，无论是系统内置浏览器，第三方浏览器，还是APP内置浏览器，都可以帮你拦截掉所有的恶意网址，钓鱼网站。</string >
 	<string name = "about_extra_info" >注：恶意网址库来源于http://www.mwsl.org.cn</string >
 
 	<string name = "guide_start_right_now" >立即体验</string >
