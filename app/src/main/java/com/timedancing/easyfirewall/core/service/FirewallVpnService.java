@@ -3,7 +3,6 @@ package com.timedancing.easyfirewall.core.service;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.net.VpnService;
-import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
@@ -108,7 +107,7 @@ public class FirewallVpnService extends VpnService implements Runnable {
 			mTcpProxyServer.start();
 
 			//启动udp代理服务
-			mUdpProxyServer = new UdpProxyServer(0);
+			mUdpProxyServer = new UdpProxyServer();
 			mUdpProxyServer.start();
 
 			//启动dns代理服务
@@ -207,9 +206,9 @@ public class FirewallVpnService extends VpnService implements Runnable {
 			case IPHeader.TCP:
 //				TCPHeader tcpHeader = mTCPHeader;
 				TCPHeader tcpHeader = new TCPHeader(buff, 20);
-				if (BuildConfig.DEBUG) {
-					Log.d(TAG, "onIPPacketReceived: just tcp packet = " + tcpHeader);
-				}
+//				if (BuildConfig.DEBUG) {
+//					Log.d(TAG, "onIPPacketReceived: just tcp packet = " + tcpHeader);
+//				}
 //				tcpHeader.mOffset = ipHeader.getHeaderLength(); //矫正TCPHeader里的偏移量，使它指向真正的TCP数据地址
 				if (tcpHeader.getSourcePort() == mTcpProxyServer.getPort()) { //tcp proxy发来的报文
 
@@ -266,9 +265,9 @@ public class FirewallVpnService extends VpnService implements Runnable {
 					tcpHeader.setDestinationPort(mTcpProxyServer.getPort()); //目的端口
 
 					CommonMethods.ComputeTCPChecksum(ipHeader, tcpHeader);
-					if (BuildConfig.DEBUG) {
-						Log.d("xxx--->", "onIPPacketReceived: send tcp to proxy " + ipHeader);
-					}
+//					if (BuildConfig.DEBUG) {
+//						Log.d("xxx--->", "onIPPacketReceived: send tcp to proxy " + ipHeader);
+//					}
 					mVPNOutputStream.write(ipHeader.mData, ipHeader.mOffset, size);
 					session.bytesSent += tcpDataSize; //注意顺序
 					mSentBytes += size;
@@ -296,15 +295,9 @@ public class FirewallVpnService extends VpnService implements Runnable {
 					if (BuildConfig.DEBUG) {
 						Log.d(TAG, "onIPPacketReceived: old ip header = " + ipHeader + " | " + udpHeader.getSourcePort() + "->" + udpHeader.getDestinationPort());
 					}
-					ipHeader.setSourceIP(ipHeader.getDestinationIP());
-					ipHeader.setDestinationIP(LOCAL_IP); //目的地址 本机ip
-					udpHeader.setSourcePort(udpHeader.getDestinationPort());
-					udpHeader.setDestinationPort(mUdpProxyServer.getPort()); //目的端口 UdpProxyServer的端口
-					CommonMethods.ComputeUDPChecksum(ipHeader, udpHeader);
-					if (BuildConfig.DEBUG) {
-						Log.d(TAG, "onIPPacketReceived: new ip header = " + ipHeader + ":" + mUdpProxyServer.getPort() + " | " + udpHeader.getSourcePort() + "->" + udpHeader.getDestinationPort());
-					}
-					mVPNOutputStream.write(ipHeader.mData, ipHeader.mOffset, size);
+//					ByteBuffer mUDPBuffer = ((ByteBuffer) ByteBuffer.wrap(buff).position(28)).slice();
+//					mUDPBuffer.limit(udpHeader.getTotalLength() - 8);
+					mUdpProxyServer.onUdpRequestReceived(ipHeader, udpHeader);
 				}
 				break;
 		}

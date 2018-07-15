@@ -82,18 +82,18 @@ public class DnsProxy implements Runnable {
 			int ipHeaderLength = 20;
 			UDPHeader udpHeader = new UDPHeader(buff, ipHeaderLength);
 
-			int udpHeaderLenght = 8;
+			int udpHeaderLength = 8;
 			ByteBuffer dnsBuffer = ByteBuffer.wrap(buff);
-			dnsBuffer.position(ipHeaderLength + udpHeaderLenght);
+			dnsBuffer.position(ipHeaderLength + udpHeaderLength);
 			dnsBuffer = dnsBuffer.slice(); //去除ip和udp头部
 
 			//不包含头部信息
 			DatagramPacket packet = new DatagramPacket(buff, 28, buff.length - (ipHeaderLength +
-					udpHeaderLenght));
+					udpHeaderLength));
 
+			//不包含头部信息，减去ip和udp头部长度
+			packet.setLength(buff.length - (ipHeaderLength + udpHeaderLength));
 			while (mClient != null && !mClient.isClosed()) {
-				//不包含头部信息，减去ip和udp头部长度
-				packet.setLength(buff.length - (ipHeaderLength + udpHeaderLenght));
 				mClient.receive(packet); //获取说道的udp数据报文
 
 				dnsBuffer.clear();

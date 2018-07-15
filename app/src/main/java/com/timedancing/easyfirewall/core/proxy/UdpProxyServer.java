@@ -3,111 +3,131 @@ package com.timedancing.easyfirewall.core.proxy;
 import android.util.Log;
 
 import com.timedancing.easyfirewall.BuildConfig;
+import com.timedancing.easyfirewall.constant.AppDebug;
+import com.timedancing.easyfirewall.core.tcpip.CommonMethods;
 import com.timedancing.easyfirewall.core.tcpip.IPHeader;
 import com.timedancing.easyfirewall.core.tcpip.UDPHeader;
 import com.timedancing.easyfirewall.core.util.VpnServiceHelper;
+import com.timedancing.easyfirewall.util.DebugLog;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.Inet4Address;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.channels.DatagramChannel;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.util.Iterator;
 
 public class UdpProxyServer implements Runnable {
+    private static final boolean DEBUG = BuildConfig.DEBUG;
     private static final String TAG = "UdpProxyServer";
 
     private boolean mStop;
-    private Selector mSelector;
-    private DatagramChannel mServerSocketChannel;
-    private DatagramChannel mInnerServerSocketChannel;
-    private short mPort;
+    private DatagramSocket mClient;
 
-    public UdpProxyServer(int port) throws IOException {
-        mSelector = Selector.open();
-        mServerSocketChannel = DatagramChannel.open();
-        mServerSocketChannel.configureBlocking(false);
-        mServerSocketChannel.socket().bind(new InetSocketAddress(port));
-        mServerSocketChannel.register(mSelector,
-//                SelectionKey.OP_CONNECT |
-                        SelectionKey.OP_READ, mServerSocketChannel);
-        mPort = (short) mServerSocketChannel.socket().getLocalPort();
-
-        mInnerServerSocketChannel = new DatagramSocket().getChannel();
-//        mInnerServerSocketChannel.register(mSelector, SelectionKey.OP_READ| SelectionKey.OP_WRITE, mInnerServerSocketChannel);
-        VpnServiceHelper.protect(mServerSocketChannel.socket());
+    public UdpProxyServer() throws IOException {
+        mClient = new DatagramSocket(0);
+        VpnServiceHelper.protect(mClient);
     }
 
     public void start() {
-        mStop = true;
         new Thread(this, "UdpProxyServerThread").start();
     }
 
     public void stop() {
-        mStop = false;
+        if (!mStop) {
+            mStop = true;
+            mClient.close();
+        }
     }
 
     @Override
     public void run() {
-        while (mStop) {
-            try {
-                mSelector.select();
-                Iterator<SelectionKey> iter = mSelector.selectedKeys().iterator();
-                while (iter.hasNext()) {
-                    SelectionKey key = iter.next();
-                    DatagramChannel channel = (DatagramChannel) key.channel();
-                    if (key.isValid()) {
-                        if (key.isReadable()) { //有udp报文
-                            ByteBuffer byteBuff = ByteBuffer.allocate(20000);
-                            SocketAddress sa = channel.receive(byteBuff);
-                            byteBuff.flip();
-                            DatagramPacket packet = new DatagramPacket(byteBuff.array(), byteBuff.limit());
-                            if (BuildConfig.DEBUG) {
-                                Log.d(TAG, "run: sa = " + sa +", packet size = " + packet.getLength());
-                            }
-                            InetAddress senderAddress = packet.getAddress();
-//                            SocketAddress hostAddress = packet.getSocketAddress();
-//                            packet.getPort();
-                            //TODO 需要一个tunnel
-                            UDPHeader udpHeader = new UDPHeader(byteBuff.array(), 0);
-                            if (BuildConfig.DEBUG) {
-                                Log.d(TAG, "run: udp header read " + udpHeader);
-                                Log.d(TAG, "run: udp sender address " + senderAddress);
-//                                Log.d(TAG, "run: udp socket address " + hostAddress);
-                                Log.d(TAG, "run: udp content read " + new String(packet.getData(), 0, packet.getLength()));
-//                                Log.d(TAG, "run: udp packet " + packet);
-                            }
-//                            mInnerServerSocketChannel.send(byteBuff.asReadOnlyBuffer(), new InetSocketAddress(new Inet4Address(udpHeader.get), udpHeader.getSourcePort()));
-                        } else if (key.isWritable()) {
-                            if (BuildConfig.DEBUG) {
-                                Log.d(TAG, "run: udp header write ");
-                            }
-                        } else if (key.isConnectable()) {
+        try {
+            byte[] buff = new byte[20000];
+            IPHeader ipHeader = new IPHeader(buff, 0);
+            ipHeader.defaultValue();
+            int ipHeaderLength = 20;
+            UDPHeader udpHeader = new UDPHeader(buff, ipHeaderLength);
 
-                            if (BuildConfig.DEBUG) {
-                                Log.d(TAG, "run: udp header write ");
-                            }
-                        }
-                    }
-                    iter.remove();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+            int udpHeaderLenght = 8;
+            ByteBuffer udpBuffer = ByteBuffer.wrap(buff);
+            udpBuffer.position(ipHeaderLength + udpHeaderLenght);
+            udpBuffer = udpBuffer.slice(); //去除ip和udp头部
+
+            //不包含头部信息
+            DatagramPacket packet = new DatagramPacket(buff, 28, buff.length - (ipHeaderLength +
+                    udpHeaderLenght));
+            //不包含头部信息，减去ip和udp头部长度
+            packet.setLength(buff.length - (ipHeaderLength + udpHeaderLenght));
+            while (mClient != null && !mClient.isClosed()) {
+                mClient.receive(packet); //获取说道的udp数据报文
+
+//                udpBuffer.clear();
+//                udpBuffer.limit(packet.getLength()); //设置dnsBuffer的长度
+                OnUdpResponseReceived(ipHeader, udpHeader);
             }
+        } catch (Exception e) {
+            if (AppDebug.IS_DEBUG) {
+                e.printStackTrace(System.err);
+            }
+            DebugLog.e("DnsProxy Thread catch an exception %s\n", e);
+        } finally {
+            DebugLog.i("DnsProxy Thread Exited.\n");
+            this.stop();
         }
     }
 
     /**
-     * 获取端口
-     * @return
+     * 收到APPs的DNS查询包，根据情况转发或者提供一个虚假的DNS回复数据报
      */
-    public short getPort() {
-        return mPort;
+    public void onUdpRequestReceived(IPHeader ipHeader, UDPHeader udpHeader) {
+        int destIp = ipHeader.getDestinationIP();
+        int destPort = udpHeader.getDestinationPort();
+        if (DEBUG) {
+            Log.d(TAG, "onUdpRequestReceived: dest ip = " + CommonMethods.ipIntToString(destIp) + ":" + destPort);
+        }
+        if (filter(destIp, destPort)) {
+            if (DEBUG) {
+                Log.d(TAG, "onUdpRequestReceived: be filtered, ignore, dest ip = " + destIp + ", dest port = " + destPort);
+            }
+            return;
+        }
+        InetSocketAddress socketAddress = new InetSocketAddress(CommonMethods.ipIntToInet4Address(destIp),
+                destPort);
+        if (DEBUG) {
+            Log.d(TAG, "onUdpRequestReceived: udpHeader = " + udpHeader);
+            Log.d(TAG, "onUdpRequestReceived: offset = " + udpHeader.mOffset);
+            Log.d(TAG, "onUdpRequestReceived: length = " + udpHeader.mData.length);
+            Log.d(TAG, "onUdpRequestReceived: total length = " + udpHeader.getTotalLength());
+        }
+        DatagramPacket packet = new DatagramPacket(udpHeader.mData, udpHeader.mOffset + 8, udpHeader.getTotalLength() - 8);
+        packet.setSocketAddress(socketAddress);
+        try {
+            mClient.send(packet);
+        } catch (IOException e) {
+            if (DEBUG) {
+                Log.e(TAG, "onUdpRequestReceived: send packet error.", e);
+            }
+        }
+    }
+
+    private boolean filter(int ip, int port) {
+
+        return false;
+    }
+
+    public void OnUdpResponseReceived(IPHeader ipHeader, UDPHeader udpHeader) {
+        int srcIp = ipHeader.getSourceIP();
+        int srcPort = udpHeader.getSourcePort();
+        if (DEBUG) {
+            Log.d(TAG, "OnUdpResponseReceived: srcIp = " + CommonMethods.ipIntToString(srcIp) + ", srcPort = " + srcPort);
+        }
+        if (filter(srcIp, srcPort)) {
+            if (DEBUG) {
+                Log.d(TAG, "OnUdpResponseReceived: be filtered, ignore, src ip = " + srcIp + ", src port = " + srcPort);
+            }
+            return;
+        }
+        //输出到请求发起者
+        VpnServiceHelper.sendUDPPacket(ipHeader, udpHeader);
     }
 }

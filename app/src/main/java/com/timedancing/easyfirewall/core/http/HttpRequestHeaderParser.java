@@ -128,6 +128,7 @@ public class HttpRequestHeaderParser {
 				return null;
 			}
 
+			//读取16个bit
 			int cipherSuitesLength = CommonMethods.readShort(buffer, offset) & 0xFFFF;
 			offset += 2;
 			offset += cipherSuitesLength;
