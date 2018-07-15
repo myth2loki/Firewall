@@ -41,4 +41,6 @@
     <string name="home_page">首页</string>
 	<string name="about_page">关于</string>
 	<string name="settings_page">设置</string>
+	<string name="protect_feature_title">保护功能</string>
+	<string name="protect_feature_sub_title">开启/关闭保护功能</string>
 </resources >

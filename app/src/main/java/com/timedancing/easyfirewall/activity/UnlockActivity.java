@@ -134,7 +134,7 @@ public class UnlockActivity extends BaseActivity {
 	}
 
 	private void navigateToMainActivity() {
-		Intent intent = new Intent(this, MainActivity.class);
+		Intent intent = new Intent(this, MainActivity1.class);
 		startActivity(intent);
 		finish();
 	}

@@ -40,6 +40,11 @@
 				android:noHistory = "false"
 				android:screenOrientation = "portrait" >
 		</activity >
+		<activity
+				android:name = ".activity.MainActivity1"
+				android:noHistory = "false"
+				android:screenOrientation = "portrait" >
+		</activity >
 
 		<activity
 				android:name = ".activity.UnlockActivity"
