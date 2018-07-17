@@ -34,7 +34,8 @@
 	<string name = "updating_config" >正在更新配置……</string >
 
 	<string name = "about_version" >当前版本：%1$s</string >
-	<string name = "about_description" >少儿网络助手利用一个简单的VPN，深入系统层面，无论是系统内置浏览器，第三方浏览器，还是APP内置浏览器，都可以帮你拦截掉所有的恶意网址，钓鱼网站。</string >
+	<string name = "about_description1" >少儿网络助手利用一个简单的VPN，深入系统层面，无论是系统内置浏览器，第三方浏览器，还是APP内置浏览器，都可以帮你拦截掉所有的恶意网址，钓鱼网站。</string >
+	<string name = "about_description" >少儿网络助手是一款简单、易用、免费的网络监控工具，主要针对少年儿童进行量身定制，限制少年儿童无限制使用移动设备。提供的日志记录功能，可准确的了解您不在的情况下移动设备的网络使用情况。少儿网络助手工作在IP层能够有效地拦截所有网络请求，给孩子们一个绿色、安全的网络环境！</string >
 	<string name = "about_extra_info" >注：恶意网址库来源于http://www.mwsl.org.cn</string >
 
 	<string name = "guide_start_right_now" >立即体验</string >

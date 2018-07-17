@@ -1,17 +1,14 @@
 package com.timedancing.easyfirewall.activity;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
 import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.timedancing.easyfirewall.R;
 import com.timedancing.easyfirewall.util.PhoneStateUtil;
 
-/**
- * Created by zengzheying on 16/1/20.
- */
 public class AboutActivity extends BaseActivity {
 
 	private TextView mTVVersion;
@@ -25,7 +22,8 @@ public class AboutActivity extends BaseActivity {
 
 		mTVVersion = (TextView) findViewById(R.id.tv_version);
 		mToolbar = (Toolbar) findViewById(R.id.toolbar);
-
+		TextView about = (TextView) findViewById(R.id.tv_about);
+		about.setText(Html.fromHtml(getString(R.string.about_extra_info)));
 		setUpViews();
 	}
 

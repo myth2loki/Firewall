@@ -15,9 +15,6 @@ import com.timedancing.easyfirewall.cache.AppConfig;
 import com.timedancing.easyfirewall.receiver.PreventUninstallDeviceAdminReceiver;
 import com.timedancing.easyfirewall.view.SettingItemView;
 
-/**
- * Created by zengzheying on 16/1/18.
- */
 public class SettingActivity extends BaseActivity {
 
 	private static final int REQUEST_DEVICE_MANAGER_CODE = 118;

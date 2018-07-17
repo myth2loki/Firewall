@@ -62,14 +62,14 @@
 				android:textSize = "13dp" />
 
 		<TextView
-				android:layout_width = "match_parent"
-				android:layout_height = "wrap_content"
-				android:layout_marginLeft = "37dp"
-				android:layout_marginRight = "37dp"
-				android:layout_marginTop = "29dp"
-				android:text = "@string/about_extra_info"
-				android:textColor = "#246b73"
-				android:textSize = "13dp" />
+			android:id="@+id/tv_about"
+			android:layout_width = "match_parent"
+			android:layout_height = "wrap_content"
+			android:layout_marginLeft = "37dp"
+			android:layout_marginRight = "37dp"
+			android:layout_marginTop = "29dp"
+			android:textColor = "#246b73"
+			android:textSize = "13dp" />
 
 	</LinearLayout >
 
