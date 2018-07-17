@@ -7,4 +7,172 @@
 	android:orientation="vertical"
 	android:fitsSystemWindows = "true" >
 
+	<RelativeLayout
+		android:id="@+id/protect_bar"
+		android:background="@drawable/ripple_clickable"
+		android:layout_width="match_parent"
+		android:onClick="onClick"
+		android:layout_height="80dp">
+		<LinearLayout
+			android:orientation="vertical"
+			android:layout_centerVertical="true"
+			android:layout_marginLeft="20dp"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content">
+			<TextView
+				android:id="@+id/title_protect"
+				android:text="@string/protect_feature_title"
+				android:textStyle="bold"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content" />
+			<TextView
+				android:id="@+id/sub_title_protect"
+				android:text="@string/protect_feature_sub_title"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content" />
+		</LinearLayout>
+		<CheckBox
+			android:id="@+id/checkbox"
+			android:scaleType="centerInside"
+			android:layout_centerVertical="true"
+			android:layout_alignParentRight="true"
+			android:layout_marginRight="40dp"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content" />
+
+		<ImageView
+			android:layout_width="match_parent"
+			android:layout_height="1dp"
+			android:layout_alignParentBottom="true"
+			android:layout_alignParentLeft="true"
+			android:layout_alignParentStart="true"
+			android:background="@color/background_color" />
+	</RelativeLayout>
+
+	<RelativeLayout
+		android:id="@+id/log_bar"
+		android:background="@drawable/ripple_clickable"
+		android:layout_width="match_parent"
+		android:onClick="onClick"
+		android:layout_height="80dp">
+		<LinearLayout
+			android:orientation="vertical"
+			android:layout_centerVertical="true"
+			android:layout_marginLeft="20dp"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content">
+			<TextView
+				android:id="@+id/title_log"
+				android:text="@string/log_feature_title"
+				android:textStyle="bold"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content" />
+			<TextView
+				android:id="@+id/sub_title_log"
+				android:text="@string/log_feature_sub_title"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content" />
+		</LinearLayout>
+		<ImageView
+			android:id="@+id/icon_log"
+			android:scaleType="centerInside"
+			android:layout_centerVertical="true"
+			android:layout_alignParentRight="true"
+			android:layout_marginRight="40dp"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content" />
+
+		<ImageView
+			android:layout_width="match_parent"
+			android:layout_height="1dp"
+			android:layout_alignParentBottom="true"
+			android:layout_alignParentLeft="true"
+			android:layout_alignParentStart="true"
+			android:background="@color/background_color" />
+	</RelativeLayout>
+
+
+	<RelativeLayout
+		android:id="@+id/setting_bar"
+		android:onClick="onClick"
+		android:background="@drawable/ripple_clickable"
+		android:layout_width="match_parent"
+		android:layout_height="80dp">
+		<LinearLayout
+			android:orientation="vertical"
+			android:layout_centerVertical="true"
+			android:layout_marginLeft="20dp"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content">
+			<TextView
+				android:id="@+id/title_setting"
+				android:text="@string/setting_feature_title"
+				android:textStyle="bold"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content" />
+			<TextView
+				android:id="@+id/sub_title_setting"
+				android:text="@string/setting_feature_sub_title"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content" />
+		</LinearLayout>
+		<ImageView
+			android:id="@+id/icon_setting"
+			android:scaleType="centerInside"
+			android:layout_centerVertical="true"
+			android:layout_alignParentRight="true"
+			android:layout_marginRight="40dp"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content" />
+
+		<ImageView
+			android:layout_width="match_parent"
+			android:layout_height="1dp"
+			android:layout_alignParentBottom="true"
+			android:layout_alignParentLeft="true"
+			android:layout_alignParentStart="true"
+			android:background="@color/background_color" />
+	</RelativeLayout>
+
+	<RelativeLayout
+		android:id="@+id/about_bar"
+		android:onClick="onClick"
+		android:background="@drawable/ripple_clickable"
+		android:layout_width="match_parent"
+		android:layout_height="80dp">
+		<LinearLayout
+			android:orientation="vertical"
+			android:layout_centerVertical="true"
+			android:layout_marginLeft="20dp"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content">
+			<TextView
+				android:id="@+id/title_about"
+				android:text="@string/about_feature_title"
+				android:textStyle="bold"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content" />
+			<TextView
+				android:id="@+id/sub_title_about"
+				android:text="@string/about_feature_sub_title"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content" />
+		</LinearLayout>
+		<ImageView
+			android:id="@+id/icon_about"
+			android:scaleType="centerInside"
+			android:layout_centerVertical="true"
+			android:layout_alignParentRight="true"
+			android:layout_marginRight="40dp"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content" />
+
+		<ImageView
+			android:layout_width="match_parent"
+			android:layout_height="1dp"
+			android:layout_alignParentBottom="true"
+			android:layout_alignParentLeft="true"
+			android:layout_alignParentStart="true"
+			android:background="@color/background_color" />
+	</RelativeLayout>
 </LinearLayout >

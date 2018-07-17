@@ -3,9 +3,8 @@ package com.timedancing.easyfirewall.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import com.timedancing.easyfirewall.R;
 import com.timedancing.easyfirewall.cache.AppCache;
@@ -25,9 +24,7 @@ public class MainActivity1 extends BaseActivity implements View.OnClickListener 
 		setTitle(getString(R.string.home_page));
 		setContentView(R.layout.activity_main_1);
 		mMainRoot = (LinearLayout) findViewById(R.id.main_root);
-		createView();
-		createView();
-		createView();
+
 
 		AppCache.syncBlockCountWithLeanCloud(this);
 
@@ -36,27 +33,28 @@ public class MainActivity1 extends BaseActivity implements View.OnClickListener 
 		}
 	}
 
-	private void createView() {
-		RelativeLayout rl = (RelativeLayout) getLayoutInflater().inflate(R.layout.activity_main_item, mMainRoot, false);
-		TextView title = (TextView) rl.findViewById(R.id.title);
-		title.setText(R.string.protect_feature_title);
-		TextView subTitle = (TextView) rl.findViewById(R.id.sub_title);
-		subTitle.setText(R.string.protect_feature_sub_title);
-		mMainRoot.addView(rl);
-	}
-
-	private View genItem(int titleRes, int subTitleRes, int iconRes) {
-		RelativeLayout rl = (RelativeLayout) getLayoutInflater().inflate(R.layout.activity_main_item, null);
-		TextView title1 = (TextView) rl.findViewById(R.id.title);
-		title1.setText(titleRes);
-		TextView title2 = (TextView) rl.findViewById(R.id.sub_title);
-		title2.setText(subTitleRes);
-		return rl;
-	}
 
 	@Override
 	public void onClick(View v) {
+		switch (v.getId()) {
+			case R.id.protect_bar:
+				CheckBox cb = (CheckBox) findViewById(R.id.checkbox);
+				cb.setChecked(!cb.isChecked());
+				break;
+			case R.id.log_bar:
+				break;
+			case R.id.setting_bar:
+				openActivity(SettingActivity.class);
+				break;
+			case R.id.about_bar:
+				openActivity(AboutActivity.class);
+				break;
+		}
+	}
 
+	private void openActivity(Class<?> clazz) {
+		Intent itt = new Intent(this, clazz);
+		startActivity(itt);
 	}
 
 	@Override

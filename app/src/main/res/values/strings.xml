@@ -43,4 +43,10 @@
 	<string name="settings_page">设置</string>
 	<string name="protect_feature_title">保护功能</string>
 	<string name="protect_feature_sub_title">开启/关闭保护功能</string>
+	<string name="log_feature_title">查看日志</string>
+	<string name="log_feature_sub_title">查看违规行为和操作日志</string>
+	<string name="setting_feature_title">设置</string>
+	<string name="setting_feature_sub_title">设置规律规则</string>
+	<string name="about_feature_title">关于</string>
+	<string name="about_feature_sub_title">查看软件信息</string>
 </resources >
