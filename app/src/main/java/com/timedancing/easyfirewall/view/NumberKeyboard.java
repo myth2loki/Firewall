@@ -26,7 +26,7 @@ public class NumberKeyboard extends FrameLayout implements View.OnClickListener 
 		super(context, attrs);
 
 		DisplayMetrics dm = context.getResources().getDisplayMetrics();
-		mTextSize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 18.0f, dm);
+		mTextSize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 12.0f, dm);
 //		init(context);
 	}
 
@@ -71,7 +71,7 @@ public class NumberKeyboard extends FrameLayout implements View.OnClickListener 
 		textView.setTextColor(Color.WHITE);
 		textView.setTextSize(mTextSize);
 //		textView.setTypeface(Typeface.DEFAULT_BOLD);
-		textView.setBackgroundResource(R.drawable.selector_keyboard_number);
+		textView.setBackgroundResource(R.drawable.ripple_rect_round);
 //			textView.setTag(i != 10 ? i : 0);
 		textView.setTag(text);
 		textView.setOnClickListener(this);

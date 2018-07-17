@@ -49,7 +49,7 @@ public class UnlockActivity extends BaseActivity {
 		for (int i = 0; i< 6; i++) {
 			TextView tv = new TextView(this);
 			mPwdArr[i] = tv;
-			tv.setBackgroundResource(R.drawable.rect_round);
+			tv.setBackgroundResource(R.drawable.rect_round_white);
 			LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(width, width);
 			lp.leftMargin = i > 0 ? 40 : 0;
 			tv.setGravity(Gravity.CENTER);
