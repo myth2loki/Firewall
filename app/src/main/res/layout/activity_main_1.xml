@@ -27,7 +27,7 @@
 				android:layout_height="wrap_content" />
 			<TextView
 				android:id="@+id/sub_title_protect"
-				android:text="@string/protect_feature_sub_title"
+				android:text="@string/protect_feature_sub_title_started"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content" />
 		</LinearLayout>

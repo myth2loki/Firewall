@@ -4,31 +4,45 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.CheckBox;
-import android.widget.LinearLayout;
+import android.widget.CompoundButton;
+import android.widget.TextView;
 
 import com.timedancing.easyfirewall.R;
 import com.timedancing.easyfirewall.cache.AppCache;
 import com.timedancing.easyfirewall.core.util.VpnServiceHelper;
 import com.timedancing.easyfirewall.network.HostHelper;
-import com.timedancing.easyfirewall.util.DebugLog;
 
 import de.greenrobot.event.EventBus;
 
 public class MainActivity1 extends BaseActivity implements View.OnClickListener {
 	private static final String TAG = "MainActivity";
 
-	private LinearLayout mMainRoot;
+	private CheckBox mProtectCheckbox;
+	private TextView mSubTitleProtect;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setTitle(getString(R.string.home_page));
 		setContentView(R.layout.activity_main_1);
-		mMainRoot = (LinearLayout) findViewById(R.id.main_root);
-
+		mSubTitleProtect = (TextView) findViewById(R.id.sub_title_protect);
+		mProtectCheckbox = (CheckBox) findViewById(R.id.checkbox);
+		mProtectCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+			@Override
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+				mSubTitleProtect.setText(isChecked ? R.string.protect_feature_sub_title_started
+						: R.string.protect_feature_sub_title_stopped);
+				VpnServiceHelper.changeVpnRunningStatus(buttonView.getContext(), isChecked);
+			}
+		});
 
 		AppCache.syncBlockCountWithLeanCloud(this);
 
-		if (!VpnServiceHelper.vpnRunningStatus()) {
+		boolean isRunning = VpnServiceHelper.vpnRunningStatus();
+		mProtectCheckbox.setChecked(isRunning);
+		mSubTitleProtect.setText(isRunning ? R.string.protect_feature_sub_title_started
+				: R.string.protect_feature_sub_title_stopped);
+		if (!isRunning) {
 			HostHelper.updateHost(this);
 		}
 	}
@@ -73,9 +87,9 @@ public class MainActivity1 extends BaseActivity implements View.OnClickListener 
 		if (requestCode == VpnServiceHelper.START_VPN_SERVICE_REQUEST_CODE) {
 			if (resultCode == RESULT_OK) {
 				VpnServiceHelper.startVpnService(this);
+				mProtectCheckbox.setChecked(true);
 			} else {
-//				changeButtonStatus(false);
-				DebugLog.e("canceled");
+				mProtectCheckbox.setChecked(false);
 			}
 			return;
 		}

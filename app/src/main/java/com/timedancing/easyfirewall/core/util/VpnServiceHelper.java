@@ -69,7 +69,9 @@ public class VpnServiceHelper {
 			}
 		} else {
 			boolean stopStatus = false;
-			sVpnService.setVpnRunningStatus(stopStatus);
+			if (sVpnService != null) {
+				sVpnService.setVpnRunningStatus(stopStatus);
+			}
 		}
 	}
 
