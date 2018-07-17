@@ -58,7 +58,7 @@ public class MainActivity1 extends BaseActivity implements View.OnClickListener 
 			case R.id.log_bar:
 				break;
 			case R.id.setting_bar:
-				openActivity(SettingActivity.class);
+				openActivity(SettingActivity1.class);
 				break;
 			case R.id.about_bar:
 				openActivity(AboutActivity.class);

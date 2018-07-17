@@ -59,6 +59,11 @@
 				android:theme = "@style/AppTheme.NoActionBar" />
 
 		<activity
+				android:name = ".activity.SettingActivity1"
+				android:screenOrientation = "portrait"
+				android:theme = "@style/AppTheme.NoActionBar" />
+
+		<activity
 				android:name = ".activity.FeedbackActivity"
 				android:screenOrientation = "portrait"
 				android:theme = "@style/AppTheme.NoActionBar" />
