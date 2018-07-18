@@ -51,4 +51,5 @@
 	<string name="setting_feature_sub_title">设置规律规则</string>
 	<string name="about_feature_title">关于</string>
 	<string name="about_feature_sub_title">查看软件信息</string>
+    <string name="white_list">白名单</string>
 </resources >

@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SettingActivity1 extends BaseActivity {
+	public static final String PREF_NAME = "settings.dat";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
