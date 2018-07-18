@@ -48,8 +48,12 @@ public class ProxyConfig {
 		return (ip & ProxyConfig.FAKE_NETWORK_MASK) == ProxyConfig.FAKE_NETWORK_IP;
 	}
 
-	public void addDomainFilter(DomainFilter domainFilter) {
-		mDomainFilterList.add(domainFilter);
+	public void addDomainFilter(DomainFilter filter) {
+		mDomainFilterList.add(filter);
+	}
+
+	public void addHtmlFilter(HtmlFilter filter) {
+		mHtmlFilterList.add(filter);
 	}
 
 	public void prepare() throws IllegalStateException {

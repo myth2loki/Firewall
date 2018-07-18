@@ -1,7 +1,9 @@
 package com.timedancing.easyfirewall.core.http;
 
 import android.text.TextUtils;
+import android.util.Log;
 
+import com.timedancing.easyfirewall.BuildConfig;
 import com.timedancing.easyfirewall.constant.AppDebug;
 import com.timedancing.easyfirewall.util.Compressor;
 import com.timedancing.easyfirewall.util.CompressorFactory;
@@ -17,6 +19,8 @@ import java.util.Set;
  * Created by zengzheying on 15/12/31.
  */
 public class HttpResponse {
+	private static final String TAG = "HttpResponse";
+	private static final boolean DEBUG = BuildConfig.DEBUG;
 
 	private  static final String KEY_CONTENT_TYPE = "Content-Type";
 	private  static final String KEY_CONTENT_LENGTH = "Content-Length";
@@ -147,6 +151,11 @@ public class HttpResponse {
 	}
 
 	private void parseHttpBody() {
+		if (DEBUG) {
+			Log.d(TAG, "parseHttpBody: mBodyByteArray = " + mBodyByteArray);
+			Log.d(TAG, "parseHttpBody: isHtml = " + isHtml() + ", mContentType = " + mContentType);
+			Log.d(TAG, "parseHttpBody: mContentEncoding = " + mContentEncoding);
+		}
 		if (mBodyByteArray != null && isHtml()) {
 			if (!TextUtils.isEmpty(mContentEncoding)) { //采用压缩
 				Compressor compressor = CompressorFactory.getCompressor(mContentEncoding);
@@ -386,7 +395,13 @@ public class HttpResponse {
 	 * @return true: 弃用  false: 不弃用
 	 */
 	public boolean isShouldAbandon() {
-		return isParsedHeader && (!isHtml() || mStateCode != 200);
+		if (DEBUG) {
+			Log.d(TAG, "isShouldAbandon: isParsedHeader = " + isParsedHeader + ", mStateCode = " + mStateCode + ", " +
+					"isHtml() = " + isHtml());
+		}
+		boolean ret = isParsedHeader && mStateCode == 200 && isHtml();
+		return !ret;
+//		return isParsedHeader && (!isHtml() || mStateCode != 200);
 	}
 
 	/**

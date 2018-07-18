@@ -59,12 +59,12 @@ public class GlobalApplication extends Application {
 
 		@Override
 		public void onVpnStart(Context context) {
-			StatService.trackCustomBeginKVEvent(context, "VPN_OPEN", mProperties);
+//			StatService.trackCustomBeginKVEvent(context, "VPN_OPEN", mProperties);
 		}
 
 		@Override
 		public void onVpnEnd(Context context) {
-			StatService.trackCustomEndKVEvent(context, "VPN_OPEN", mProperties);
+//			StatService.trackCustomEndKVEvent(context, "VPN_OPEN", mProperties);
 		}
 	}
 }

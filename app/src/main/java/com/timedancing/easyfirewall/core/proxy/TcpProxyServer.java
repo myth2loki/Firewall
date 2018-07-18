@@ -1,5 +1,8 @@
 package com.timedancing.easyfirewall.core.proxy;
 
+import android.util.Log;
+
+import com.timedancing.easyfirewall.BuildConfig;
 import com.timedancing.easyfirewall.constant.AppDebug;
 import com.timedancing.easyfirewall.core.ProxyConfig;
 import com.timedancing.easyfirewall.core.nat.NatSession;
@@ -22,6 +25,7 @@ import java.util.Iterator;
  */
 public class TcpProxyServer implements Runnable {
 	private static final String TAG = "TcpProxyServer";
+	private static final boolean DEBUG = BuildConfig.DEBUG;
 
 	private boolean mStopped;
 	private short mPort;
@@ -146,6 +150,10 @@ public class TcpProxyServer implements Runnable {
 		short portKey = (short) localChannel.socket().getPort();
 		NatSession session = NatSessionManager.getSession(portKey);
 		if (session != null) {
+			if (DEBUG) {
+				Log.d(TAG, "getDestAddress: session.remoteHost = " + session.remoteHost);
+				Log.d(TAG, "getDestAddress: session.requestUrl = " + session.requestUrl);
+			}
 			if (ProxyConfig.Instance.filter(session.remoteHost, session.remoteIP)) {
 				//TODO 完成跟具体的拦截策略？？？
 				DebugLog.i("%d/%d:[BLOCK] %s=>%s:%d\n", NatSessionManager.getSessionCount(), Tunnel.SessionCount,

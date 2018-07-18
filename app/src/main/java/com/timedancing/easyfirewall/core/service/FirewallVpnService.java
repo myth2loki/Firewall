@@ -8,6 +8,7 @@ import android.util.Log;
 
 import com.timedancing.easyfirewall.BuildConfig;
 import com.timedancing.easyfirewall.activity.MainActivity;
+import com.timedancing.easyfirewall.filter.BlackHtmlFilter;
 import com.timedancing.easyfirewall.filter.HtmlBlockingInfoBuilder;
 import com.timedancing.easyfirewall.constant.AppDebug;
 import com.timedancing.easyfirewall.core.ProxyConfig;
@@ -97,6 +98,7 @@ public class FirewallVpnService extends VpnService implements Runnable {
 			//设置黑名单
 			ProxyConfig.Instance.addDomainFilter(new BlackListFilter());
 			ProxyConfig.Instance.addDomainFilter(new CustomerFilter());
+			ProxyConfig.Instance.addHtmlFilter(new BlackHtmlFilter());
 			//设置网页内容过滤
 			ProxyConfig.Instance.prepare();
 			ProxyConfig.Instance.setBlockingInfoBuilder(new HtmlBlockingInfoBuilder());

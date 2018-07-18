@@ -16,7 +16,8 @@ public class CustomerFilter implements DomainFilter {
 
     @Override
     public void prepare() {
-
+        mBlackList.add("baidu.com");
+        mWhiteList.add("baidu.com");
     }
 
     @Override
@@ -28,7 +29,7 @@ public class CustomerFilter implements DomainFilter {
             boolean ret = mWhiteList.contains(ipAddress);
             if (!ret) {
                 for (String white : mWhiteList) {
-                    if (white.contains(ipAddress)) {
+                    if (white.contains(ipAddress) || ipAddress.contains(white)) {
                         return true;
                     }
                 }
@@ -38,7 +39,7 @@ public class CustomerFilter implements DomainFilter {
             boolean ret = mBlackList.contains(ipAddress);
             if (!ret) {
                 for (String black : mBlackList) {
-                    if (black.contains(ipAddress)) {
+                    if (black.contains(ipAddress) || ipAddress.contains(black)) {
                         return true;
                     }
                 }

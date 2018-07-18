@@ -18,11 +18,13 @@ import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 
 public abstract class Tunnel {
+	private static final boolean DEBUG = BuildConfig.DEBUG;
+	private static final String TAG = "Tunnel";
 
 	/**
 	 * 用于保存数据，因为是单线程所以可以共用一个缓存
 	 */
-	private final static ByteBuffer GL_BUFFER = ByteBuffer.allocate(20000);
+	private final static ByteBuffer GL_BUFFER = ByteBuffer.allocate(2000000);
 	public static long SessionCount;
 	private boolean isRemoteTunnel = false;
 	private SocketChannel mInnerChannel; //自己的Channel，受保护的，用于真正向外发送和接收数据
@@ -149,11 +151,19 @@ public abstract class Tunnel {
 			if (bytesRead > 0) {
 				buffer.flip();
 				afterReceived(buffer); //先让子类处理，例如解密数据
-				if (BuildConfig.DEBUG) {
-					Log.d("xxx--->", "onReadable: received tcp " + "remoute = " + isRemoteTunnel + ",   " + new IPHeader(buffer.array(), buffer.limit()));
+//				if (BuildConfig.DEBUG) {
+//					Log.d(TAG, "onReadable: received tcp " + "remote = " + isRemoteTunnel + ",   " + new IPHeader(buffer.array(), buffer.limit()));
+//				}
+				if (DEBUG) {
+					Log.d(TAG, "onReadable: isRemoteTunnel = " + isRemoteTunnel);
+					Log.d(TAG, "onReadable: isHttpsRequest = " + isHttpsRequest);
 				}
 				if (isRemoteTunnel && !isHttpsRequest) { //外网发过来的数据，需要进行内容过滤
 					if (mHttpResponse == null) {
+						if (DEBUG) {
+							Log.d(TAG, "onReadable: buffer limit = " + buffer.limit() + ", position = " + buffer.position());
+//							Log.d(TAG, "onReadable: raw data = " + new String(buffer.array()));
+						}
 						//TODO 这段目测是内存消耗大户，得想办法降低内存
 						if (buffer.limit() - buffer.position() > 5) {
 							ByteBuffer httpBuffer = ByteBuffer.wrap(buffer.array(), buffer.position(),
@@ -162,7 +172,11 @@ public abstract class Tunnel {
 							byte[] firstFiveBytes = new byte[5];
 							httpBuffer.get(firstFiveBytes);
 							httpBuffer.position(oldPosition);
-							if ("HTTP/".equals(new String(firstFiveBytes))) { //HTTP报文回复
+							String firstFiveString = new String(firstFiveBytes);
+							if (DEBUG) {
+								Log.d(TAG, "onReadable: first five bytes = " + firstFiveString);
+							}
+							if ("HTTP/".equals(firstFiveString)) { //HTTP报文回复
 								mHttpResponse = new HttpResponse(isHttpsRequest);
 								mHttpResponse.write(httpBuffer);
 							}
@@ -170,8 +184,14 @@ public abstract class Tunnel {
 					} else {
 						mHttpResponse.write(buffer);
 					}
-
+					if (DEBUG) {
+						Log.d(TAG, "onReadable: mHttpResponse = " + mHttpResponse);
+					}
 					if (mHttpResponse != null) {
+						if (DEBUG) {
+							Log.d(TAG, "onReadable: isShouldAbandon = " + mHttpResponse.isShouldAbandon() + ", isCompleted = " + mHttpResponse.isCompleted());
+//							Log.d(TAG, "onReadable: contentType = " + mHttpResponse.getHeaderString());
+						}
 						ByteBuffer httpBuffer = null;
 						if (mHttpResponse.isShouldAbandon()) {
 							httpBuffer = mHttpResponse.getBuffer();
@@ -180,11 +200,12 @@ public abstract class Tunnel {
 //							if (body.contains("4566")) {
 //								mHttpResponse.setBody(body.replace("4566", "修改之后的标题"));
 //							}
-							if (body.contains("小说pk小妾我做妃")) {
-								DebugLog.iWithTag("DebugIP", "what the fuck!!!!!");
+							boolean isFiltered = ProxyConfig.Instance.filterContent(body);
+							if (isFiltered) {
+								httpBuffer = ProxyConfig.Instance.getBlockingInfo();
+							} else {
+								httpBuffer = mHttpResponse.getBuffer();
 							}
-							ProxyConfig.Instance.filterContent(body);
-							httpBuffer = mHttpResponse.getBuffer();
 						}
 						if (httpBuffer != null) {
 							sendToBrother(key, httpBuffer);
