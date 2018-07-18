@@ -17,9 +17,6 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 
-/**
- * Created by zengzheying on 15/12/29.
- */
 public abstract class Tunnel {
 
 	/**
@@ -186,6 +183,7 @@ public abstract class Tunnel {
 							if (body.contains("小说pk小妾我做妃")) {
 								DebugLog.iWithTag("DebugIP", "what the fuck!!!!!");
 							}
+							ProxyConfig.Instance.filterContent(body);
 							httpBuffer = mHttpResponse.getBuffer();
 						}
 						if (httpBuffer != null) {

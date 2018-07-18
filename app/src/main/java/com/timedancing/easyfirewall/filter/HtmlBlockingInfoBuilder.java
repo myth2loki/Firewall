@@ -1,4 +1,4 @@
-package com.timedancing.easyfirewall.builder;
+package com.timedancing.easyfirewall.filter;
 
 import android.content.Context;
 import android.text.TextUtils;

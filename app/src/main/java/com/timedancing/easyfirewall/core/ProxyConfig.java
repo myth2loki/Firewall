@@ -6,15 +6,14 @@ import android.content.Context;
 import com.timedancing.easyfirewall.core.builder.BlockingInfoBuilder;
 import com.timedancing.easyfirewall.core.builder.DefaultBlockingInfoBuilder;
 import com.timedancing.easyfirewall.core.filter.DomainFilter;
+import com.timedancing.easyfirewall.core.filter.HtmlFilter;
 import com.timedancing.easyfirewall.core.tcpip.CommonMethods;
 import com.timedancing.easyfirewall.util.DebugLog;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.List;
 
-/**
- * Created by zengzheying on 15/12/28.
- */
 public class ProxyConfig {
 
 	public static final ProxyConfig Instance = new ProxyConfig();
@@ -30,7 +29,8 @@ public class ProxyConfig {
 //	HashMap<String, Boolean> mDomainMap;
 	private String mSessionName;
 	private int mMtu;
-	private DomainFilter mDomainFilter;
+	private List<DomainFilter> mDomainFilterList = new ArrayList<>();
+	private List<HtmlFilter> mHtmlFilterList = new ArrayList<>();
 	private BlockingInfoBuilder mBlockingInfoBuilder;
 	private VpnStatusListener mVpnStatusListener;
 
@@ -48,16 +48,13 @@ public class ProxyConfig {
 		return (ip & ProxyConfig.FAKE_NETWORK_MASK) == ProxyConfig.FAKE_NETWORK_IP;
 	}
 
-	public void setDomainFilter(DomainFilter domainFilter) {
-		mDomainFilter = domainFilter;
+	public void addDomainFilter(DomainFilter domainFilter) {
+		mDomainFilterList.add(domainFilter);
 	}
 
 	public void prepare() throws IllegalStateException {
-		if (mDomainFilter != null) {
-			mDomainFilter.prepare();
-		} else {
-			throw new IllegalStateException("ProxyConfig need an instance of DomainFilter," +
-					" you should set an DomainFilter object by call the setDomainFilter() method");
+		for (DomainFilter filter : mDomainFilterList) {
+			filter.prepare();
 		}
 	}
 
@@ -106,9 +103,27 @@ public class ProxyConfig {
 	 * @return true代表被过滤，否则false
 	 */
 	public boolean filter(String host, int ip) {
-		boolean filter = mDomainFilter != null && mDomainFilter.needFilter(host, ip);
-		DebugLog.iWithTag("Debug", String.format("host %s content %s %s", host, CommonMethods.ipIntToString(ip), filter));
-		return filter || isFakeIP(ip);
+		boolean isFiltered = false;
+		for (DomainFilter filter : mDomainFilterList) {
+			isFiltered = isFiltered || filter.needFilter(host, ip);
+			if (isFiltered) {
+				break;
+			}
+		}
+		DebugLog.iWithTag("Debug",
+				String.format("host %s content %s %s", host, CommonMethods.ipIntToString(ip), isFiltered));
+		return isFiltered || isFakeIP(ip);
+	}
+
+	public boolean filterContent(String content) {
+		boolean isFiltered = false;
+		for (HtmlFilter filter : mHtmlFilterList) {
+			isFiltered = isFiltered || filter.needFilter(content);
+			if (isFiltered) {
+				break;
+			}
+		}
+		return isFiltered;
 	}
 
 	public void setBlockingInfoBuilder(BlockingInfoBuilder blockingInfoBuilder) {

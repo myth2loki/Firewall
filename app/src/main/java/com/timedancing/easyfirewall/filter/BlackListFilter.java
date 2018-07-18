@@ -10,7 +10,6 @@ import com.timedancing.easyfirewall.constant.AppDebug;
 import com.timedancing.easyfirewall.core.ProxyConfig;
 import com.timedancing.easyfirewall.core.filter.DomainFilter;
 import com.timedancing.easyfirewall.core.tcpip.CommonMethods;
-import com.timedancing.easyfirewall.network.BlackListHelper;
 
 import java.io.BufferedReader;
 import java.io.File;

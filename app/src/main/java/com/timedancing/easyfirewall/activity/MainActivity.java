@@ -16,7 +16,7 @@ import com.timedancing.easyfirewall.cache.AppConfig;
 import com.timedancing.easyfirewall.core.util.VpnServiceHelper;
 import com.timedancing.easyfirewall.event.HostUpdateEvent;
 import com.timedancing.easyfirewall.event.VPNEvent;
-import com.timedancing.easyfirewall.network.BlackListHelper;
+import com.timedancing.easyfirewall.filter.BlackListHelper;
 import com.timedancing.easyfirewall.util.DebugLog;
 
 import java.io.IOException;

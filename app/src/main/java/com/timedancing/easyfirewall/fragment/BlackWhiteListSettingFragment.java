@@ -27,6 +27,7 @@ import com.j256.ormlite.table.DatabaseTable;
 import com.timedancing.easyfirewall.BuildConfig;
 import com.timedancing.easyfirewall.R;
 import com.timedancing.easyfirewall.activity.SettingActivity1;
+import com.timedancing.easyfirewall.filter.CustomerFilter;
 import com.timedancing.easyfirewall.util.GeneralDAO;
 import com.timedancing.easyfirewall.util.SharedPrefUtil;
 
@@ -88,6 +89,7 @@ public class BlackWhiteListSettingFragment extends BaseSettingFragment implement
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 isWhiteList = isChecked;
+                CustomerFilter.setWhiteEnabled(isWhiteList);
                 initData();
                 SharedPrefUtil.saveValue(buttonView.getContext(), SettingActivity1.PREF_NAME,
                         "isWhiteList", isChecked + "");

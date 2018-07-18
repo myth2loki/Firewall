@@ -8,7 +8,7 @@ import android.util.Log;
 
 import com.timedancing.easyfirewall.BuildConfig;
 import com.timedancing.easyfirewall.activity.MainActivity;
-import com.timedancing.easyfirewall.builder.HtmlBlockingInfoBuilder;
+import com.timedancing.easyfirewall.filter.HtmlBlockingInfoBuilder;
 import com.timedancing.easyfirewall.constant.AppDebug;
 import com.timedancing.easyfirewall.core.ProxyConfig;
 import com.timedancing.easyfirewall.core.dns.DnsPacket;
@@ -25,6 +25,7 @@ import com.timedancing.easyfirewall.core.tcpip.UDPHeader;
 import com.timedancing.easyfirewall.core.util.VpnServiceHelper;
 import com.timedancing.easyfirewall.event.VPNEvent;
 import com.timedancing.easyfirewall.filter.BlackListFilter;
+import com.timedancing.easyfirewall.filter.CustomerFilter;
 import com.timedancing.easyfirewall.util.DebugLog;
 
 import java.io.FileInputStream;
@@ -36,9 +37,6 @@ import java.util.ArrayList;
 
 import de.greenrobot.event.EventBus;
 
-/**
- * Created by zengzheying on 15/12/28.
- */
 public class FirewallVpnService extends VpnService implements Runnable {
 	private static final String TAG = "FirewallVpnService";
 
@@ -97,10 +95,11 @@ public class FirewallVpnService extends VpnService implements Runnable {
 			waitUntilPrepared();
 
 			//设置黑名单
-			ProxyConfig.Instance.setDomainFilter(new BlackListFilter());
+			ProxyConfig.Instance.addDomainFilter(new BlackListFilter());
+			ProxyConfig.Instance.addDomainFilter(new CustomerFilter());
 			//设置网页内容过滤
-			ProxyConfig.Instance.setBlockingInfoBuilder(new HtmlBlockingInfoBuilder());
 			ProxyConfig.Instance.prepare();
+			ProxyConfig.Instance.setBlockingInfoBuilder(new HtmlBlockingInfoBuilder());
 
 			//启动TCP代理服务
 			mTcpProxyServer = new TcpProxyServer(0);

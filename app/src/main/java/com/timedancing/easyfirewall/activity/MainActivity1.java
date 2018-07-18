@@ -10,7 +10,7 @@ import android.widget.TextView;
 import com.timedancing.easyfirewall.R;
 import com.timedancing.easyfirewall.cache.AppCache;
 import com.timedancing.easyfirewall.core.util.VpnServiceHelper;
-import com.timedancing.easyfirewall.network.BlackListHelper;
+import com.timedancing.easyfirewall.filter.BlackListHelper;
 
 import de.greenrobot.event.EventBus;
 
