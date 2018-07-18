@@ -10,7 +10,7 @@ import android.widget.TextView;
 import com.timedancing.easyfirewall.R;
 import com.timedancing.easyfirewall.cache.AppCache;
 import com.timedancing.easyfirewall.core.util.VpnServiceHelper;
-import com.timedancing.easyfirewall.network.HostHelper;
+import com.timedancing.easyfirewall.network.BlackListHelper;
 
 import de.greenrobot.event.EventBus;
 
@@ -43,7 +43,7 @@ public class MainActivity1 extends BaseActivity implements View.OnClickListener 
 		mSubTitleProtect.setText(isRunning ? R.string.protect_feature_sub_title_started
 				: R.string.protect_feature_sub_title_stopped);
 		if (!isRunning) {
-			HostHelper.updateHost(this);
+			BlackListHelper.update(this);
 		}
 	}
 

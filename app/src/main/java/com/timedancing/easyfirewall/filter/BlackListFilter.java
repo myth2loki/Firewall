@@ -10,6 +10,7 @@ import com.timedancing.easyfirewall.constant.AppDebug;
 import com.timedancing.easyfirewall.core.ProxyConfig;
 import com.timedancing.easyfirewall.core.filter.DomainFilter;
 import com.timedancing.easyfirewall.core.tcpip.CommonMethods;
+import com.timedancing.easyfirewall.network.BlackListHelper;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -21,9 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-/**
- * Created by zengzheying on 16/1/6.
- */
+
 public class BlackListFilter implements DomainFilter {
 
 	private Map<String, Integer> mDomainMap = new HashMap<>();
@@ -34,11 +33,9 @@ public class BlackListFilter implements DomainFilter {
 
 	@Override
 	public void prepare() {
-
 		if (mDomainMap.size() != 0 || mIpMask.size() != 0) {
 			return;
 		}
-
 		InputStream in = getHostInputStream();
 		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 		String line = null;
@@ -104,7 +101,7 @@ public class BlackListFilter implements DomainFilter {
 	private InputStream getHostInputStream() {
 		InputStream in = null;
 		Context context = GlobalApplication.getInstance();
-		File file = new File(context.getExternalCacheDir(), "host.txt");
+		File file = BlackListHelper.getHostsFile(context);
 		if (file.exists()) {
 			try {
 				in = new FileInputStream(file);

@@ -11,9 +11,6 @@ import com.avos.avoscloud.GetCallback;
 import com.timedancing.easyfirewall.constant.ApiConstant;
 import com.timedancing.easyfirewall.constant.AppDebug;
 
-/**
- * Created by zengzheying on 16/1/20.
- */
 public class AppCache {
 
 	public static final String KEY_IF_SINCE_MODIFIED_SINCE = "If-Modified-Since";

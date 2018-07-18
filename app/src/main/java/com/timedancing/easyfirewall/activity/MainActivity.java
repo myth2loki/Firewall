@@ -16,7 +16,7 @@ import com.timedancing.easyfirewall.cache.AppConfig;
 import com.timedancing.easyfirewall.core.util.VpnServiceHelper;
 import com.timedancing.easyfirewall.event.HostUpdateEvent;
 import com.timedancing.easyfirewall.event.VPNEvent;
-import com.timedancing.easyfirewall.network.HostHelper;
+import com.timedancing.easyfirewall.network.BlackListHelper;
 import com.timedancing.easyfirewall.util.DebugLog;
 
 import java.io.IOException;
@@ -101,7 +101,7 @@ public class MainActivity extends BaseActivity {
 		AppCache.syncBlockCountWithLeanCloud(this);
 
 		if (!VpnServiceHelper.vpnRunningStatus()) {
-			HostHelper.updateHost(this);
+			BlackListHelper.update(this);
 		}
 
 		//TEST
