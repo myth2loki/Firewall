@@ -15,7 +15,7 @@ public class Domain {
 	@DatabaseField(columnName = "domain")
 	private String mDomain;
 
-	@DatabaseField(columnName = "ip")
+	@DatabaseField(columnName = "content")
 	private int mIp;
 
 	public Domain() {

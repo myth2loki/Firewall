@@ -8,7 +8,7 @@ import com.j256.ormlite.table.DatabaseTable;
  */
 @DatabaseTable(tableName = "tb_ip")
 public class IP {
-	@DatabaseField(id = true, columnName = "ip")
+	@DatabaseField(id = true, columnName = "content")
 	private int ip;
 
 	public IP() {

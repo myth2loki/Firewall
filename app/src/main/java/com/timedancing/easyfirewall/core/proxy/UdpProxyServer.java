@@ -83,11 +83,11 @@ public class UdpProxyServer implements Runnable {
         int destIp = ipHeader.getDestinationIP();
         int destPort = udpHeader.getDestinationPort();
         if (DEBUG) {
-            Log.d(TAG, "onUdpRequestReceived: dest ip = " + CommonMethods.ipIntToString(destIp) + ":" + destPort);
+            Log.d(TAG, "onUdpRequestReceived: dest content = " + CommonMethods.ipIntToString(destIp) + ":" + destPort);
         }
         if (filter(destIp, destPort)) {
             if (DEBUG) {
-                Log.d(TAG, "onUdpRequestReceived: be filtered, ignore, dest ip = " + destIp + ", dest port = " + destPort);
+                Log.d(TAG, "onUdpRequestReceived: be filtered, ignore, dest content = " + destIp + ", dest port = " + destPort);
             }
             return;
         }
@@ -123,7 +123,7 @@ public class UdpProxyServer implements Runnable {
         }
         if (filter(srcIp, srcPort)) {
             if (DEBUG) {
-                Log.d(TAG, "OnUdpResponseReceived: be filtered, ignore, src ip = " + srcIp + ", src port = " + srcPort);
+                Log.d(TAG, "OnUdpResponseReceived: be filtered, ignore, src content = " + srcIp + ", src port = " + srcPort);
             }
             return;
         }

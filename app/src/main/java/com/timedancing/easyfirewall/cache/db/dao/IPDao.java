@@ -36,7 +36,7 @@ public class IPDao {
 	public void add(IP ip) {
 		try {
 			DatabaseHelper helper = DatabaseHelper.getHelper(mContext);
-			List<IP> ips = helper.getIPs().queryBuilder().where().eq("ip", ip.getIp()).query();
+			List<IP> ips = helper.getIPs().queryBuilder().where().eq("content", ip.getIp()).query();
 			if (ips == null || ips.size() == 0) {
 				helper.getIPs().create(ip);
 			}
@@ -53,7 +53,7 @@ public class IPDao {
 
 		try {
 			DatabaseHelper helper = DatabaseHelper.getHelper(mContext);
-			result = helper.getIPs().queryBuilder().where().eq("ip", ip).queryForFirst();
+			result = helper.getIPs().queryBuilder().where().eq("content", ip).queryForFirst();
 		} catch (SQLException ex) {
 			if (AppDebug.IS_DEBUG) {
 				ex.printStackTrace(System.err);

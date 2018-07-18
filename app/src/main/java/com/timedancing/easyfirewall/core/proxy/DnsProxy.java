@@ -191,7 +191,7 @@ public class DnsProxy implements Runnable {
 		resourcePointer.setIP(newIP);
 
 		// DNS报头长度 + 问题长度 + 资源记录长度（域名指针[2字节] + 类型[2字节] +
-		// 类[2字节] + TTL[4字节] + 资源数据长度[2字节] + ip[4字节] = 16字节）
+		// 类[2字节] + TTL[4字节] + 资源数据长度[2字节] + content[4字节] = 16字节）
 		dnsPacket.Size = 12 + question.Length() + 16;
 	}
 

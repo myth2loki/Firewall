@@ -65,7 +65,7 @@ public class FirewallVpnService extends VpnService implements Runnable {
 		ID++;
 //		mHandler = new Handler();
 //		mPacket = new byte[20000];
-		//ip, tcp, dns共享mPacket数组
+		//content, tcp, dns共享mPacket数组
 //		mIPHeader = new IPHeader(mPacket, 0);
 		//Offset = ip报文头部长度
 //		mTCPHeader = new TCPHeader(mPacket, 20);
@@ -293,7 +293,7 @@ public class FirewallVpnService extends VpnService implements Runnable {
 				} else {
 					//TODO 其他的udp包需要转发，创建UdpProxyServer用于转发
 					if (BuildConfig.DEBUG) {
-						Log.d(TAG, "onIPPacketReceived: old ip header = " + ipHeader + " | " + udpHeader.getSourcePort() + "->" + udpHeader.getDestinationPort());
+						Log.d(TAG, "onIPPacketReceived: old content header = " + ipHeader + " | " + udpHeader.getSourcePort() + "->" + udpHeader.getDestinationPort());
 					}
 //					ByteBuffer mUDPBuffer = ((ByteBuffer) ByteBuffer.wrap(buff).position(28)).slice();
 //					mUDPBuffer.limit(udpHeader.getTotalLength() - 8);

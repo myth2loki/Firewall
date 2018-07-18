@@ -107,7 +107,7 @@ public class ProxyConfig {
 	 */
 	public boolean filter(String host, int ip) {
 		boolean filter = mDomainFilter != null && mDomainFilter.needFilter(host, ip);
-		DebugLog.iWithTag("Debug", String.format("host %s ip %s %s", host, CommonMethods.ipIntToString(ip), filter));
+		DebugLog.iWithTag("Debug", String.format("host %s content %s %s", host, CommonMethods.ipIntToString(ip), filter));
 		return filter || isFakeIP(ip);
 	}
 
