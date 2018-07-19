@@ -23,9 +23,14 @@ public class CustomIpFilter implements DomainFilter {
     private List<String> mBlackList = new ArrayList<>();
     private List<String> mWhiteList = new ArrayList<>();
     private static boolean isWhite;
+    private static boolean isReload;
 
     public static void setWhiteEnabled(boolean enabled) {
         isWhite = enabled;
+    }
+
+    public static void reload() {
+        isReload = true;
     }
 
     @Override
@@ -55,19 +60,26 @@ public class CustomIpFilter implements DomainFilter {
 
     @Override
     public boolean needFilter(String ipAddress, int ip) {
+        if (isReload) {
+            isReload = false;
+            prepare();
+        }
         if (ipAddress == null) {
             return false;
         }
+        if (ipAddress.contains("xebest.com")) {
+            Log.d(TAG, "needFilter: ");
+        }
         if (isWhite) {
             for (String white : mWhiteList) {
-                if (white.contains(ipAddress)) {
+                if (white.contains(ipAddress) || ipAddress.contains(white)) {
                     return false;
                 }
             }
             return true;
         } else {
             for (String black : mBlackList) {
-                if (black.contains(ipAddress)) {
+                if (black.contains(ipAddress) || ipAddress.contains(black)) {
                     return true;
                 }
             }

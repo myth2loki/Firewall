@@ -173,6 +173,8 @@ public class BlackWhiteListSettingFragment extends BaseSettingFragment implement
             }
         }
         initData();
+        CustomIpFilter.reload();
+        CustomContentFilter.reload();
     }
 
     private void showInputDialog(int titleRes) {

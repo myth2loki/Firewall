@@ -3,6 +3,7 @@ package com.timedancing.easyfirewall.core.http;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.timedancing.easyfirewall.BuildConfig;
 import com.timedancing.easyfirewall.constant.AppDebug;
 import com.timedancing.easyfirewall.core.nat.NatSession;
 import com.timedancing.easyfirewall.core.tcpip.CommonMethods;
@@ -15,6 +16,7 @@ import java.util.Locale;
  */
 public class HttpRequestHeaderParser {
 	private static final String TAG = "HttpRequestHeaderParser";
+	private static final boolean DEBUG = BuildConfig.DEBUG;
 
 	public static void parseHttpRequestHeader(NatSession session, byte[] buffer, int offset, int count) {
 		try {
@@ -31,14 +33,15 @@ public class HttpRequestHeaderParser {
 					break;
 				case 0x16: //SSL
 					session.remoteHost = getSNI(session, buffer, offset, count);
-					Log.d(TAG, "parseHttpRequestHeader: ssl host = " + session.remoteHost);
+					if (DEBUG) {
+						Log.d(TAG, "parseHttpRequestHeader: sni host = " + session.remoteHost);
+					}
 					break;
 			}
 		} catch (Exception ex) {
-			if (AppDebug.IS_DEBUG) {
-				ex.printStackTrace(System.err);
+			if (DEBUG) {
+				Log.e(TAG, "parseHttpRequestHeader: error: parseHost", ex);
 			}
-			DebugLog.e("Error: parseHost: %s", ex);
 		}
 	}
 
@@ -54,7 +57,9 @@ public class HttpRequestHeaderParser {
 		String headerString = new String(buffer, offset, count);
 		String[] headerLines = headerString.split("\\r\\n");
 		String host = getHttpHost(headerLines);
-		Log.d(TAG, "getHttpHostAndRequestUrl: host = " + host);
+		if (DEBUG) {
+			Log.d(TAG, "getHttpHostAndRequestUrl: host = " + host);
+		}
 		if (!TextUtils.isEmpty(host)) {
 			session.remoteHost = host;
 		}

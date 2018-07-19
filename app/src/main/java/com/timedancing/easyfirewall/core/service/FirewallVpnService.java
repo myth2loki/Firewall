@@ -39,6 +39,7 @@ import de.greenrobot.event.EventBus;
 
 public class FirewallVpnService extends VpnService implements Runnable {
 	private static final String TAG = "FirewallVpnService";
+	private static final boolean DEBUG = BuildConfig.DEBUG;
 
 	private static int ID;
 	private static int LOCAL_IP;
@@ -229,11 +230,11 @@ public class FirewallVpnService extends VpnService implements Runnable {
 
 					//添加端口映射
 					int portKey = tcpHeader.getSourcePort();
-					if (portKey == 53) {
-						Log.d(TAG, "onIPPacketReceived: tcp port = " + portKey);
-					}
 					//获取缓存信息
 					NatSession session = NatSessionManager.getSession(portKey);
+					if (DEBUG) {
+						Log.d(TAG, "onIPPacketReceived: session = " + session);
+					}
 					if (session == null || session.remoteIP != ipHeader.getDestinationIP() || session.remotePort
 							!= tcpHeader.getDestinationPort()) {
 						session = NatSessionManager.createSession(portKey, ipHeader.getDestinationIP(), tcpHeader
@@ -244,9 +245,9 @@ public class FirewallVpnService extends VpnService implements Runnable {
 					session.packetSent++; //注意顺序
 
 					int tcpDataSize = ipHeader.getDataLength() - tcpHeader.getHeaderLength();
-//					if (session.packetSent == 2 && tcpDataSize == 0) {
-//						return; //丢弃tcp握手的第二个ACK报文。因为客户端发数据的时候也会带上ACK，这样可以在服务器Accept之前分析出HOST信息。
-//					}
+					if (session.packetSent == 2 && tcpDataSize == 0) {
+						return; //丢弃tcp握手的第二个ACK报文。因为客户端发数据的时候也会带上ACK，这样可以在服务器Accept之前分析出HOST信息。
+					}
 
 					//分析数据，找到host
 					if (session.bytesSent == 0 && tcpDataSize > 10) {
@@ -254,8 +255,12 @@ public class FirewallVpnService extends VpnService implements Runnable {
 						//解析http请求头，将信息存储到session中
 						HttpRequestHeaderParser.parseHttpRequestHeader(session, tcpHeader.mData, dataOffset,
 								tcpDataSize);
-						DebugLog.i("Host: %s\n", session.remoteHost);
-						DebugLog.i("Request: %s %s\n", session.method, session.requestUrl);
+//						boolean isFiltered = ProxyConfig.Instance.filter(session.remoteHost, session.remoteIP);
+//						if (DEBUG) {
+//                            Log.d(TAG, "onIPPacketReceived: filter: Host = " + session.remoteHost
+//                                    + ", request = " + session.method + " " + session.requestUrl
+//                                    + ", isFiltered = " + isFiltered);
+//                        }
 					}
 
 					//转发给本地TCP代理服务器

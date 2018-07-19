@@ -144,19 +144,19 @@ public class TcpProxyServer implements Runnable {
 	 * @return
 	 */
 	private InetSocketAddress getDestAddress(SocketChannel localChannel) {
-		short portKey = (short) localChannel.socket().getPort();
-		NatSession session = NatSessionManager.getSession(portKey);
+		int portKey = localChannel.socket().getPort();
+		NatSession session = NatSessionManager.getSession((short)portKey);
 		if (session != null) {
 			if (DEBUG) {
-				Log.d(TAG, "getDestAddress: session.remoteHost = " + session.remoteHost);
-				Log.d(TAG, "getDestAddress: session.requestUrl = " + session.requestUrl);
+				Log.d(TAG, "getDestAddress: session = " + session);
 			}
 			if (ProxyConfig.Instance.filter(session.remoteHost, session.remoteIP)) {
 				//TODO 完成跟具体的拦截策略？？？
-				DebugLog.i("%d/%d:[BLOCK] %s=>%s:%d\n", NatSessionManager.getSessionCount(), Tunnel.SessionCount,
-						session.remoteHost,
-						CommonMethods.ipIntToString(session.remoteIP), session.remotePort & 0xFFFF);
-
+				if (DEBUG) {
+					Log.d(TAG, String.format("getDestAddress: %d/%d:[BLOCK] %s=>%s:%d\n", NatSessionManager.getSessionCount(), Tunnel.SessionCount,
+							session.remoteHost,
+							CommonMethods.ipIntToString(session.remoteIP), session.remotePort & 0xFFFF));
+				}
 				return null;
 			} else {
 				return new InetSocketAddress(localChannel.socket().getInetAddress(), session.remotePort & 0xFFFF);
@@ -193,7 +193,7 @@ public class TcpProxyServer implements Runnable {
 			} else {
 				short portKey = (short) localChannel.socket().getPort();
 				NatSession session = NatSessionManager.getSession(portKey);
-				if (session != null) {
+				if (session != null && ProxyConfig.Instance.filter(session.remoteHost, session.remoteIP)) {
 					if (DEBUG) {
 						Log.d(TAG, String.format("onAccepted: Have block a request to %s=>%s:%d", session.remoteHost, CommonMethods.ipIntToString
 										(session.remoteIP),

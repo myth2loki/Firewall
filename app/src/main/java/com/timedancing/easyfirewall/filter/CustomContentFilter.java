@@ -20,9 +20,14 @@ public class CustomContentFilter implements HtmlFilter {
     private List<String> mWhiteContentList = new ArrayList<>();
 
     private static boolean isWhite;
+    private static boolean isReload;
 
     public static void setWhiteEnabled(boolean enabled) {
         isWhite = enabled;
+    }
+
+    public static void reload() {
+        isReload = true;
     }
 
     @Override
@@ -46,6 +51,10 @@ public class CustomContentFilter implements HtmlFilter {
 
     @Override
     public boolean needFilter(String content) {
+        if (isReload) {
+            isReload = false;
+            prepare();
+        }
         if (TextUtils.isEmpty(content)) {
             return false;
         }
