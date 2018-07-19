@@ -8,6 +8,7 @@ import android.util.Log;
 
 import com.timedancing.easyfirewall.BuildConfig;
 import com.timedancing.easyfirewall.activity.MainActivity;
+import com.timedancing.easyfirewall.filter.CustomContentFilter;
 import com.timedancing.easyfirewall.filter.HtmlBlockingInfoBuilder;
 import com.timedancing.easyfirewall.constant.AppDebug;
 import com.timedancing.easyfirewall.core.ProxyConfig;
@@ -98,6 +99,7 @@ public class FirewallVpnService extends VpnService implements Runnable {
 			//设置黑名单
 			ProxyConfig.Instance.addDomainFilter(new BlackListFilter());
 			ProxyConfig.Instance.addDomainFilter(new CustomIpFilter());
+			ProxyConfig.Instance.addHtmlFilter(new CustomContentFilter());
 			//设置网页内容过滤
 			ProxyConfig.Instance.prepare();
 			ProxyConfig.Instance.setBlockingInfoBuilder(new HtmlBlockingInfoBuilder());
@@ -125,17 +127,17 @@ public class FirewallVpnService extends VpnService implements Runnable {
 			ProxyConfig.Instance.onVpnEnd(this);
 
 		} catch (InterruptedException e) {
-			if (AppDebug.IS_DEBUG) {
-				e.printStackTrace();
+			if (DEBUG) {
+				Log.e(TAG, "run: VpnService run catch an exception", e);
 			}
-			DebugLog.e("VpnService run catch an exception %s.\n", e);
 		} catch (Exception e) {
-			if (AppDebug.IS_DEBUG) {
-				e.printStackTrace();
+			if (DEBUG) {
+				Log.e(TAG, "run: VpnService run catch an exception", e);
 			}
-			DebugLog.e("VpnService run catch an exception %s.\n", e);
 		} finally {
-			DebugLog.i("VpnService terminated");
+			if (DEBUG) {
+				Log.d(TAG, "run: VpnService terminated");
+			}
 			dispose();
 		}
 	}
@@ -172,7 +174,9 @@ public class FirewallVpnService extends VpnService implements Runnable {
 	//停止Vpn工作线程
 	@Override
 	public void onDestroy() {
-		DebugLog.i("VPNService(%s) destroyed.\n", ID);
+		if (DEBUG) {
+			Log.d(TAG, "onDestroy: VPNService(" + ID + ") destroyed.");
+		}
 		if (mVPNThread != null) {
 			mVPNThread.interrupt();
 		}
@@ -186,11 +190,9 @@ public class FirewallVpnService extends VpnService implements Runnable {
 			CommonMethods.ComputeUDPChecksum(ipHeader, udpHeader);
 			this.mVPNOutputStream.write(ipHeader.mData, ipHeader.mOffset, ipHeader.getTotalLength());
 		} catch (IOException e) {
-			if (AppDebug.IS_DEBUG) {
-				e.printStackTrace();
+			if (DEBUG) {
+				Log.e(TAG, "sendUDPPacket: VpnService send UDP packet catch an exception", e);
 			}
-
-			DebugLog.e("VpnService send UDP packet catch an exception %s", e);
 		}
 	}
 

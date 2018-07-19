@@ -10,6 +10,7 @@ import com.timedancing.easyfirewall.core.nat.NatSessionManager;
 import com.timedancing.easyfirewall.core.service.FirewallVpnService;
 import com.timedancing.easyfirewall.core.tcpip.IPHeader;
 import com.timedancing.easyfirewall.core.tcpip.UDPHeader;
+import com.timedancing.easyfirewall.util.SharedPrefUtil;
 
 import java.net.DatagramSocket;
 import java.net.Socket;
@@ -75,7 +76,13 @@ public class VpnServiceHelper {
 			if (sVpnService != null) {
 				sVpnService.setVpnRunningStatus(stopStatus);
 			}
+			SharedPrefUtil.saveValue(context, "global", "isProtected", "false");
 		}
+	}
+
+	public static boolean shouldStartVPNService(Context context) {
+		String result = SharedPrefUtil.getValue(context, "global", "isProtected", "false");
+		return "true".equals(result);
 	}
 
 	public static void restartVpnService(final Context context, final Runnable run) {
@@ -98,5 +105,6 @@ public class VpnServiceHelper {
 		}
 
 		context.startService(new Intent(context, FirewallVpnService.class));
+		SharedPrefUtil.saveValue(context, "global", "isProtected", "true");
 	}
 }

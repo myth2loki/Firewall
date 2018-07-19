@@ -7,6 +7,7 @@ import com.avos.avoscloud.AVOSCloud;
 import com.tencent.stat.StatService;
 import com.timedancing.easyfirewall.constant.ApiConstant;
 import com.timedancing.easyfirewall.core.ProxyConfig;
+import com.timedancing.easyfirewall.core.util.VpnServiceHelper;
 
 import java.util.Properties;
 
@@ -50,6 +51,9 @@ public class GlobalApplication extends Application {
 		AVOSCloud.initialize(this, ApiConstant.LEANCLOUND_APP_ID, ApiConstant.LEANCLOUD_APP_KEY);
 
 		ProxyConfig.Instance.setVpnStatusListener(new StatusListener());
+
+		boolean should = VpnServiceHelper.shouldStartVPNService(this);
+		VpnServiceHelper.changeVpnRunningStatus(this, should);
 	}
 
 

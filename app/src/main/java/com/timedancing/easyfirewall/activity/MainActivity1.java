@@ -35,7 +35,10 @@ public class MainActivity1 extends BaseActivity implements View.OnClickListener 
 				VpnServiceHelper.changeVpnRunningStatus(buttonView.getContext(), isChecked);
 			}
 		});
+		initData();
+	}
 
+	private void initData() {
 		AppCache.syncBlockCountWithLeanCloud(this);
 
 		boolean isRunning = VpnServiceHelper.vpnRunningStatus();
