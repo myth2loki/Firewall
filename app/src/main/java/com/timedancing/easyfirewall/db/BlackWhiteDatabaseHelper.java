@@ -1,4 +1,4 @@
-package com.timedancing.easyfirewall.fragment;
+package com.timedancing.easyfirewall.db;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
@@ -7,6 +7,11 @@ import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
+import com.timedancing.easyfirewall.core.blackwhite.BlackContent;
+import com.timedancing.easyfirewall.core.blackwhite.BlackIP;
+import com.timedancing.easyfirewall.core.blackwhite.WhiteContent;
+import com.timedancing.easyfirewall.core.blackwhite.WhiteIP;
+import com.timedancing.easyfirewall.fragment.BlackWhiteListSettingFragment;
 
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -48,10 +53,10 @@ class BlackWhiteDatabaseHelper extends OrmLiteSqliteOpenHelper {
     public void onCreate(SQLiteDatabase database, ConnectionSource connectionSource) {
         try {
             //建立表user_table
-            TableUtils.createTable(connectionSource, BlackWhiteListSettingFragment.BlackIP.class);
-            TableUtils.createTable(connectionSource, BlackWhiteListSettingFragment.BlackContent.class);
-            TableUtils.createTable(connectionSource, BlackWhiteListSettingFragment.WhiteIP.class);
-            TableUtils.createTable(connectionSource, BlackWhiteListSettingFragment.WhiteContent.class);
+            TableUtils.createTable(connectionSource, BlackIP.class);
+            TableUtils.createTable(connectionSource, BlackContent.class);
+            TableUtils.createTable(connectionSource, WhiteIP.class);
+            TableUtils.createTable(connectionSource, WhiteContent.class);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -69,10 +74,10 @@ class BlackWhiteDatabaseHelper extends OrmLiteSqliteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase database, ConnectionSource connectionSource, int oldVersion, int newVersion) {
         try {
-            TableUtils.dropTable(connectionSource, BlackWhiteListSettingFragment.BlackIP.class, true);
-            TableUtils.dropTable(connectionSource, BlackWhiteListSettingFragment.BlackContent.class, true);
-            TableUtils.dropTable(connectionSource, BlackWhiteListSettingFragment.WhiteIP.class, true);
-            TableUtils.dropTable(connectionSource, BlackWhiteListSettingFragment.WhiteContent.class, true);
+            TableUtils.dropTable(connectionSource, BlackIP.class, true);
+            TableUtils.dropTable(connectionSource, BlackContent.class, true);
+            TableUtils.dropTable(connectionSource, WhiteIP.class, true);
+            TableUtils.dropTable(connectionSource, WhiteContent.class, true);
             onCreate(database, connectionSource);
         } catch (SQLException e) {
             e.printStackTrace();

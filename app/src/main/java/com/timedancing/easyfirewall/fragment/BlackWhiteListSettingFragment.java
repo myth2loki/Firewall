@@ -1,10 +1,7 @@
 package com.timedancing.easyfirewall.fragment;
 
-import android.app.Dialog;
-import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
@@ -18,15 +15,19 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.table.DatabaseTable;
 import com.timedancing.easyfirewall.BuildConfig;
 import com.timedancing.easyfirewall.R;
 import com.timedancing.easyfirewall.activity.SettingActivity1;
+import com.timedancing.easyfirewall.component.InputDialog;
+import com.timedancing.easyfirewall.core.blackwhite.BlackContent;
+import com.timedancing.easyfirewall.core.blackwhite.BlackIP;
+import com.timedancing.easyfirewall.core.blackwhite.StringItem;
+import com.timedancing.easyfirewall.core.blackwhite.WhiteContent;
+import com.timedancing.easyfirewall.core.blackwhite.WhiteIP;
+import com.timedancing.easyfirewall.db.DAOFactory;
 import com.timedancing.easyfirewall.filter.CustomerFilter;
 import com.timedancing.easyfirewall.util.GeneralDAO;
 import com.timedancing.easyfirewall.util.SharedPrefUtil;
@@ -34,7 +35,7 @@ import com.timedancing.easyfirewall.util.SharedPrefUtil;
 import java.util.List;
 
 public class BlackWhiteListSettingFragment extends BaseSettingFragment implements View.OnClickListener,
-        OnOKClickListener {
+        InputDialog.OnOKClickListener {
     private static final String TAG = "bwListFrag";
     private static final boolean DEBUG = BuildConfig.DEBUG;
 
@@ -70,11 +71,11 @@ public class BlackWhiteListSettingFragment extends BaseSettingFragment implement
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        BlackWhiteDatabaseHelper dbHelper = BlackWhiteDatabaseHelper.getInstance(getContext());
-        mBlackIPDAO = new GeneralDAO<>(getContext(), dbHelper, BlackIP.class);
-        mBlackContentDAO = new GeneralDAO<>(getContext(), dbHelper, BlackContent.class);
-        mWhiteIPDAO = new GeneralDAO<>(getContext(), dbHelper, WhiteIP.class);
-        mWhiteContentDAO = new GeneralDAO<>(getContext(), dbHelper, WhiteContent.class);
+
+        mBlackIPDAO = DAOFactory.getDAO(getContext(), BlackIP.class);
+        mBlackContentDAO = DAOFactory.getDAO(getContext(), BlackContent.class);
+        mWhiteIPDAO = DAOFactory.getDAO(getContext(), WhiteIP.class);
+        mWhiteContentDAO = DAOFactory.getDAO(getContext(), WhiteContent.class);
 
         mBlackWhiteListCb = new CheckBox(getContext());
         String str = SharedPrefUtil.getValue(getContext(), SettingActivity1.PREF_NAME, "isWhiteList", "false");
@@ -187,128 +188,6 @@ public class BlackWhiteListSettingFragment extends BaseSettingFragment implement
         menu.add("").setActionView(mBlackWhiteListCb).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
     }
 
-
-    private static class InputDialog extends Dialog implements View.OnClickListener {
-        private String title;
-        private OnOKClickListener mListener;
-
-        InputDialog(@NonNull Context context, String title) {
-            super(context);
-            this.title = title;
-            initView();
-        }
-
-        void setListener(OnOKClickListener listener) {
-            mListener = listener;
-        }
-
-        private void initView() {
-            setContentView(R.layout.layout_input_dialog);
-            findViewById(R.id.cancel).setOnClickListener(this);
-            findViewById(R.id.ok).setOnClickListener(this);
-            TextView titleTv = (TextView) findViewById(R.id.title);
-            titleTv.setText(title);
-        }
-
-        @Override
-        public void onClick(View v) {
-            switch (v.getId()) {
-                case R.id.cancel:
-                    dismiss();
-                    break;
-                case R.id.ok:
-                    saveData();
-                    dismiss();
-                    break;
-            }
-        }
-
-        private void saveData() {
-            EditText edit = (EditText) findViewById(R.id.input);
-            String content = edit.getEditableText().toString();
-            if (mListener != null) {
-                mListener.onClick(content);
-            }
-        }
-    }
-
-    interface StringItem {
-        int getId();
-        String getText();
-    }
-
-    @DatabaseTable(tableName = "black_ip")
-    static class BlackIP implements StringItem {
-        @DatabaseField(generatedId = true)
-        public int id;
-        @DatabaseField(columnName = "content")
-        public String ip;
-
-        @Override
-        public int getId() {
-            return id;
-        }
-
-        @Override
-        public String getText() {
-            return ip;
-        }
-    }
-
-    @DatabaseTable(tableName = "black_content")
-    static class BlackContent implements StringItem {
-        @DatabaseField(generatedId = true)
-        public int id;
-        @DatabaseField(columnName = "content")
-        public String content;
-
-        @Override
-        public int getId() {
-            return id;
-        }
-
-        @Override
-        public String getText() {
-            return content;
-        }
-    }
-
-    @DatabaseTable(tableName = "white_ip")
-    static class WhiteIP implements StringItem {
-        @DatabaseField(generatedId = true)
-        public int id;
-        @DatabaseField(columnName = "content")
-        public String ip;
-
-        @Override
-        public int getId() {
-            return id;
-        }
-
-        @Override
-        public String getText() {
-            return ip;
-        }
-    }
-
-    @DatabaseTable(tableName = "white_content")
-    static class WhiteContent implements StringItem {
-        @DatabaseField(generatedId = true)
-        public int id;
-        @DatabaseField(columnName = "content")
-        public String content;
-
-        @Override
-        public int getId() {
-            return id;
-        }
-
-        @Override
-        public String getText() {
-            return content;
-        }
-    }
-
     static class BlackWhiteAdapter extends BaseAdapter {
         private List<? extends StringItem> mItems;
 
@@ -343,8 +222,4 @@ public class BlackWhiteListSettingFragment extends BaseSettingFragment implement
             return convertView;
         }
     }
-}
-
-interface OnOKClickListener {
-    void onClick(String text);
 }
