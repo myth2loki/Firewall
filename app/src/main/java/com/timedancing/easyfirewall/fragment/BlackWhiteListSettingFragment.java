@@ -27,6 +27,7 @@ import com.timedancing.easyfirewall.core.blackwhite.BlackIP;
 import com.timedancing.easyfirewall.core.blackwhite.StringItem;
 import com.timedancing.easyfirewall.core.blackwhite.WhiteContent;
 import com.timedancing.easyfirewall.core.blackwhite.WhiteIP;
+import com.timedancing.easyfirewall.core.util.VpnServiceHelper;
 import com.timedancing.easyfirewall.db.DAOFactory;
 import com.timedancing.easyfirewall.filter.CustomContentFilter;
 import com.timedancing.easyfirewall.filter.CustomIpFilter;
@@ -89,7 +90,8 @@ public class BlackWhiteListSettingFragment extends BaseSettingFragment implement
         mBlackWhiteListCb.setTextColor(Color.WHITE);
         mBlackWhiteListCb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            public void onCheckedChanged(final CompoundButton buttonView, boolean isChecked) {
+                buttonView.setEnabled(false);
                 isWhiteList = isChecked;
                 CustomIpFilter.setWhiteEnabled(isWhiteList);
                 initData();
@@ -97,6 +99,12 @@ public class BlackWhiteListSettingFragment extends BaseSettingFragment implement
                 CustomIpFilter.setWhiteEnabled(isWhiteList);
                 SharedPrefUtil.saveValue(buttonView.getContext(), SettingActivity1.PREF_NAME,
                         "isWhiteList", isChecked + "");
+                VpnServiceHelper.restartVpnService(buttonView.getContext(), new Runnable() {
+                    @Override
+                    public void run() {
+                        buttonView.setEnabled(true);
+                    }
+                });
             }
         });
         initData();

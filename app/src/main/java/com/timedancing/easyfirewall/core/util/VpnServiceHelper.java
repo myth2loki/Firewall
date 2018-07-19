@@ -3,7 +3,10 @@ package com.timedancing.easyfirewall.core.util;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Looper;
 
+import com.timedancing.easyfirewall.core.nat.NatSessionManager;
 import com.timedancing.easyfirewall.core.service.FirewallVpnService;
 import com.timedancing.easyfirewall.core.tcpip.IPHeader;
 import com.timedancing.easyfirewall.core.tcpip.UDPHeader;
@@ -73,6 +76,20 @@ public class VpnServiceHelper {
 				sVpnService.setVpnRunningStatus(stopStatus);
 			}
 		}
+	}
+
+	public static void restartVpnService(final Context context, final Runnable run) {
+		VpnServiceHelper.changeVpnRunningStatus(context, false);
+		new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				NatSessionManager.clearAllSessions();
+				VpnServiceHelper.changeVpnRunningStatus(context, true);
+				if (run != null) {
+					run.run();
+				}
+			}
+		}, 1000);
 	}
 
 	public static void startVpnService(Context context) {

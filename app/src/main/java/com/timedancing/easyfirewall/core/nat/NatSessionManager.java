@@ -48,6 +48,10 @@ public class NatSessionManager {
 		}
 	}
 
+	public static void clearAllSessions() {
+		sSessions.clear();
+	}
+
 	/**
 	 * 创建会话
 	 *
