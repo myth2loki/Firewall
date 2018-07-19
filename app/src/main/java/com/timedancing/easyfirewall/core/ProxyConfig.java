@@ -2,19 +2,22 @@ package com.timedancing.easyfirewall.core;
 
 
 import android.content.Context;
+import android.util.Log;
 
+import com.timedancing.easyfirewall.BuildConfig;
 import com.timedancing.easyfirewall.core.builder.BlockingInfoBuilder;
 import com.timedancing.easyfirewall.core.builder.DefaultBlockingInfoBuilder;
 import com.timedancing.easyfirewall.core.filter.DomainFilter;
 import com.timedancing.easyfirewall.core.filter.HtmlFilter;
 import com.timedancing.easyfirewall.core.tcpip.CommonMethods;
-import com.timedancing.easyfirewall.util.DebugLog;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ProxyConfig {
+	private static final String TAG = "ProxyConfig";
+	private static final boolean DEBUG = BuildConfig.DEBUG;
 
 	public static final ProxyConfig Instance = new ProxyConfig();
 
@@ -58,6 +61,10 @@ public class ProxyConfig {
 
 	public void prepare() throws IllegalStateException {
 		for (DomainFilter filter : mDomainFilterList) {
+			filter.prepare();
+		}
+
+		for (HtmlFilter filter : mHtmlFilterList) {
 			filter.prepare();
 		}
 	}
@@ -114,8 +121,10 @@ public class ProxyConfig {
 				break;
 			}
 		}
-		DebugLog.iWithTag("Debug",
-				String.format("host %s content %s %s", host, CommonMethods.ipIntToString(ip), isFiltered));
+		if (DEBUG) {
+			Log.d(TAG, String.format("filter: host %s content %s %s",
+					host, CommonMethods.ipIntToString(ip), isFiltered));
+		}
 		return isFiltered || isFakeIP(ip);
 	}
 
@@ -126,6 +135,9 @@ public class ProxyConfig {
 			if (isFiltered) {
 				break;
 			}
+		}
+		if (DEBUG) {
+			Log.d(TAG, String.format("filterContent: content %s %s", content, isFiltered));
 		}
 		return isFiltered;
 	}

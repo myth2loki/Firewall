@@ -28,7 +28,8 @@ import com.timedancing.easyfirewall.core.blackwhite.StringItem;
 import com.timedancing.easyfirewall.core.blackwhite.WhiteContent;
 import com.timedancing.easyfirewall.core.blackwhite.WhiteIP;
 import com.timedancing.easyfirewall.db.DAOFactory;
-import com.timedancing.easyfirewall.filter.CustomerFilter;
+import com.timedancing.easyfirewall.filter.CustomContentFilter;
+import com.timedancing.easyfirewall.filter.CustomIpFilter;
 import com.timedancing.easyfirewall.util.GeneralDAO;
 import com.timedancing.easyfirewall.util.SharedPrefUtil;
 
@@ -90,8 +91,10 @@ public class BlackWhiteListSettingFragment extends BaseSettingFragment implement
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 isWhiteList = isChecked;
-                CustomerFilter.setWhiteEnabled(isWhiteList);
+                CustomIpFilter.setWhiteEnabled(isWhiteList);
                 initData();
+                CustomContentFilter.setWhiteEnabled(isWhiteList);
+                CustomIpFilter.setWhiteEnabled(isWhiteList);
                 SharedPrefUtil.saveValue(buttonView.getContext(), SettingActivity1.PREF_NAME,
                         "isWhiteList", isChecked + "");
             }

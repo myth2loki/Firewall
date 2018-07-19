@@ -20,9 +20,6 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 
-/**
- * Created by zengzheying on 15/12/30.
- */
 public class TcpProxyServer implements Runnable {
 	private static final String TAG = "TcpProxyServer";
 	private static final boolean DEBUG = BuildConfig.DEBUG;
@@ -197,15 +194,19 @@ public class TcpProxyServer implements Runnable {
 				short portKey = (short) localChannel.socket().getPort();
 				NatSession session = NatSessionManager.getSession(portKey);
 				if (session != null) {
-					DebugLog.i("Have block a request to %s=>%s:%d", session.remoteHost, CommonMethods.ipIntToString
-									(session.remoteIP),
-							session.remotePort & 0xFFFF);
+					if (DEBUG) {
+						Log.d(TAG, String.format("onAccepted: Have block a request to %s=>%s:%d", session.remoteHost, CommonMethods.ipIntToString
+										(session.remoteIP),
+								session.remotePort & 0xFFFF));
+					}
 					localTunnel.sendBlockInformation();
 				} else {
-					DebugLog.i("Error: socket(%s:%d) have no session.", localChannel.socket().getInetAddress()
-							.toString(), portKey);
+					if (DEBUG) {
+						Log.d(TAG, String.format("onAccepted: Error: socket(%s:%d) have no session.", localChannel.socket().getInetAddress()
+								.toString(), portKey));
+					}
 				}
-
+                //TODO 记录日志
 				localTunnel.dispose();
 			}
 		} catch (Exception ex) {
