@@ -6,6 +6,9 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.timedancing.easyfirewall.R;
+import com.timedancing.easyfirewall.constant.AppGlobal;
+import com.timedancing.easyfirewall.core.logger.Logger;
 import com.timedancing.easyfirewall.core.nat.NatSessionManager;
 import com.timedancing.easyfirewall.core.service.FirewallVpnService;
 import com.timedancing.easyfirewall.core.tcpip.IPHeader;
@@ -15,9 +18,6 @@ import com.timedancing.easyfirewall.util.SharedPrefUtil;
 import java.net.DatagramSocket;
 import java.net.Socket;
 
-/**
- * Created by zengzheying on 16/1/12.
- */
 public class VpnServiceHelper {
 
 	public static final int START_VPN_SERVICE_REQUEST_CODE = 2015;
@@ -76,12 +76,13 @@ public class VpnServiceHelper {
 			if (sVpnService != null) {
 				sVpnService.setVpnRunningStatus(stopStatus);
 			}
-			SharedPrefUtil.saveValue(context, "global", "isProtected", "false");
+			SharedPrefUtil.saveValue(context, AppGlobal.GLOBAL_PREF_NAME, "isProtected", "false");
+			Logger.getInstance(context).insert(context.getString(R.string.stop_protect));
 		}
 	}
 
 	public static boolean shouldStartVPNService(Context context) {
-		String result = SharedPrefUtil.getValue(context, "global", "isProtected", "false");
+		String result = SharedPrefUtil.getValue(context, AppGlobal.GLOBAL_PREF_NAME, "isProtected", "false");
 		return "true".equals(result);
 	}
 
@@ -105,6 +106,7 @@ public class VpnServiceHelper {
 		}
 
 		context.startService(new Intent(context, FirewallVpnService.class));
-		SharedPrefUtil.saveValue(context, "global", "isProtected", "true");
+		SharedPrefUtil.saveValue(context, AppGlobal.GLOBAL_PREF_NAME, "isProtected", "true");
+		Logger.getInstance(context).insert(context.getString(R.string.start_protect));
 	}
 }

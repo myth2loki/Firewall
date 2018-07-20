@@ -59,6 +59,7 @@ public class MainActivity1 extends BaseActivity implements View.OnClickListener 
 				cb.setChecked(!cb.isChecked());
 				break;
 			case R.id.log_bar:
+				openActivity(LogActivity.class);
 				break;
 			case R.id.setting_bar:
 				openActivity(SettingActivity1.class);

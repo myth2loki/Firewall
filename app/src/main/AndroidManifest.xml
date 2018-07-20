@@ -72,8 +72,12 @@
 				android:name = ".activity.AboutActivity"
 				android:screenOrientation = "portrait"
 				android:theme = "@style/AppTheme.NoActionBar" />
+        <activity android:name=".activity.LogActivity"
+			android:screenOrientation="portrait"
+			android:theme="@style/AppTheme.NoActionBar"
+			/>
 
-		<!-- Service -->
+        <!-- Service -->
 
 		<service
 				android:name = ".core.service.FirewallVpnService"

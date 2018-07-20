@@ -56,5 +56,9 @@
 	<string name="content_list">内容列表</string>
     <string name="parent_password_login">家长密码登录</string>
 	<string name="stop_navigate_x">阻止访问%s</string>
-	<string name="stop_navigate_content_with_x">阻止访问%s - %s</string>
+	<string name="stop_navigate_content_with_x">阻止访问%1$s - %2$s</string>
+	<string name="start_protect">开启保护功能</string>
+	<string name="stop_protect">关闭保护功能</string>
+	<string name="log">日志</string>
+	<string name="order_asc">升序</string>
 </resources >

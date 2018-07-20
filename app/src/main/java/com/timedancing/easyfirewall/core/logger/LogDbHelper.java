@@ -9,7 +9,7 @@ class LogDbHelper extends SQLiteOpenHelper {
     private static final int DB_VERSION = 1;
     public static final String LOG_TABLE_NAME = "log";
     private static final String CREATE_TABLE = "create table log(" +
-            "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+            "_id INTEGER PRIMARY KEY AUTOINCREMENT," +
             "creationDate INTEGER NOT NULL," +
             "log TEXT NOT NULL" +
             ");";
