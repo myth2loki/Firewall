@@ -3,11 +3,13 @@ package com.timedancing.easyfirewall.filter;
 import android.content.Context;
 import android.text.TextUtils;
 
+import com.timedancing.easyfirewall.R;
 import com.timedancing.easyfirewall.activity.SettingActivity1;
 import com.timedancing.easyfirewall.app.GlobalApplication;
 import com.timedancing.easyfirewall.core.blackwhite.BlackContent;
 import com.timedancing.easyfirewall.core.blackwhite.WhiteContent;
 import com.timedancing.easyfirewall.core.filter.HtmlFilter;
+import com.timedancing.easyfirewall.core.logger.Logger;
 import com.timedancing.easyfirewall.db.DAOFactory;
 import com.timedancing.easyfirewall.util.GeneralDAO;
 import com.timedancing.easyfirewall.util.SharedPrefUtil;
@@ -59,7 +61,6 @@ public class CustomContentFilter implements HtmlFilter {
             return false;
         }
         if (isWhite) {
-
             for (String white : mWhiteContentList) {
                 if (content.contains(white)) {
                     return false;
@@ -69,6 +70,10 @@ public class CustomContentFilter implements HtmlFilter {
         } else {
             for (String black : mBlackContentList) {
                 if (content.contains(black)) {
+                    Context context = GlobalApplication.getInstance();
+                    Logger logger = Logger.getInstance(context);
+                    logger.insert(context
+                            .getString(R.string.stop_navigate_content_with_x, black, ""));
                     return true;
                 }
             }

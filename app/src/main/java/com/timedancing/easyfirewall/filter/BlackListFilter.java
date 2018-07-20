@@ -9,6 +9,7 @@ import com.timedancing.easyfirewall.app.GlobalApplication;
 import com.timedancing.easyfirewall.constant.AppDebug;
 import com.timedancing.easyfirewall.core.ProxyConfig;
 import com.timedancing.easyfirewall.core.filter.DomainFilter;
+import com.timedancing.easyfirewall.core.logger.Logger;
 import com.timedancing.easyfirewall.core.tcpip.CommonMethods;
 
 import java.io.BufferedReader;
@@ -93,7 +94,10 @@ public class BlackListFilter implements DomainFilter {
 				mIpMask.put(ip, 1);
 			}
 		}
-
+		if (isFiltered) {
+			Context context = GlobalApplication.getInstance();
+			Logger.getInstance(context).insert(context.getString(R.string.stop_navigate_x, ipAddress));
+		}
 		return isFiltered;
 	}
 

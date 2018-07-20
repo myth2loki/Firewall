@@ -4,11 +4,13 @@ import android.content.Context;
 import android.util.Log;
 
 import com.timedancing.easyfirewall.BuildConfig;
+import com.timedancing.easyfirewall.R;
 import com.timedancing.easyfirewall.activity.SettingActivity1;
 import com.timedancing.easyfirewall.app.GlobalApplication;
 import com.timedancing.easyfirewall.core.blackwhite.BlackIP;
 import com.timedancing.easyfirewall.core.blackwhite.WhiteIP;
 import com.timedancing.easyfirewall.core.filter.DomainFilter;
+import com.timedancing.easyfirewall.core.logger.Logger;
 import com.timedancing.easyfirewall.db.DAOFactory;
 import com.timedancing.easyfirewall.util.GeneralDAO;
 import com.timedancing.easyfirewall.util.SharedPrefUtil;
@@ -67,9 +69,6 @@ public class CustomIpFilter implements DomainFilter {
         if (ipAddress == null) {
             return false;
         }
-        if (ipAddress.contains("xebest.com")) {
-            Log.d(TAG, "needFilter: ");
-        }
         if (isWhite) {
             for (String white : mWhiteList) {
                 if (white.contains(ipAddress) || ipAddress.contains(white)) {
@@ -80,6 +79,9 @@ public class CustomIpFilter implements DomainFilter {
         } else {
             for (String black : mBlackList) {
                 if (black.contains(ipAddress) || ipAddress.contains(black)) {
+                    Context context = GlobalApplication.getInstance();
+                    Logger logger = Logger.getInstance(context);
+                    logger.insert(context.getString(R.string.stop_navigate_x, black));
                     return true;
                 }
             }

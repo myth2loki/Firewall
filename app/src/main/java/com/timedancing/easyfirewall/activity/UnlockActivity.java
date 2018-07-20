@@ -15,6 +15,7 @@ import com.tencent.stat.StatService;
 import com.timedancing.easyfirewall.R;
 import com.timedancing.easyfirewall.cache.AppConfig;
 import com.timedancing.easyfirewall.constant.AppDebug;
+import com.timedancing.easyfirewall.core.logger.Logger;
 import com.timedancing.easyfirewall.view.NumberKeyboard;
 
 public class UnlockActivity extends BaseActivity {
@@ -134,6 +135,7 @@ public class UnlockActivity extends BaseActivity {
 	}
 
 	private void navigateToMainActivity() {
+		Logger.getInstance(this).insert(getString(R.string.parent_password_login));
 		Intent intent = new Intent(this, MainActivity1.class);
 		startActivity(intent);
 		finish();
