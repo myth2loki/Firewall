@@ -39,7 +39,7 @@ public class LogActivity extends BaseActivity {
 		mToolbar = (Toolbar) findViewById(R.id.toolbar);
 		setUpViews();
 
-		String value = SharedPrefUtil.getValue(this, AppGlobal.GLOBAL_PREF_NAME, IS_ASC, "true");
+		String value = SharedPrefUtil.getValue(this, AppGlobal.GLOBAL_PREF_NAME, IS_ASC, "false");
 		boolean isAsc = "true".equals(value);
 		initData(!isAsc);
 		mOrderCb.setChecked(isAsc);
