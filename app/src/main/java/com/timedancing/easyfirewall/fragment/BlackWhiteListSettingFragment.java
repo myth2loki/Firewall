@@ -27,6 +27,7 @@ import com.timedancing.easyfirewall.core.blackwhite.BlackIP;
 import com.timedancing.easyfirewall.core.blackwhite.StringItem;
 import com.timedancing.easyfirewall.core.blackwhite.WhiteContent;
 import com.timedancing.easyfirewall.core.blackwhite.WhiteIP;
+import com.timedancing.easyfirewall.core.logger.Logger;
 import com.timedancing.easyfirewall.core.util.VpnServiceHelper;
 import com.timedancing.easyfirewall.db.DAOFactory;
 import com.timedancing.easyfirewall.filter.CustomContentFilter;
@@ -99,6 +100,8 @@ public class BlackWhiteListSettingFragment extends BaseSettingFragment implement
                 CustomIpFilter.setWhiteEnabled(isWhiteList);
                 SharedPrefUtil.saveValue(buttonView.getContext(), SettingActivity1.PREF_NAME,
                         "isWhiteList", isChecked + "");
+                Logger.getInstance(buttonView.getContext())
+                        .insert(isWhiteList ? getString(R.string.change_to_white_list) : getString(R.string.change_to_black_list));
                 VpnServiceHelper.restartVpnService(buttonView.getContext(), new Runnable() {
                     @Override
                     public void run() {
