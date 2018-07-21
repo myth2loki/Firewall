@@ -61,4 +61,8 @@
 	<string name="stop_protect">关闭保护功能</string>
 	<string name="log">日志</string>
 	<string name="order_asc">升序</string>
+    <string name="change_to_white_list">切换到白名单</string>
+	<string name="change_to_black_list">切换到黑名单</string>
+	<string name="insert_x_to_white_list">添加白名单：%1$s</string>
+	<string name="insert_x_to_black_list">添加黑名单：%1$s</string>
 </resources >

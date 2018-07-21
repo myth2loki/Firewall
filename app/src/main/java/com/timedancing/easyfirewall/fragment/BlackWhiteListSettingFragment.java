@@ -1,5 +1,7 @@
 package com.timedancing.easyfirewall.fragment;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -12,6 +14,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -38,7 +41,7 @@ import com.timedancing.easyfirewall.util.SharedPrefUtil;
 import java.util.List;
 
 public class BlackWhiteListSettingFragment extends BaseSettingFragment implements View.OnClickListener,
-        InputDialog.OnOKClickListener {
+        InputDialog.OnOKClickListener, AdapterView.OnItemClickListener {
     private static final String TAG = "bwListFrag";
     private static final boolean DEBUG = BuildConfig.DEBUG;
 
@@ -49,6 +52,8 @@ public class BlackWhiteListSettingFragment extends BaseSettingFragment implement
     private GeneralDAO<BlackContent> mBlackContentDAO;
     private GeneralDAO<WhiteIP> mWhiteIPDAO;
     private GeneralDAO<WhiteContent> mWhiteContentDAO;
+    private ListView mIpDomainListView;
+    private ListView mContentListView;
 
     @Override
     public String getTitle() {
@@ -120,27 +125,64 @@ public class BlackWhiteListSettingFragment extends BaseSettingFragment implement
             }
             return;
         }
-        ListView ipDomainLV = (ListView) getView().findViewById(R.id.ip_domain_list);
-        ListView contentList = (ListView) getView().findViewById(R.id.content_list);
+        mIpDomainListView = (ListView) getView().findViewById(R.id.ip_domain_list);
+        mIpDomainListView.setOnItemClickListener(this);
+        mContentListView = (ListView) getView().findViewById(R.id.content_list);
+        mContentListView.setOnItemClickListener(this);
         if (!isWhiteList) {
             //加载白名单数据
             List<BlackIP> biList = mBlackIPDAO.queryForAll();
             BlackWhiteAdapter adapter = new BlackWhiteAdapter(biList);
-            ipDomainLV.setAdapter(adapter);
+            mIpDomainListView.setAdapter(adapter);
 
             List<BlackContent> bcList = mBlackContentDAO.queryForAll();
             adapter = new BlackWhiteAdapter(bcList);
-            contentList.setAdapter(adapter);
+            mContentListView.setAdapter(adapter);
         } else {
             //加载黑名单数据
             List<WhiteIP> wiList = mWhiteIPDAO.queryForAll();
             BlackWhiteAdapter adapter = new BlackWhiteAdapter(wiList);
-            ipDomainLV.setAdapter(adapter);
+            mIpDomainListView.setAdapter(adapter);
 
             List<WhiteContent> wcList = mWhiteContentDAO.queryForAll();
             adapter = new BlackWhiteAdapter(wcList);
-            contentList.setAdapter(adapter);
+            mContentListView.setAdapter(adapter);
         }
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        showAlertDialog(parent, position);
+    }
+
+    private void showAlertDialog(final AdapterView<?> parent, int position) {
+        final StringItem item = (StringItem) parent.getItemAtPosition(position);
+        AlertDialog dialog = new AlertDialog.Builder(getContext(), R.style.AlertDialog)
+            .setTitle("提示")
+            .setMessage("确认删除吗？")
+            .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    if (parent == mIpDomainListView) {
+                        if (isWhiteList) {
+                            mWhiteIPDAO.removeById((WhiteIP) item, item.getId());
+                        } else {
+                            mBlackIPDAO.removeById((BlackIP) item, item.getId());
+                        }
+                    } else if (parent == mContentListView) {
+                        if (isWhiteList) {
+                            mWhiteContentDAO.removeById((WhiteContent) item, item.getId());
+                        } else {
+                            mBlackContentDAO.removeById((BlackContent) item, item.getId());
+                        }
+                    }
+                    BlackWhiteAdapter adapter = (BlackWhiteAdapter) parent.getAdapter();
+                    adapter.remove(item);
+                    adapter.notifyDataSetChanged();
+                }
+            })
+            .setNegativeButton(android.R.string.cancel, null)
+            .show();
     }
 
     @Override
@@ -167,20 +209,24 @@ public class BlackWhiteListSettingFragment extends BaseSettingFragment implement
                 WhiteIP ip = new WhiteIP();
                 ip.ip = text;
                 mWhiteIPDAO.create(ip);
+                Logger.getInstance(getContext()).insert(getString(R.string.insert_x_to_white_list, ip.ip));
             } else {
                 BlackIP ip = new BlackIP();
                 ip.ip = text;
                 mBlackIPDAO.create(ip);
+                Logger.getInstance(getContext()).insert(getString(R.string.insert_x_to_black_list, ip.ip));
             }
         } else {
             if (isWhiteList) {
                 WhiteContent content = new WhiteContent();
                 content.content = text;
                 mWhiteContentDAO.create(content);
+                Logger.getInstance(getContext()).insert(getString(R.string.insert_x_to_white_list, content.content));
             } else {
                 BlackContent content = new BlackContent();
                 content.content = text;
                 mBlackContentDAO.create(content);
+                Logger.getInstance(getContext()).insert(getString(R.string.insert_x_to_black_list, content.content));
             }
         }
         initData();
@@ -236,6 +282,13 @@ public class BlackWhiteListSettingFragment extends BaseSettingFragment implement
             tv1.setTextColor(convertView.getResources().getColor(R.color.background_color));
             tv1.setText(mItems.get(position).getText());
             return convertView;
+        }
+
+        public void remove(StringItem item) {
+            if (item == null) {
+                return;
+            }
+            mItems.remove(item);
         }
     }
 }
