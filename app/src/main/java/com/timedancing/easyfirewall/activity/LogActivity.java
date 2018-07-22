@@ -4,6 +4,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -11,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CursorAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -22,7 +25,7 @@ import com.timedancing.easyfirewall.util.SharedPrefUtil;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class LogActivity extends BaseActivity {
+public class LogActivity extends BaseActivity implements TextWatcher {
 	private static final String IS_ASC = "is_asc";
 
 	private Toolbar mToolbar;
@@ -65,6 +68,32 @@ public class LogActivity extends BaseActivity {
 				initData(!isChecked);
 			}
 		});
+		EditText et = (EditText) findViewById(R.id.search);
+		et.addTextChangedListener(this);
+	}
+
+	@Override
+	public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+	}
+
+	@Override
+	public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+	}
+
+	@Override
+	public void afterTextChanged(Editable s) {
+		if (s.length() == 0) {
+			initData(!mOrderCb.isChecked());
+			return;
+		}
+		String text = s.toString();
+		if (mCursor != null && !mCursor.isClosed()) {
+			mCursor.close();
+		}
+
+		mCursor = Logger.getInstance(this).find(text, !mOrderCb.isChecked());
 	}
 
 	private void initData(boolean isDesc) {
@@ -72,6 +101,7 @@ public class LogActivity extends BaseActivity {
 			mCursor.close();
 		}
 		ListView lv = (ListView) findViewById(R.id.list_view);
+		lv.requestFocus();
 		mCursor = Logger.getInstance(this).getAll(isDesc);
 		lv.setAdapter(new LogAdapter(this, mCursor));
 	}

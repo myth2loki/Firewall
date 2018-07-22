@@ -39,6 +39,6 @@ public class Logger {
         }
         String order = isDesc ? "creationDate desc" : "creationDate asc";
         return mDbHelper.getReadableDatabase().query(LogDbHelper.LOG_TABLE_NAME, null,
-                "log like %?%", new String[]{filter}, null, null, order);
+                "log like '%" + filter + "%'", null, null, null, order);
     }
 }
