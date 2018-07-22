@@ -1,5 +1,9 @@
 package com.timedancing.easyfirewall.activity;
 
+import android.app.admin.DevicePolicyManager;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -7,19 +11,29 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
+import com.timedancing.easyfirewall.BuildConfig;
 import com.timedancing.easyfirewall.R;
 import com.timedancing.easyfirewall.fragment.BaseSettingFragment;
 import com.timedancing.easyfirewall.fragment.BlackWhiteListSettingFragment;
 import com.timedancing.easyfirewall.fragment.PasswordSettingFragment;
 import com.timedancing.easyfirewall.fragment.TimeSettingFragment;
+import com.timedancing.easyfirewall.receiver.NoUninstallReceiver;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class SettingActivity1 extends BaseActivity {
+	private static final String TAG = "SettingActivity";
+	private static final boolean DEBUG = BuildConfig.DEBUG;
+
 	public static final String PREF_NAME = "settings.dat";
+
+	private static final int DEVICE_MANAGER_REQUEST_CODE = 1;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -45,12 +59,59 @@ public class SettingActivity1 extends BaseActivity {
 	}
 
 	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		boolean result = super.onCreateOptionsMenu(menu);
+
+		ComponentName componentName = new ComponentName(this, NoUninstallReceiver.class);
+		DevicePolicyManager manager = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
+		if (manager != null) {
+			menu.add(0, 1, 999, R.string.prevent_uninstall)
+					.setCheckable(true).setChecked(manager.isAdminActive(componentName));
+		}
+		return result;
+	}
+
+	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		if (item.getItemId() == android.R.id.home) {
 			onBackPressed();
 			return true;
+		} else if (item.getItemId() == 1) {
+			item.setChecked(!item.isChecked());
+			requestNoInstall();
+			Toast.makeText(this, "admin： " + item.isChecked(), Toast.LENGTH_SHORT).show();
 		}
 		return super.onOptionsItemSelected(item);
+	}
+
+	private void requestNoInstall() {
+		ComponentName componentName = new ComponentName(this, NoUninstallReceiver.class);
+		DevicePolicyManager manager = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
+		if (manager == null) {
+			Log.d(TAG, "requestNoInstall: DevicePolicyManager is null.");
+			return;
+		}
+		if (!manager.isAdminActive(componentName)) {
+			Intent intent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
+			intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, new ComponentName(this,
+					NoUninstallReceiver.class));
+			intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, getString(R.string
+					.admin_request_description));
+
+			startActivityForResult(intent, DEVICE_MANAGER_REQUEST_CODE);
+		} else {
+			manager.removeActiveAdmin(componentName);
+		}
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+
+		if (requestCode == DEVICE_MANAGER_REQUEST_CODE) {
+//			mSivPreventUninstall.setChecked(resultCode == RESULT_OK);
+			Toast.makeText(this, "防止卸载：" + (resultCode == RESULT_OK), Toast.LENGTH_SHORT).show();
+		}
 	}
 
 	private class SettingFragmentAdapter extends FragmentStatePagerAdapter {

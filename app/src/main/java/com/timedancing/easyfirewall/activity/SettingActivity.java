@@ -5,14 +5,13 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 
 import com.timedancing.easyfirewall.R;
 import com.timedancing.easyfirewall.cache.AppConfig;
-import com.timedancing.easyfirewall.receiver.PreventUninstallDeviceAdminReceiver;
+import com.timedancing.easyfirewall.receiver.NoUninstallReceiver;
 import com.timedancing.easyfirewall.view.SettingItemView;
 
 public class SettingActivity extends BaseActivity {
@@ -92,7 +91,7 @@ public class SettingActivity extends BaseActivity {
 		mSivRunWhenCompleted.setChecked(AppConfig.isShouldAutoRunWhenBootCompleted(this));
 		DevicePolicyManager manager = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
 		mSivPreventUninstall.setChecked(manager.isAdminActive(new ComponentName(this,
-				PreventUninstallDeviceAdminReceiver.class)));
+				NoUninstallReceiver.class)));
 	}
 
 //	@Override
@@ -114,12 +113,12 @@ public class SettingActivity extends BaseActivity {
 
 	private void requireAdmin() {
 		ComponentName componentName = new ComponentName(SettingActivity.this,
-				PreventUninstallDeviceAdminReceiver.class);
+				NoUninstallReceiver.class);
 		DevicePolicyManager manager = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
 		if (!manager.isAdminActive(componentName)) {
 			Intent intent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
 			intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, new ComponentName(SettingActivity.this,
-					PreventUninstallDeviceAdminReceiver.class));
+					NoUninstallReceiver.class));
 			intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, getString(R.string
 					.admin_request_description));
 

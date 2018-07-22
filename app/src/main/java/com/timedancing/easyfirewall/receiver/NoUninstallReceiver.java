@@ -6,10 +6,7 @@ import android.content.Intent;
 
 import com.timedancing.easyfirewall.R;
 
-/**
- * Created by zengzheying on 16/1/18.
- */
-public class PreventUninstallDeviceAdminReceiver extends DeviceAdminReceiver {
+public class NoUninstallReceiver extends DeviceAdminReceiver {
 
 	@Override
 	public CharSequence onDisableRequested(Context context, Intent intent) {

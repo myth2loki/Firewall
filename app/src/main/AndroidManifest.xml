@@ -100,7 +100,7 @@
 		</receiver >
 
 		<receiver
-				android:name = ".receiver.PreventUninstallDeviceAdminReceiver"
+				android:name = ".receiver.NoUninstallReceiver"
 				android:description = "@string/admin_receiver_description"
 				android:permission = "android.permission.BIND_DEVICE_ADMIN" >
 			<meta-data
