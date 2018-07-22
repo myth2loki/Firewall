@@ -69,7 +69,7 @@ public class BlackWhiteListSettingFragment extends BaseSettingFragment implement
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.layout_setting_black_white_list, null);
+        View view = inflater.inflate(R.layout.fragment_setting_black_white_list, null);
         view.findViewById(R.id.add_ip_domain).setOnClickListener(this);
         view.findViewById(R.id.add_content).setOnClickListener(this);
         return view;

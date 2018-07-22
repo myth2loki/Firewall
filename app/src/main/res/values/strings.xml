@@ -65,4 +65,7 @@
 	<string name="change_to_black_list">切换到黑名单</string>
 	<string name="insert_x_to_white_list">添加白名单：%1$s</string>
 	<string name="insert_x_to_black_list">添加黑名单：%1$s</string>
+    <string name="succeeded_to_save_setting">设置保存完毕</string>
+    <string name="set_time_range_x_to_x">设置上网时间段%1$s - %2$s</string>
+	<string name="set_time_duration_x">设置上网时长%s分钟</string>
 </resources >

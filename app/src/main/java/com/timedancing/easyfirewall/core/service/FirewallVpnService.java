@@ -27,6 +27,8 @@ import com.timedancing.easyfirewall.core.util.VpnServiceHelper;
 import com.timedancing.easyfirewall.event.VPNEvent;
 import com.timedancing.easyfirewall.filter.BlackListFilter;
 import com.timedancing.easyfirewall.filter.CustomIpFilter;
+import com.timedancing.easyfirewall.filter.TimeDurationFilter;
+import com.timedancing.easyfirewall.filter.TimeRangeFilter;
 import com.timedancing.easyfirewall.util.DebugLog;
 
 import java.io.FileInputStream;
@@ -100,6 +102,10 @@ public class FirewallVpnService extends VpnService implements Runnable {
 			ProxyConfig.Instance.addDomainFilter(new BlackListFilter());
 			ProxyConfig.Instance.addDomainFilter(new CustomIpFilter());
 			ProxyConfig.Instance.addHtmlFilter(new CustomContentFilter());
+			//设置时间规则
+			ProxyConfig.Instance.addDomainFilter(new TimeRangeFilter());
+			ProxyConfig.Instance.addDomainFilter(new TimeDurationFilter());
+
 			//设置网页内容过滤
 			ProxyConfig.Instance.prepare();
 			ProxyConfig.Instance.setBlockingInfoBuilder(new HtmlBlockingInfoBuilder());

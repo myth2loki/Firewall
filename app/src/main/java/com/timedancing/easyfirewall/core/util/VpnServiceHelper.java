@@ -13,6 +13,7 @@ import com.timedancing.easyfirewall.core.nat.NatSessionManager;
 import com.timedancing.easyfirewall.core.service.FirewallVpnService;
 import com.timedancing.easyfirewall.core.tcpip.IPHeader;
 import com.timedancing.easyfirewall.core.tcpip.UDPHeader;
+import com.timedancing.easyfirewall.filter.TimeDurationFilter;
 import com.timedancing.easyfirewall.util.SharedPrefUtil;
 
 import java.net.DatagramSocket;
@@ -77,6 +78,7 @@ public class VpnServiceHelper {
 				sVpnService.setVpnRunningStatus(stopStatus);
 			}
 			SharedPrefUtil.saveValue(context, AppGlobal.GLOBAL_PREF_NAME, "isProtected", "false");
+            SharedPrefUtil.remove(context, AppGlobal.GLOBAL_PREF_NAME, TimeDurationFilter.PROTECT_START_TIME);
 			Logger.getInstance(context).insert(context.getString(R.string.stop_protect));
 		}
 	}
@@ -107,6 +109,7 @@ public class VpnServiceHelper {
 
 		context.startService(new Intent(context, FirewallVpnService.class));
 		SharedPrefUtil.saveValue(context, AppGlobal.GLOBAL_PREF_NAME, "isProtected", "true");
+		SharedPrefUtil.saveLong(context, AppGlobal.GLOBAL_PREF_NAME, TimeDurationFilter.PROTECT_START_TIME, System.currentTimeMillis());
 		Logger.getInstance(context).insert(context.getString(R.string.start_protect));
 	}
 }
