@@ -5,7 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
+import com.timedancing.easyfirewall.BuildConfig;
 import com.timedancing.easyfirewall.R;
 import com.timedancing.easyfirewall.constant.AppGlobal;
 import com.timedancing.easyfirewall.core.logger.Logger;
@@ -14,12 +16,15 @@ import com.timedancing.easyfirewall.core.service.FirewallVpnService;
 import com.timedancing.easyfirewall.core.tcpip.IPHeader;
 import com.timedancing.easyfirewall.core.tcpip.UDPHeader;
 import com.timedancing.easyfirewall.filter.TimeDurationFilter;
+import com.timedancing.easyfirewall.util.ServiceUtil;
 import com.timedancing.easyfirewall.util.SharedPrefUtil;
 
 import java.net.DatagramSocket;
 import java.net.Socket;
 
 public class VpnServiceHelper {
+	public static final String TAG = "VpnServiceHelper";
+	public static final boolean DEBUG = BuildConfig.DEBUG;
 
 	public static final int START_VPN_SERVICE_REQUEST_CODE = 2015;
 	private static FirewallVpnService sVpnService;
@@ -77,14 +82,14 @@ public class VpnServiceHelper {
 			if (sVpnService != null) {
 				sVpnService.setVpnRunningStatus(stopStatus);
 			}
-			SharedPrefUtil.saveValue(context, AppGlobal.GLOBAL_PREF_NAME, "isProtected", "false");
+			SharedPrefUtil.saveValue(context, AppGlobal.GLOBAL_PREF_NAME, AppGlobal.IS_PROTECTED, "false");
             SharedPrefUtil.remove(context, AppGlobal.GLOBAL_PREF_NAME, TimeDurationFilter.PROTECT_START_TIME);
 			Logger.getInstance(context).insert(context.getString(R.string.stop_protect));
 		}
 	}
 
 	public static boolean shouldStartVPNService(Context context) {
-		String result = SharedPrefUtil.getValue(context, AppGlobal.GLOBAL_PREF_NAME, "isProtected", "false");
+		String result = SharedPrefUtil.getValue(context, AppGlobal.GLOBAL_PREF_NAME, AppGlobal.IS_PROTECTED, "false");
 		return "true".equals(result);
 	}
 
@@ -107,8 +112,16 @@ public class VpnServiceHelper {
 			return;
 		}
 
+		boolean isVpnConnected = ServiceUtil.isVpnConnected();
+		if (DEBUG) {
+			Log.d(TAG, "startVpnService: isVpnConnected = " + isVpnConnected);
+		}
+		if (isVpnConnected) {
+			return;
+		}
+
 		context.startService(new Intent(context, FirewallVpnService.class));
-		SharedPrefUtil.saveValue(context, AppGlobal.GLOBAL_PREF_NAME, "isProtected", "true");
+		SharedPrefUtil.saveValue(context, AppGlobal.GLOBAL_PREF_NAME, AppGlobal.IS_PROTECTED, "true");
 		SharedPrefUtil.saveLong(context, AppGlobal.GLOBAL_PREF_NAME, TimeDurationFilter.PROTECT_START_TIME, System.currentTimeMillis());
 		Logger.getInstance(context).insert(context.getString(R.string.start_protect));
 	}

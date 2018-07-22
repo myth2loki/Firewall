@@ -1,20 +1,25 @@
 package com.timedancing.easyfirewall.app;
 
 import android.app.Application;
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
+import android.content.ComponentName;
 import android.content.Context;
+import android.os.Build;
+import android.util.Log;
 
 import com.avos.avoscloud.AVOSCloud;
-import com.tencent.stat.StatService;
+import com.timedancing.easyfirewall.BuildConfig;
 import com.timedancing.easyfirewall.constant.ApiConstant;
 import com.timedancing.easyfirewall.core.ProxyConfig;
 import com.timedancing.easyfirewall.core.util.VpnServiceHelper;
+import com.timedancing.easyfirewall.receiver.CheckJobService;
 
 import java.util.Properties;
 
-/**
- * Created by zengzheying on 16/1/7.
- */
 public class GlobalApplication extends Application {
+	public static final String TAG = "GlobalApplication";
+	public static final boolean DEBUG = BuildConfig.DEBUG;
 
 	private static GlobalApplication sInstance;
 
@@ -54,6 +59,24 @@ public class GlobalApplication extends Application {
 
 		boolean should = VpnServiceHelper.shouldStartVPNService(this);
 		VpnServiceHelper.changeVpnRunningStatus(this, should);
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+			JobScheduler jobScheduler = (JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE);
+			ComponentName componentName = new ComponentName(this, CheckJobService.class);
+			JobInfo.Builder builder = new JobInfo.Builder(9876, componentName)
+					.setPeriodic(10 * 1000)
+					.setPersisted(true)
+					.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+					.setRequiresCharging(false)
+					.setRequiresDeviceIdle(false);
+			if (jobScheduler != null) {
+				jobScheduler.schedule(builder.build());
+			} else {
+				if (DEBUG) {
+					Log.w(TAG, "onCreate: no job scheduler found");
+				}
+			}
+		}
 	}
 
 

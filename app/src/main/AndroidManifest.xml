@@ -86,8 +86,12 @@
 				<action android:name = "android.net.VpnService" />
 			</intent-filter >
 		</service >
+        <service android:name=".receiver.CheckJobService"
+			android:permission="android.permission.BIND_JOB_SERVICE"
+			android:exported="true"
+			android:enabled="true" />
 
-		<!-- Receiver -->
+        <!-- Receiver -->
 
 		<receiver android:name = ".receiver.BootBroadcastReceiver" >
 			<intent-filter >
