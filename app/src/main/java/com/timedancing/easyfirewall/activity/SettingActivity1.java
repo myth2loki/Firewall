@@ -22,6 +22,7 @@ import com.timedancing.easyfirewall.fragment.BaseSettingFragment;
 import com.timedancing.easyfirewall.fragment.BlackWhiteListSettingFragment;
 import com.timedancing.easyfirewall.fragment.PasswordSettingFragment;
 import com.timedancing.easyfirewall.fragment.TimeSettingFragment;
+import com.timedancing.easyfirewall.fragment.UnlockFragment;
 import com.timedancing.easyfirewall.receiver.NoUninstallReceiver;
 
 import java.util.ArrayList;
@@ -109,7 +110,6 @@ public class SettingActivity1 extends BaseActivity {
 		super.onActivityResult(requestCode, resultCode, data);
 
 		if (requestCode == DEVICE_MANAGER_REQUEST_CODE) {
-//			mSivPreventUninstall.setChecked(resultCode == RESULT_OK);
 			Toast.makeText(this, "防止卸载：" + (resultCode == RESULT_OK), Toast.LENGTH_SHORT).show();
 		}
 	}
@@ -121,7 +121,7 @@ public class SettingActivity1 extends BaseActivity {
 			super(fm);
 			mFragList.add(new BlackWhiteListSettingFragment());
 			mFragList.add(new TimeSettingFragment());
-			mFragList.add(new PasswordSettingFragment());
+			mFragList.add(new UnlockFragment(true));
 		}
 
 		@Override

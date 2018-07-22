@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+	xmlns:android = "http://schemas.android.com/apk/res/android"
+	android:background = "@color/background_color"
+	android:fitsSystemWindows = "true"
+	android:layout_width = "match_parent"
+	android:layout_height = "match_parent" >
+	<TextView
+		android:id = "@+id/tv_hint"
+		android:layout_width = "wrap_content"
+		android:layout_height = "40dp"
+		android:layout_marginTop="80dp"
+		android:layout_centerHorizontal = "true"
+		android:paddingLeft="60dp"
+		android:paddingRight="60dp"
+		android:gravity = "center_vertical"
+		android:text = "@string/input_password"
+		android:background="@drawable/rect_round_gray"
+		android:textColor = "#ffffff"
+		android:textSize = "16sp" />
+	<LinearLayout
+		android:layout_below="@id/tv_hint"
+		android:gravity="center"
+		android:id="@+id/pwd_caption_ll"
+		android:layout_marginTop="30dp"
+		android:orientation="horizontal"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content" />
+	<EditText
+		android:id = "@+id/et_pwd"
+		android:layout_width = "match_parent"
+		android:layout_height = "60dp"
+		android:layout_below= "@id/tv_hint"
+		android:background = "@null"
+		android:focusable = "false"
+		android:gravity = "center"
+		android:inputType = "numberPassword"
+		android:maxLength = "6"
+		android:visibility="invisible"
+		android:textColor = "#ffffff"
+		android:textSize = "20sp" />
+	<com.timedancing.easyfirewall.view.NumberKeyboard
+		android:id = "@+id/numberKeyboard"
+		android:layout_width = "match_parent"
+		android:layout_height = "wrap_content"
+		android:layout_marginBottom="30dp"
+		android:layout_alignParentBottom = "true" />
+</RelativeLayout >
