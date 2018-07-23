@@ -2,6 +2,7 @@ package com.timedancing.easyfirewall.filter;
 
 import android.content.Context;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.SparseIntArray;
 
 import com.timedancing.easyfirewall.R;
@@ -24,6 +25,7 @@ import java.util.regex.Pattern;
 
 
 public class BlackListFilter implements DomainFilter {
+	private static final String TAG = "BlackListFilter";
 
 	private Map<String, Integer> mDomainMap = new HashMap<>();
 	/**
@@ -40,34 +42,30 @@ public class BlackListFilter implements DomainFilter {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 		String line = null;
 		try {
-			while ((line = reader.readLine()) != null) {
-				line = line.trim();
-				if (line.startsWith("#")
-						|| !TextUtils.isDigitsOnly(String.valueOf(line.charAt(0)))) {
-					continue;
-				}
-
-				String[] parts = line.split(" ");
-				if (parts.length == 2
-						&& !"localhost".equalsIgnoreCase(parts[1])) {
-					String ipStr = parts[0];
-					int ip = CommonMethods.ipStringToInt(ipStr);
-					mDomainMap.put(parts[1], ip);
-					mIpMask.put(ip, 1);
-				}
-			}
-		} catch (IOException ex) {
-			if (AppDebug.IS_DEBUG) {
-				ex.printStackTrace(System.err);
-			}
-		} finally {
 			try {
+				while ((line = reader.readLine()) != null) {
+					line = line.trim();
+					if (line.startsWith("#")
+							|| !TextUtils.isDigitsOnly(String.valueOf(line.charAt(0)))) {
+						continue;
+					}
+
+					String[] parts = line.split(" ");
+					if (parts.length == 2
+							&& !"localhost".equalsIgnoreCase(parts[1])) {
+						String ipStr = parts[0];
+						int ip = CommonMethods.ipStringToInt(ipStr);
+						mDomainMap.put(parts[1], ip);
+						mIpMask.put(ip, 1);
+					}
+				}
+			} finally {
 				reader.close();
 				in.close();
-			} catch (IOException ex) {
-				if (AppDebug.IS_DEBUG) {
-					ex.printStackTrace(System.err);
-				}
+			}
+		} catch (IOException e) {
+			if (AppDebug.IS_DEBUG) {
+				Log.e(TAG, "prepare: failed", e);
 			}
 		}
 	}

@@ -44,6 +44,9 @@ public class BlackListHelper {
 				.header(AppCache.KEY_IF_SINCE_MODIFIED_SINCE, AppCache.getIfSinceModifiedSince(context))
 				.build();
 		EventBus.getDefault().post(new HostUpdateEvent(HostUpdateEvent.Status.Updating));
+		if (DEBUG) {
+			Log.d(TAG, "update: request = " + req);
+		}
 		httpClient.newCall(req).enqueue(new Callback() {
 			@Override
 			public void onFailure(Call call, IOException e) {
