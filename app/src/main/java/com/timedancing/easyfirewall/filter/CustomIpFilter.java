@@ -70,11 +70,15 @@ public class CustomIpFilter implements DomainFilter {
             return false;
         }
         if (isWhite) {
+            Context context = GlobalApplication.getInstance();
+            Logger logger = Logger.getInstance(context);
             for (String white : mWhiteList) {
                 if (white.contains(ipAddress) || ipAddress.contains(white)) {
+                    logger.insert(context.getString(R.string.allow_to_navigate_x, white));
                     return false;
                 }
             }
+            logger.insert(context.getString(R.string.stop_navigate_x, ipAddress));
             return true;
         } else {
             for (String black : mBlackList) {

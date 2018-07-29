@@ -41,4 +41,8 @@ public class Logger {
         return mDbHelper.getReadableDatabase().query(LogDbHelper.LOG_TABLE_NAME, null,
                 "log like '%" + filter + "%'", null, null, null, order);
     }
+
+    public void clear() {
+        mDbHelper.getWritableDatabase().delete(LogDbHelper.LOG_TABLE_NAME, null, null);
+    }
 }

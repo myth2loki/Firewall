@@ -7,6 +7,7 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,6 +28,7 @@ import java.util.Date;
 
 public class LogActivity extends BaseActivity implements TextWatcher {
 	private static final String IS_ASC = "is_asc";
+	private static final int CLEAR = 0;
 
 	private Toolbar mToolbar;
 	private CheckBox mOrderCb;
@@ -73,6 +75,12 @@ public class LogActivity extends BaseActivity implements TextWatcher {
 	}
 
 	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		menu.add(0, CLEAR, 0, "清空");
+		return super.onCreateOptionsMenu(menu);
+	}
+
+	@Override
 	public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
 	}
@@ -94,6 +102,8 @@ public class LogActivity extends BaseActivity implements TextWatcher {
 		}
 
 		mCursor = Logger.getInstance(this).find(text, !mOrderCb.isChecked());
+		ListView lv = (ListView) findViewById(R.id.list_view);
+		lv.setAdapter(new LogAdapter(this, mCursor));
 	}
 
 	private void initData(boolean isDesc) {
@@ -108,9 +118,14 @@ public class LogActivity extends BaseActivity implements TextWatcher {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		if (item.getItemId() == android.R.id.home) {
-			onBackPressed();
-			return true;
+		switch (item.getItemId()) {
+			case android.R.id.home:
+				onBackPressed();
+				return true;
+			case CLEAR:
+				Logger.getInstance(this).clear();
+				initData(!mOrderCb.isChecked());
+				break;
 		}
 		return super.onOptionsItemSelected(item);
 	}

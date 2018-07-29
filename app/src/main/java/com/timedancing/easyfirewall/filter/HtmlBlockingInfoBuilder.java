@@ -30,7 +30,7 @@ public class HtmlBlockingInfoBuilder implements BlockingInfoBuilder {
 		ByteBuffer byteBuffer = null;
 		Context context = GlobalApplication.getInstance();
 		if (mHtmlContent == null) {
-			mHtmlContent = AssetsUtil.readAssetsTextFile(context, "html/block.html");
+			mHtmlContent = AssetsUtil.readAssetsTextFile(context, "html/block_by_time.html");
 		}
 		if (!TextUtils.isEmpty(mHtmlContent)) {
 

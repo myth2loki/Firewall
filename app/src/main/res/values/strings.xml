@@ -69,4 +69,5 @@
 	<string name="set_time_duration_x">设置上网时长%s分钟</string>
 	<string name="prevent_uninstall">防止卸载</string>
     <string name="succeeded_to_set_parent_password">家长密码设置成功</string>
+	<string name="allow_to_navigate_x">允许访问%1$s</string>
 </resources >
