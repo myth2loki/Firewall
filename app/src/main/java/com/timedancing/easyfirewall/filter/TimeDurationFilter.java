@@ -21,6 +21,7 @@ public class TimeDurationFilter implements DomainFilter {
     private int mType;
     private long mStartTime;
     private int mDuration;
+    private boolean mEnabled;
 
     private static boolean isReload;
 
@@ -32,6 +33,7 @@ public class TimeDurationFilter implements DomainFilter {
     public void prepare() {
         Context context = GlobalApplication.getInstance();
         mType = SharedPrefUtil.getInt(context, AppGlobal.GLOBAL_PREF_NAME, TYPE, 0);
+        mEnabled = (mType & TimeSettingFragment.TIME_DURATION) != TimeSettingFragment.TIME_DURATION;
         mDuration = SharedPrefUtil.getInt(context, AppGlobal.GLOBAL_PREF_NAME, DURATION, -1);
         mStartTime = SharedPrefUtil.getLong(context, AppGlobal.GLOBAL_PREF_NAME, PROTECT_START_TIME, -1);
     }
@@ -46,7 +48,7 @@ public class TimeDurationFilter implements DomainFilter {
             prepare();
         }
         long duration = System.currentTimeMillis() - mStartTime;
-        if ((mType & TimeSettingFragment.TIME_DURATION) != TimeSettingFragment.TIME_DURATION) {
+        if (mEnabled) {
             boolean result = duration <= mDuration;
             if (DEBUG) {
                 Log.d(TAG, "needFilter: result = " + result);

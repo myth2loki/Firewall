@@ -14,9 +14,6 @@ import com.timedancing.easyfirewall.util.AssetsUtil;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 
-/**
- * Created by zengzheying on 16/1/15.
- */
 public class HtmlBlockingInfoBuilder implements BlockingInfoBuilder {
 
 	private static final String PLACEHOLDER_TITLE = "{title}";
@@ -30,7 +27,7 @@ public class HtmlBlockingInfoBuilder implements BlockingInfoBuilder {
 		ByteBuffer byteBuffer = null;
 		Context context = GlobalApplication.getInstance();
 		if (mHtmlContent == null) {
-			mHtmlContent = AssetsUtil.readAssetsTextFile(context, "html/block_by_time.html");
+			mHtmlContent = AssetsUtil.readAssetsTextFile(context, "html/block.html");
 		}
 		if (!TextUtils.isEmpty(mHtmlContent)) {
 

@@ -5,9 +5,6 @@ import com.timedancing.easyfirewall.core.http.HttpResponse;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 
-/**
- * Created by zengzheying on 16/1/15.
- */
 public class DefaultBlockingInfoBuilder implements BlockingInfoBuilder {
 
 	private static DefaultBlockingInfoBuilder sInstance;

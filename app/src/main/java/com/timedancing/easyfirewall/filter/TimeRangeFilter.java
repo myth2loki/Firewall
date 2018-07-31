@@ -24,6 +24,7 @@ public class TimeRangeFilter implements DomainFilter {
     private int mType;
     private Date mStartDate;
     private Date mEndDate;
+    private boolean mEnabled;
 
     private static boolean isReload;
 
@@ -35,6 +36,7 @@ public class TimeRangeFilter implements DomainFilter {
     public void prepare() {
         Context context = GlobalApplication.getInstance();
         mType = SharedPrefUtil.getInt(context, AppGlobal.GLOBAL_PREF_NAME, TYPE, 0);
+        mEnabled = (mType & TimeSettingFragment.TIME_RANGE) != TimeSettingFragment.TIME_RANGE;
         long startTime = SharedPrefUtil.getLong(context, AppGlobal.GLOBAL_PREF_NAME, START_TIME, -1);
         long endTime = SharedPrefUtil.getLong(context, AppGlobal.GLOBAL_PREF_NAME, END_TIME, -1);
         if (startTime > -1) {
@@ -51,16 +53,16 @@ public class TimeRangeFilter implements DomainFilter {
             isReload = false;
             prepare();
         }
-        if ((mType & TimeSettingFragment.TIME_RANGE) != TIME_RANGE) {
+        if (!mEnabled) {
             return false;
         }
         if (mStartDate == null || mEndDate == null) {
             return false;
         }
         long curTime = System.currentTimeMillis();
-        boolean result = curTime >= mStartDate.getTime() && curTime <= mEndDate.getTime();
+        boolean result = curTime < mStartDate.getTime() || curTime > mEndDate.getTime();
         if (DEBUG) {
-            Log.d(TAG, "needFilter: result = " + result);
+            Log.d(TAG, "needFilter: result = " + result + "， domain = " + domain + ", ip = " + ip);
         }
         return result;
     }

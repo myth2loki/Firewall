@@ -69,10 +69,10 @@ public class TimeSettingFragment extends BaseSettingFragment implements View.OnC
         mTimeRangeTimeStartButton.setOnClickListener(this);
 
         mTimeRangeDateEndButton = (Button) view.findViewById(R.id.time_range_date_end_button);
-        mTimeRangeDateEndButton.setText(getDateString(mStartCalendar));
+        mTimeRangeDateEndButton.setText(getDateString(mEndCalendar));
         mTimeRangeDateEndButton.setOnClickListener(this);
         mTimeRangeTimeEndButton = (Button) view.findViewById(R.id.time_range_time_end_button);
-        mTimeRangeTimeEndButton.setText(getTimeString(mStartCalendar));
+        mTimeRangeTimeEndButton.setText(getTimeString(mEndCalendar));
         mTimeRangeTimeEndButton.setOnClickListener(this);
 
         EditText timeDuration = (EditText) view.findViewById(R.id.time_duration_edit_text);
@@ -97,6 +97,12 @@ public class TimeSettingFragment extends BaseSettingFragment implements View.OnC
             mEndCalendar.setTime(new Date(endTime));
         }
         mDuration = SharedPrefUtil.getInt(context, AppGlobal.GLOBAL_PREF_NAME, DURATION, 0);
+        if (DEBUG) {
+            Log.d(TAG, "onAttach: type = " + mType);
+            Log.d(TAG, "onAttach: startTime = " + startTime);
+            Log.d(TAG, "onAttach: endTime = " + endTime);
+            Log.d(TAG, "onAttach: mDuration = " + mDuration);
+        }
     }
 
     @Override
@@ -109,6 +115,10 @@ public class TimeSettingFragment extends BaseSettingFragment implements View.OnC
         cb.setChecked((mType & 0b10) == TIME_DURATION);
         cb.setOnCheckedChangeListener(this);
         ((EditText) getView().findViewById(R.id.time_duration_edit_text)).setText(mDuration == 0 ? "" : mDuration + "");
+        if (DEBUG) {
+            Log.d(TAG, "onActivityCreated: mType & 0b01 = " + (mType & 0b01));
+            Log.d(TAG, "onActivityCreated: mType & 0b10 = " + (mType & 0b10));
+        }
     }
 
     @Override
@@ -154,7 +164,7 @@ public class TimeSettingFragment extends BaseSettingFragment implements View.OnC
                 break;
             case R.id.time_save_button:
                 SharedPrefUtil.saveInt(getContext(), AppGlobal.GLOBAL_PREF_NAME, TYPE, mType);
-                if ((mType | TIME_RANGE) == TIME_RANGE) {
+                if ((mType & TIME_RANGE) == TIME_RANGE) {
                     SharedPrefUtil.saveLong(getContext(), AppGlobal.GLOBAL_PREF_NAME, START_TIME, mStartCalendar.getTimeInMillis());
                     SharedPrefUtil.saveLong(getContext(), AppGlobal.GLOBAL_PREF_NAME, END_TIME, mEndCalendar.getTimeInMillis());
                     TimeRangeFilter.reload();
@@ -163,7 +173,7 @@ public class TimeSettingFragment extends BaseSettingFragment implements View.OnC
                                     getDateString(mStartCalendar) + " " + getTimeString(mStartCalendar),
                                     getDateString(mEndCalendar) + " " + getTimeString(mEndCalendar)));
                 }
-                if ((mType | TIME_DURATION) == TIME_DURATION && mDuration > 0) {
+                if ((mType & TIME_DURATION) == TIME_DURATION && mDuration > 0) {
                     SharedPrefUtil.saveInt(getContext(), AppGlobal.GLOBAL_PREF_NAME, DURATION, mDuration);
                     TimeDurationFilter.reload();
                     Logger.getInstance(getContext())
