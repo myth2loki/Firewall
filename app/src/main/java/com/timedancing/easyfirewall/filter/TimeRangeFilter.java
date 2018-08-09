@@ -48,7 +48,7 @@ public class TimeRangeFilter implements DomainFilter {
     }
 
     @Override
-    public boolean needFilter(String domain, int ip) {
+    public boolean needFilter(String domain, int ip, int port) {
         if (isReload) {
             isReload = false;
             prepare();

@@ -29,22 +29,22 @@ public class TCPHeader {
 	 * ｜－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－｜
 	 **/
 
-	public static final int FIN = 1;
-	public static final int SYN = 2;
-	public static final int RST = 4;
-	public static final int PSH = 8;
-	public static final int ACK = 16;
-	public static final int URG = 32;
+	private  static final int FIN = 1;
+	private  static final int SYN = 2;
+	private  static final int RST = 4;
+	private  static final int PSH = 8;
+	private  static final int ACK = 16;
+	private  static final int URG = 32;
 
-	static final short offset_src_port = 0; // 16位源端口
-	static final short offset_dest_port = 2; // 16位目的端口
-	static final int offset_seq = 4; //32位序列号
-	static final int offset_ack = 8; //32位确认号
-	static final byte offset_lenres = 12; //4位首部长度 + 4位保留位
-	static final byte offset_flag = 13; //2位保留字 + 6位标志位
-	static final short offset_win = 14; //16位窗口大小
-	static final short offset_crc = 16; //16位校验和
-	static final short offset_urp = 18; //16位紧急偏移量
+	private static final short offset_src_port = 0; // 16位源端口
+	private static final short offset_dest_port = 2; // 16位目的端口
+	private static final int offset_seq = 4; //32位序列号
+	private static final int offset_ack = 8; //32位确认号
+	private static final byte offset_lenres = 12; //4位首部长度 + 4位保留位
+	private static final byte offset_flag = 13; //2位保留字 + 6位标志位
+	private static final short offset_win = 14; //16位窗口大小
+	private static final short offset_crc = 16; //16位校验和
+	private static final short offset_urp = 18; //16位紧急偏移量
 
 	public byte[] mData;
 	public int mOffset;

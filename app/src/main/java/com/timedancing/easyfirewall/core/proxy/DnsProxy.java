@@ -240,7 +240,7 @@ public class DnsProxy implements Runnable {
 			if (question.Type == 1) { //希望获取域名的ip
 				int realIP = getFirstIP(dnsPacket);
 				//过滤
-				if (ProxyConfig.Instance.filter(question.Domain, realIP)) {
+				if (ProxyConfig.Instance.filter(question.Domain, realIP, -1)) {
 					int fakeIP = getOrCreateFakeIP(question.Domain);
 					//使用fakeIp
 					tamperDnsResponse(rawPacket, dnsPacket, fakeIP);
@@ -322,7 +322,7 @@ public class DnsProxy implements Runnable {
 		DebugLog.i("DNS query %s", question.Domain);
 
 		if (question.Type == 1) {
-			if (ProxyConfig.Instance.filter(question.Domain, getIPFromCache(question.Domain))) {
+			if (ProxyConfig.Instance.filter(question.Domain, getIPFromCache(question.Domain), -1)) {
 				int fakeIP = getOrCreateFakeIP(question.Domain);
 				tamperDnsResponse(ipHeader.mData, dnsPacket, fakeIP);
 

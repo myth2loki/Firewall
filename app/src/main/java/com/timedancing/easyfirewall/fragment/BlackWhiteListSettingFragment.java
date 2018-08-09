@@ -178,6 +178,8 @@ public class BlackWhiteListSettingFragment extends BaseSettingFragment implement
                     }
                     BlackWhiteAdapter adapter = (BlackWhiteAdapter) parent.getAdapter();
                     adapter.remove(item);
+                    CustomIpFilter.reload();
+                    CustomContentFilter.reload();
                     adapter.notifyDataSetChanged();
                 }
             })

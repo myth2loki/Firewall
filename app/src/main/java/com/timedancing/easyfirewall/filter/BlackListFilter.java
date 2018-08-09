@@ -71,7 +71,7 @@ public class BlackListFilter implements DomainFilter {
 	}
 
 	@Override
-	public boolean needFilter(String ipAddress, int ip) {
+	public boolean needFilter(String ipAddress, int ip, int port) {
 		if (ipAddress == null) {
 			return false;
 		}

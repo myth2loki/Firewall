@@ -61,19 +61,24 @@ public class CustomIpFilter implements DomainFilter {
     }
 
     @Override
-    public boolean needFilter(String ipAddress, int ip) {
+    public boolean needFilter(String ipAddress, int ip, int port) {
         if (isReload) {
             isReload = false;
+            mBlackList.clear();
+            mWhiteList.clear();
             prepare();
         }
         if (ipAddress == null) {
             return false;
         }
+        if (port > -1) {
+            ipAddress = ipAddress + ":" + port;
+        }
         if (isWhite) {
             Context context = GlobalApplication.getInstance();
             Logger logger = Logger.getInstance(context);
             for (String white : mWhiteList) {
-                if (white.contains(ipAddress) || ipAddress.contains(white)) {
+                if (ipAddress.contains(white)) {
                     logger.insert(context.getString(R.string.allow_to_navigate_x, white));
                     return false;
                 }
@@ -82,7 +87,7 @@ public class CustomIpFilter implements DomainFilter {
             return true;
         } else {
             for (String black : mBlackList) {
-                if (black.contains(ipAddress) || ipAddress.contains(black)) {
+                if (ipAddress.contains(black)) {
                     Context context = GlobalApplication.getInstance();
                     Logger logger = Logger.getInstance(context);
                     logger.insert(context.getString(R.string.stop_navigate_x, black));

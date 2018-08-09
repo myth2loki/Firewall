@@ -55,6 +55,8 @@ public class CustomContentFilter implements HtmlFilter {
     public boolean needFilter(String content) {
         if (isReload) {
             isReload = false;
+            mBlackContentList.clear();
+            mWhiteContentList.clear();
             prepare();
         }
         if (TextUtils.isEmpty(content)) {

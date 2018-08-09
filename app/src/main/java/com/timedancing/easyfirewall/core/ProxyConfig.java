@@ -94,7 +94,7 @@ public class ProxyConfig {
 
 	public String getSessionName() {
 		if (mSessionName == null) {
-			mSessionName = "Easy Firewall";
+			mSessionName = "Kid Protector";
 		}
 		return mSessionName;
 	}
@@ -111,12 +111,13 @@ public class ProxyConfig {
 	 * 过滤地址
 	 * @param host 主机地址
 	 * @param ip ip地址
+	 * @param port 端口号
 	 * @return true代表被过滤，否则false
 	 */
-	public boolean filter(String host, int ip) {
+	public boolean filter(String host, int ip, int port) {
 		boolean isFiltered = false;
 		for (DomainFilter filter : mDomainFilterList) {
-			isFiltered = isFiltered || filter.needFilter(host, ip);
+			isFiltered = isFiltered || filter.needFilter(host, ip, port);
 			if (isFiltered) {
 				break;
 			}

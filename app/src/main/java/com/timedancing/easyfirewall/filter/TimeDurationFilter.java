@@ -39,7 +39,7 @@ public class TimeDurationFilter implements DomainFilter {
     }
 
     @Override
-    public boolean needFilter(String domain, int ip) {
+    public boolean needFilter(String domain, int ip, int port) {
         if (mStartTime < 0) {
             return false;
         }

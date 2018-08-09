@@ -150,7 +150,7 @@ public class TcpProxyServer implements Runnable {
 			if (DEBUG) {
 				Log.d(TAG, "getDestAddress: session = " + session);
 			}
-			if (ProxyConfig.Instance.filter(session.remoteHost, session.remoteIP)) {
+			if (ProxyConfig.Instance.filter(session.remoteHost, session.remoteIP, session.remotePort)) {
 				//TODO 完成跟具体的拦截策略？？？
 				if (DEBUG) {
 					Log.d(TAG, String.format("getDestAddress: %d/%d:[BLOCK] %s=>%s:%d\n", NatSessionManager.getSessionCount(), Tunnel.SessionCount,
@@ -193,7 +193,7 @@ public class TcpProxyServer implements Runnable {
 			} else {
 				short portKey = (short) localChannel.socket().getPort();
 				NatSession session = NatSessionManager.getSession(portKey);
-				if (session != null && ProxyConfig.Instance.filter(session.remoteHost, session.remoteIP)) {
+				if (session != null && ProxyConfig.Instance.filter(session.remoteHost, session.remoteIP, session.remotePort)) {
 					if (DEBUG) {
 						Log.d(TAG, String.format("onAccepted: Have block a request to %s=>%s:%d", session.remoteHost, CommonMethods.ipIntToString
 										(session.remoteIP),

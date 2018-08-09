@@ -1,8 +1,5 @@
 package com.timedancing.easyfirewall.core.tcpip;
 
-/**
- * Created by zengzheying on 15/12/28.
- */
 public class UDPHeader {
 	/**
 	 * UDP数据报格式
