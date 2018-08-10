@@ -48,7 +48,7 @@ public abstract class Tunnel {
 	Tunnel(SocketChannel innerChannel, Selector selector) {
 		mInnerChannel = innerChannel;
 		mSelector = selector;
-		SessionCount++;
+		incSessionCount();
 	}
 
 	/**
@@ -63,7 +63,14 @@ public abstract class Tunnel {
 		this.mInnerChannel = innerChannel; //此channel为真正向外请求的socket
 		this.mSelector = selector;
 		this.mServerEP = serverAddress;
-		SessionCount++;
+		incSessionCount();
+	}
+
+	/**
+	 * 增加session count
+	 */
+	private synchronized static void incSessionCount() {
+		++SessionCount;
 	}
 
 	protected void setRemoteTunnel(boolean enabled) {

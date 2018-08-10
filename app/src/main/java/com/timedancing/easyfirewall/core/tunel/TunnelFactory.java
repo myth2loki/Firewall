@@ -8,13 +8,10 @@ import java.net.InetSocketAddress;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 
-/**
- * Created by zengzheying on 15/12/30.
- */
 public class TunnelFactory {
 
 	/**
-	 * 包装成tunnel
+	 * 包装成本地tunnel
 	 * @param channel
 	 * @param selector
 	 * @return
@@ -22,14 +19,14 @@ public class TunnelFactory {
 	public static Tunnel wrap(SocketChannel channel, Selector selector) {
 		Tunnel tunnel = new RawTunnel(channel, selector);
 //		NatSession session = NatSessionManager.getSession((short) channel.socket().getPort());
-//		if (session != null) {
-//			tunnel.setIsHttpsRequest(session.isHttpsSession);
-//		}
+////		if (session != null) {
+////			tunnel.setIsHttpsRequest(session.isHttpsSession);
+////		}
 		return tunnel;
 	}
 
 	/**
-	 * 包装成tunne
+	 * 包装成远程tunne
 	 * @param destAddress
 	 * @param selector
 	 * @return

@@ -30,8 +30,8 @@ public class TcpProxyServer implements Runnable {
 	/**
 	 * 用于接收转发来的tcp报文，通过重新设定目的地址和端口重定向过来
 	 */
-	private Selector mSelector;
-	private ServerSocketChannel mServerSocketChannel;
+	private Selector mProxySelector;
+	private ServerSocketChannel mProxyServerSocketChannel;
 
 	/**
 	 * 构造TcpProxyServer实例
@@ -39,14 +39,14 @@ public class TcpProxyServer implements Runnable {
 	 * @throws IOException
 	 */
 	public TcpProxyServer(int port) throws IOException {
-		mSelector = Selector.open();
-		mServerSocketChannel = ServerSocketChannel.open();
-		mServerSocketChannel.configureBlocking(false);
-		mServerSocketChannel.socket().bind(new InetSocketAddress(port)); //绑定端口
-		mServerSocketChannel.register(mSelector, SelectionKey.OP_ACCEPT, mServerSocketChannel);
-		this.mPort = (short) mServerSocketChannel.socket().getLocalPort();
+		mProxySelector = Selector.open();
+		mProxyServerSocketChannel = ServerSocketChannel.open();
+		mProxyServerSocketChannel.configureBlocking(false);
+		mProxyServerSocketChannel.socket().bind(new InetSocketAddress(port)); //绑定端口
+		mProxyServerSocketChannel.register(mProxySelector, SelectionKey.OP_ACCEPT, mProxyServerSocketChannel);
+		this.mPort = (short) mProxyServerSocketChannel.socket().getLocalPort();
 
-		DebugLog.i("AsyncTcpServer listen on %s:%d success.\n", mServerSocketChannel.socket().getInetAddress()
+		DebugLog.i("AsyncTcpServer listen on %s:%d success.\n", mProxyServerSocketChannel.socket().getInetAddress()
 				.toString(), this.mPort & 0xFFFF);
 	}
 
@@ -67,21 +67,23 @@ public class TcpProxyServer implements Runnable {
 	public void run() {
 		try {
 			while (true) {
-				mSelector.select();
-				Iterator<SelectionKey> keyIterator = mSelector.selectedKeys().iterator();
+				mProxySelector.select();
+				Iterator<SelectionKey> keyIterator = mProxySelector.selectedKeys().iterator();
 				while (keyIterator.hasNext()) {
 					SelectionKey key = keyIterator.next();
 					if (key.isValid()) {
 						try {
+							//来自tunnel的操作
 							if (key.isReadable()) {
 //								Log.d(TAG, "run: onReadable");
 								((Tunnel) key.attachment()).onReadable(key);
 							} else if (key.isWritable()) {
 //								Log.d(TAG, "run: onWritable");
-//								((Tunnel) key.attachment()).onWritable(key);
+								((Tunnel) key.attachment()).onWritable(key);
 							} else if (key.isConnectable()) {
 //								Log.d(TAG, "run: onConnectable");
 								((Tunnel) key.attachment()).onConnectable();
+							//来自tunnel的操作
 							} else if (key.isAcceptable()) {
 //								Log.d(TAG, "run: onAccepted");
 								onAccepted(key);
@@ -99,41 +101,39 @@ public class TcpProxyServer implements Runnable {
 
 			}
 		} catch (Exception e) {
-			if (AppDebug.IS_DEBUG) {
-				e.printStackTrace(System.err);
+			if (DEBUG) {
+				Log.e(TAG, "run: TcpProxyServer error", e);
 			}
-
-			DebugLog.e("TcpProxyServer catch an exception: %s", e);
 		} finally {
 			this.stop();
-			DebugLog.i("TcpServer thread exited.");
+			Log.i(TAG, "run: TcpServer thread exited.");
 		}
 	}
 
 	public void stop() {
 		this.mStopped = true;
-		if (mSelector != null) {
+		if (mProxySelector != null) {
 			try {
-				mSelector.close();
-				mSelector = null;
+				mProxySelector.close();
+				mProxySelector = null;
 			} catch (Exception ex) {
 				if (AppDebug.IS_DEBUG) {
 					ex.printStackTrace(System.err);
 				}
-				DebugLog.e("TcpProxyServer mSelector.close() catch an exception: %s", ex);
+				DebugLog.e("TcpProxyServer mProxySelector.close() catch an exception: %s", ex);
 			}
 		}
 
-		if (mServerSocketChannel != null) {
+		if (mProxyServerSocketChannel != null) {
 			try {
-				mServerSocketChannel.close();
-				mServerSocketChannel = null;
+				mProxyServerSocketChannel.close();
+				mProxyServerSocketChannel = null;
 			} catch (Exception ex) {
 				if (AppDebug.IS_DEBUG) {
 					ex.printStackTrace(System.err);
 				}
 
-				DebugLog.e("TcpProxyServer mServerSocketChannel.close() catch an exception: %s", ex);
+				DebugLog.e("TcpProxyServer mProxyServerSocketChannel.close() catch an exception: %s", ex);
 			}
 		}
 	}
@@ -143,17 +143,17 @@ public class TcpProxyServer implements Runnable {
 	 * @param localChannel
 	 * @return
 	 */
-	private InetSocketAddress getDestAddress(SocketChannel localChannel) {
+	private InetSocketAddress getCachedDestAddress(SocketChannel localChannel) {
 		int portKey = localChannel.socket().getPort();
 		NatSession session = NatSessionManager.getSession((short)portKey);
 		if (session != null) {
 			if (DEBUG) {
-				Log.d(TAG, "getDestAddress: session = " + session);
+				Log.d(TAG, "getCachedDestAddress: session = " + session);
 			}
 			if (ProxyConfig.Instance.filter(session.remoteHost, session.remoteIP, session.remotePort)) {
 				//TODO 完成跟具体的拦截策略？？？
 				if (DEBUG) {
-					Log.d(TAG, String.format("getDestAddress: %d/%d:[BLOCK] %s=>%s:%d\n", NatSessionManager.getSessionCount(), Tunnel.SessionCount,
+					Log.d(TAG, String.format("getCachedDestAddress: %d/%d:[BLOCK] %s=>%s:%d\n", NatSessionManager.getSessionCount(), Tunnel.SessionCount,
 							session.remoteHost,
 							CommonMethods.ipIntToString(session.remoteIP), session.remotePort & 0xFFFF));
 				}
@@ -173,17 +173,17 @@ public class TcpProxyServer implements Runnable {
 		Tunnel localTunnel = null;
 		try {
 			//获取local server的通道
-//			SocketChannel localChannel = mServerSocketChannel.accept();
+//			SocketChannel localChannel = mProxyServerSocketChannel.accept();
 			SocketChannel localChannel = ((ServerSocketChannel) key.attachment()).accept();
 			//tcp代理服务器有连接进来，localChannel代表应用与代理服务器的连接
-			localTunnel = TunnelFactory.wrap(localChannel, mSelector); //TODO 为何要调用wrap方法？ 因为需要将连接方和受vpn保护的socket配对
+			localTunnel = TunnelFactory.wrap(localChannel, mProxySelector); //TODO 为何要调用wrap方法？ 因为需要将连接方和受vpn保护的socket配对
 
 			//有连接连进来，获取到目的地址。其实就是连接方地址，因为在转发的时候已经将目的地址和端口写入到源地址和端口上
 			// dstIp = localChannel.socket().getInetAddress dstPort = localChannel.socket().getPort()
-			InetSocketAddress destAddress = getDestAddress(localChannel);
+			InetSocketAddress destAddress = getCachedDestAddress(localChannel);
 			if (destAddress != null) {
 				//创建远程tunnel，受vpn protect
-				Tunnel remoteTunnel = TunnelFactory.wrap(destAddress, mSelector);
+				Tunnel remoteTunnel = TunnelFactory.wrap(destAddress, mProxySelector);
 				//关联兄弟
 				remoteTunnel.setIsHttpsRequest(localTunnel.isHttpsRequest());
 				remoteTunnel.pair(localTunnel);
@@ -191,31 +191,18 @@ public class TcpProxyServer implements Runnable {
 //				localTunnel.setBrotherTunnel(remoteTunnel);
 				remoteTunnel.connect(); //开始连接
 			} else {
-				short portKey = (short) localChannel.socket().getPort();
-				NatSession session = NatSessionManager.getSession(portKey);
-				if (session != null && ProxyConfig.Instance.filter(session.remoteHost, session.remoteIP, session.remotePort)) {
-					if (DEBUG) {
-						Log.d(TAG, String.format("onAccepted: Have block a request to %s=>%s:%d", session.remoteHost, CommonMethods.ipIntToString
-										(session.remoteIP),
-								session.remotePort & 0xFFFF));
-					}
-					localTunnel.sendBlockInformation();
-				} else {
-					if (DEBUG) {
-						Log.d(TAG, String.format("onAccepted: Error: socket(%s:%d) have no session.", localChannel.socket().getInetAddress()
-								.toString(), portKey));
-					}
+				localTunnel.sendBlockInformation();
+				if (DEBUG) {
+					short portKey = (short) localChannel.socket().getPort();
+					Log.d(TAG, String.format("onAccepted: Error: socket(%s:%d) have no session.", localChannel.socket().getInetAddress()
+							.toString(), portKey));
 				}
-                //TODO 记录日志
 				localTunnel.dispose();
 			}
 		} catch (Exception ex) {
-			if (AppDebug.IS_DEBUG) {
-				ex.printStackTrace(System.err);
+			if (DEBUG) {
+				Log.e(TAG, "onAccepted: TcpProxyServer onAccepted catch an exception: %s", ex);
 			}
-
-			DebugLog.e("TcpProxyServer onAccepted catch an exception: %s", ex);
-
 			if (localTunnel != null) {
 				localTunnel.dispose();
 			}
