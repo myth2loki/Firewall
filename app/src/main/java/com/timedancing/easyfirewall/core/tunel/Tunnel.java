@@ -6,7 +6,6 @@ import com.timedancing.easyfirewall.BuildConfig;
 import com.timedancing.easyfirewall.constant.AppDebug;
 import com.timedancing.easyfirewall.core.ProxyConfig;
 import com.timedancing.easyfirewall.core.http.HttpResponse;
-import com.timedancing.easyfirewall.core.tcpip.IPHeader;
 import com.timedancing.easyfirewall.core.util.VpnServiceHelper;
 import com.timedancing.easyfirewall.util.DebugLog;
 
@@ -93,7 +92,7 @@ public abstract class Tunnel {
 
 	protected abstract void onDispose();
 
-	public void setBrotherTunnel(Tunnel brotherTunnel) {
+	private void setBrotherTunnel(Tunnel brotherTunnel) {
 		this.mBrotherTunnel = brotherTunnel;
 	}
 
@@ -106,18 +105,21 @@ public abstract class Tunnel {
 		brotherTunnel.setBrotherTunnel(this);
 	}
 
+	public void protect() throws IOException {
+		if (!VpnServiceHelper.protect(mInnerChannel.socket())) {
+			throw new IOException("VPN protect socket failed.");
+		}
+	}
+
 	/**
 	 * 连接到真实服务器
-	 * @throws Exception
+	 * @throws IOException
 	 */
 	public void connect() throws Exception {
-		if (VpnServiceHelper.protect(mInnerChannel.socket())) { //保护socket不走VPN
-//			mDestAddress = destAddress;
-			mInnerChannel.register(mSelector, SelectionKey.OP_CONNECT, this); //注册连接事件
-			mInnerChannel.connect(mServerEP);
-			DebugLog.i("Connecting to %s", mServerEP);
-		} else {
-			throw new Exception("VPN protect socket failed.");
+		mInnerChannel.register(mSelector, SelectionKey.OP_CONNECT, this); //注册连接事件
+		mInnerChannel.connect(mServerEP);
+		if (DEBUG) {
+			Log.d(TAG, String.format("connect: to %s", mServerEP));
 		}
 	}
 
@@ -200,7 +202,7 @@ public abstract class Tunnel {
 //							Log.d(TAG, "onReadable: contentType = " + mHttpResponse.getHeaderString());
 						}
 						ByteBuffer httpBuffer = null;
-						if (mHttpResponse.isShouldAbandon()) {
+						if (mHttpResponse.isShouldAbandon()) { //不过滤
 							httpBuffer = mHttpResponse.getBuffer();
 						} else if (mHttpResponse.isCompleted()) {  //已经完整地接收了HTTP报文
 							String body = mHttpResponse.getBody();
@@ -218,7 +220,8 @@ public abstract class Tunnel {
 							sendToBrother(key, httpBuffer);
 							mHttpResponse = null; //节约内存
 						}
-					} else { //回复的报文不是http ~T T~
+					} else {
+						//回复的报文不是http ~T T~
 						sendToBrother(key, buffer);
 					}
 				} else {

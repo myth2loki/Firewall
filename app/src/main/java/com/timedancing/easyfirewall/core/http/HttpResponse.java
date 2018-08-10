@@ -122,7 +122,7 @@ public class HttpResponse {
 					if (bodyLengthReceived == mContentLength) {
 						isCompleted = true;
 						if (mBodyByteArray == null) {
-							mBodyByteArray = new ByteArrayOutputStream();
+							mBodyByteArray = new ByteArrayOutputStream((int) mContentLength);
 						}
 						mBodyByteArray.write(mData, waitForParseStartIndex, bodyLengthReceived);
 						parseHttpBody();

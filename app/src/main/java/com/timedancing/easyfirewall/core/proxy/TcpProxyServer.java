@@ -187,8 +187,7 @@ public class TcpProxyServer implements Runnable {
 				//关联兄弟
 				remoteTunnel.setIsHttpsRequest(localTunnel.isHttpsRequest());
 				remoteTunnel.pair(localTunnel);
-//				remoteTunnel.setBrotherTunnel(localTunnel);
-//				localTunnel.setBrotherTunnel(remoteTunnel);
+				remoteTunnel.protect();
 				remoteTunnel.connect(); //开始连接
 			} else {
 				localTunnel.sendBlockInformation();
