@@ -20,7 +20,7 @@ public class HtmlBlockingInfoBuilder implements BlockingInfoBuilder {
 	private static final String PLACEHOLDER_APP_NAME = "{AppName}";
 	private static final String PLACEHOLDER_BLOCK_COUNT = "{BlockCount}";
 
-	private String mHtmlContent;
+	private static String mHtmlContent;
 
 	@Override
 	public ByteBuffer getBlockingInformation() {
