@@ -4,9 +4,6 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 
-/**
- * Created by zengzheying on 16/1/22.
- */
 public class GuideImageView extends ImageView {
 
 	public GuideImageView(Context context) {
