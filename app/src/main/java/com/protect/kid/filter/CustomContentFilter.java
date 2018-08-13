@@ -11,7 +11,7 @@ import com.protect.kid.core.blackwhite.WhiteContent;
 import com.protect.kid.core.filter.HtmlFilter;
 import com.protect.kid.core.logger.Logger;
 import com.protect.kid.db.DAOFactory;
-import com.protect.kid.util.GeneralDAO;
+import com.protect.kid.db.GeneralDAO;
 import com.protect.kid.util.SharedPrefUtil;
 
 import java.util.ArrayList;

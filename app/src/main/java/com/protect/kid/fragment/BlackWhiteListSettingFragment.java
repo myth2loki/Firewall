@@ -35,7 +35,7 @@ import com.protect.kid.core.util.VpnServiceHelper;
 import com.protect.kid.db.DAOFactory;
 import com.protect.kid.filter.CustomContentFilter;
 import com.protect.kid.filter.CustomIpFilter;
-import com.protect.kid.util.GeneralDAO;
+import com.protect.kid.db.GeneralDAO;
 import com.protect.kid.util.SharedPrefUtil;
 
 import java.util.List;

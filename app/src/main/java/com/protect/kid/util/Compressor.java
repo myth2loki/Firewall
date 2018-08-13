@@ -2,9 +2,6 @@ package com.protect.kid.util;
 
 import android.support.annotation.Nullable;
 
-/**
- * Created by zengzheying on 16/1/2.
- */
 public interface Compressor {
 
 	@Nullable

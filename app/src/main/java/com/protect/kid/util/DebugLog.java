@@ -4,12 +4,9 @@ import android.util.Log;
 
 import com.protect.kid.constant.AppDebug;
 
-/**
- * Created by zengzheying on 15/12/28.
- */
 public class DebugLog {
 
-	private static final String TAG = "EasyFirewall";
+	private static final String TAG = "kidProtector";
 
 	public static void v(String format, Object... objs) {
 		vWithTag(TAG, format, objs);

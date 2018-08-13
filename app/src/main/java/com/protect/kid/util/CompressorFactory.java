@@ -5,9 +5,6 @@ import android.util.Log;
 
 import com.protect.kid.BuildConfig;
 
-/**
- * Created by zengzheying on 15/12/31.
- */
 public class CompressorFactory {
 	private static final String TAG = "CompressorFactory";
 	private static final boolean DEBUG = BuildConfig.DEBUG;

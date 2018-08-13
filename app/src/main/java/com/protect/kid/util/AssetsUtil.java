@@ -14,9 +14,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 
-/**
- * Created by zengzheying on 16/1/15.
- */
 public class AssetsUtil {
 
 	public static void copyFileOrDir(Context context, String path) {

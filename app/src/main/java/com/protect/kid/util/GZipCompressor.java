@@ -5,9 +5,6 @@ import java.io.ByteArrayOutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-/**
- * Created by zengzheying on 15/12/31.
- */
 public class GZipCompressor implements Compressor {
 
 	/**

@@ -1,4 +1,4 @@
-package com.protect.kid.util;
+package com.protect.kid.db;
 
 import android.annotation.TargetApi;
 import android.content.ContentValues;

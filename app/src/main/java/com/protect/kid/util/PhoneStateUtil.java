@@ -5,9 +5,6 @@ import android.content.pm.PackageManager;
 
 import com.protect.kid.constant.AppDebug;
 
-/**
- * Created by zengzheying on 16/1/20.
- */
 public class PhoneStateUtil {
 
 	public static String getVersionName(Context context) {

@@ -1,8 +1,5 @@
 package com.protect.kid.event;
 
-/**
- * Created by zengzheying on 16/1/6.
- */
 public class VPNEvent {
 	private Status mStatus;
 
