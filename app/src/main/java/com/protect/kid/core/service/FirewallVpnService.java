@@ -297,9 +297,9 @@ public class FirewallVpnService extends VpnService implements Runnable {
 					ByteBuffer mDNSBuffer = ((ByteBuffer) ByteBuffer.wrap(buff).position(28)).slice();
 					mDNSBuffer.limit(udpHeader.getTotalLength() - 8);
 					DnsPacket dnsPacket = DnsPacket.fromBytes(mDNSBuffer);
-					if (dnsPacket != null && dnsPacket.Header.QuestionCount > 0) {
+					if (dnsPacket != null && dnsPacket.header.QuestionCount > 0) {
 						DebugLog.i("let the DnsProxy to process DNS request...\n");
-						DebugLog.iWithTag("DNS", "Query " + dnsPacket.Questions[0].Domain);
+						DebugLog.iWithTag("DNS", "Query " + dnsPacket.questions[0].domain);
 						mDnsProxy.onDnsRequestReceived(ipHeader, udpHeader, dnsPacket);
 					}
 				} else {

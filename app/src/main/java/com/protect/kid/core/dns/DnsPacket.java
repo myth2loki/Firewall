@@ -2,9 +2,6 @@ package com.protect.kid.core.dns;
 
 import java.nio.ByteBuffer;
 
-/**
- * Created by zengzheying on 15/12/29.
- */
 public class DnsPacket {
 
 	/**
@@ -34,11 +31,11 @@ public class DnsPacket {
 	 * ｜－－－－－－－－－－－－－－－－－－－－－－－－－－－－－｜
 	 */
 
-	public DnsHeader Header;
-	public Question[] Questions;
-	public Resource[] Resources;
-	public Resource[] AResources;
-	public Resource[] EResources;
+	public DnsHeader header;
+	public Question[] questions;
+	public Resource[] resources;
+	public Resource[] aResources;
+	public Resource[] eResources;
 
 	public int Size;
 
@@ -57,34 +54,34 @@ public class DnsPacket {
 
 		DnsPacket packet = new DnsPacket();
 		packet.Size = buffer.limit();
-		packet.Header = DnsHeader.fromBytes(buffer);
+		packet.header = DnsHeader.fromBytes(buffer);
 
-		if (packet.Header.QuestionCount > 2 || packet.Header.ResourceCount > 50
-				|| packet.Header.AResourceCount > 50
-				|| packet.Header.EResourceCount > 50) {
+		if (packet.header.QuestionCount > 2 || packet.header.ResourceCount > 50
+				|| packet.header.AResourceCount > 50
+				|| packet.header.EResourceCount > 50) {
 			return null;
 		}
 
 		//申请记录问题和资源数的数组空间
-		packet.Questions = new Question[packet.Header.QuestionCount];
-		packet.Resources = new Resource[packet.Header.ResourceCount];
-		packet.AResources = new Resource[packet.Header.AResourceCount];
-		packet.EResources = new Resource[packet.Header.EResourceCount];
+		packet.questions = new Question[packet.header.QuestionCount];
+		packet.resources = new Resource[packet.header.ResourceCount];
+		packet.aResources = new Resource[packet.header.AResourceCount];
+		packet.eResources = new Resource[packet.header.EResourceCount];
 
-		for (int i = 0; i < packet.Questions.length; i++) {
-			packet.Questions[i] = Question.fromBytes(buffer);
+		for (int i = 0; i < packet.questions.length; i++) {
+			packet.questions[i] = Question.fromBytes(buffer);
 		}
 
-		for (int i = 0; i < packet.Resources.length; i++) {
-			packet.Resources[i] = Resource.fromBytes(buffer);
+		for (int i = 0; i < packet.resources.length; i++) {
+			packet.resources[i] = Resource.fromBytes(buffer);
 		}
 
-		for (int i = 0; i < packet.AResources.length; i++) {
-			packet.AResources[i] = Resource.fromBytes(buffer);
+		for (int i = 0; i < packet.aResources.length; i++) {
+			packet.aResources[i] = Resource.fromBytes(buffer);
 		}
 
-		for (int i = 0; i < packet.EResources.length; i++) {
-			packet.EResources[i] = Resource.fromBytes(buffer);
+		for (int i = 0; i < packet.eResources.length; i++) {
+			packet.eResources[i] = Resource.fromBytes(buffer);
 		}
 
 		return packet;
@@ -139,40 +136,40 @@ public class DnsPacket {
 	}
 
 	public void toBytes(ByteBuffer buffer) {
-		Header.QuestionCount = 0;
-		Header.ResourceCount = 0;
-		Header.AResourceCount = 0;
-		Header.EResourceCount = 0;
+		header.QuestionCount = 0;
+		header.ResourceCount = 0;
+		header.AResourceCount = 0;
+		header.EResourceCount = 0;
 
-		if (Questions != null) {
-			Header.QuestionCount = (short) Questions.length;
+		if (questions != null) {
+			header.QuestionCount = (short) questions.length;
 		}
-		if (Resources != null) {
-			Header.ResourceCount = (short) Resources.length;
+		if (resources != null) {
+			header.ResourceCount = (short) resources.length;
 		}
-		if (AResources != null) {
-			Header.AResourceCount = (short) AResources.length;
+		if (aResources != null) {
+			header.AResourceCount = (short) aResources.length;
 		}
-		if (EResources != null) {
-			Header.EResourceCount = (short) EResources.length;
-		}
-
-		this.Header.toBytes(buffer);
-
-		for (int i = 0; i < Header.QuestionCount; i++) {
-			this.Questions[i].toBytes(buffer);
+		if (eResources != null) {
+			header.EResourceCount = (short) eResources.length;
 		}
 
-		for (int i = 0; i < Header.ResourceCount; i++) {
-			this.Resources[i].toBytes(buffer);
+		this.header.toBytes(buffer);
+
+		for (int i = 0; i < header.QuestionCount; i++) {
+			this.questions[i].toBytes(buffer);
 		}
 
-		for (int i = 0; i < Header.AResourceCount; i++) {
-			this.AResources[i].toBytes(buffer);
+		for (int i = 0; i < header.ResourceCount; i++) {
+			this.resources[i].toBytes(buffer);
 		}
 
-		for (int i = 0; i < Header.EResourceCount; i++) {
-			this.EResources[i].toBytes(buffer);
+		for (int i = 0; i < header.AResourceCount; i++) {
+			this.aResources[i].toBytes(buffer);
+		}
+
+		for (int i = 0; i < header.EResourceCount; i++) {
+			this.eResources[i].toBytes(buffer);
 		}
 	}
 }

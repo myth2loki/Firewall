@@ -2,9 +2,6 @@ package com.protect.kid.core.dns;
 
 import java.nio.ByteBuffer;
 
-/**
- * Created by zengzheying on 15/12/29.
- */
 public class Resource {
 	/**
 	 * 资源记录（RR）：回答字段，授权字段和附加信息字段（额外信息）均采用这种格式
@@ -48,12 +45,12 @@ public class Resource {
 	 * 资 源 数 据 ：   	该字段是可变长字段，表示按查询要求返回的相关资源记录的数据。
 	 */
 
-	public String Domain;
-	public short Type;
-	public short Class;
-	public int TTL;
-	public short DataLangth;
-	public byte[] Data;
+	public String domain;
+	public short type;
+	public short clazz;
+	public int ttl;
+	public short dataLangth;
+	public byte[] data;
 
 	private int mOffset;
 	private int mLength;
@@ -61,13 +58,13 @@ public class Resource {
 	public static Resource fromBytes(ByteBuffer buffer) {
 		Resource r = new Resource();
 		r.mOffset = buffer.arrayOffset() + buffer.position();
-		r.Domain = DnsPacket.readDomain(buffer, buffer.arrayOffset());
-		r.Type = buffer.getShort();
-		r.Class = buffer.getShort();
-		r.TTL = buffer.getInt();
-		r.DataLangth = buffer.getShort();
-		r.Data = new byte[r.DataLangth & 0xFFFF];
-		buffer.get(r.Data);
+		r.domain = DnsPacket.readDomain(buffer, buffer.arrayOffset());
+		r.type = buffer.getShort();
+		r.clazz = buffer.getShort();
+		r.ttl = buffer.getInt();
+		r.dataLangth = buffer.getShort();
+		r.data = new byte[r.dataLangth & 0xFFFF];
+		buffer.get(r.data);
 		r.mLength = buffer.arrayOffset() + buffer.position() - r.mOffset;
 		return r;
 	}
@@ -81,19 +78,19 @@ public class Resource {
 	}
 
 	public void toBytes(ByteBuffer buffer) {
-		if (this.Data == null) {
-			this.Data = new byte[0];
+		if (this.data == null) {
+			this.data = new byte[0];
 		}
-		this.DataLangth = (short) this.Data.length;
+		this.dataLangth = (short) this.data.length;
 
 		this.mOffset = buffer.position();
-		DnsPacket.writeDomain(this.Domain, buffer);
-		buffer.putShort(this.Type);
-		buffer.putShort(this.Class);
-		buffer.putInt(this.TTL);
+		DnsPacket.writeDomain(this.domain, buffer);
+		buffer.putShort(this.type);
+		buffer.putShort(this.clazz);
+		buffer.putInt(this.ttl);
 
-		buffer.putShort(this.DataLangth);
-		buffer.put(this.Data);
+		buffer.putShort(this.dataLangth);
+		buffer.put(this.data);
 		this.mLength = buffer.position() - this.mOffset;
 	}
 

@@ -4,9 +4,6 @@ import com.protect.kid.core.tcpip.CommonMethods;
 
 import java.nio.ByteBuffer;
 
-/**
- * Created by zengzheying on 15/12/29.
- */
 public class DnsHeader {
 
 	/**
@@ -22,12 +19,12 @@ public class DnsHeader {
 	 * ｜－－－－－－－－－－－－－－－－－－－－－－－－－－－－－｜　　－－
 	 */
 
-	static final short offset_ID = 0;
-	static final short offset_Flags = 2;
-	static final short offset_QuestionCount = 4;
-	static final short offset_ResourceCount = 6;
-	static final short offset_AResourceCount = 8;
-	static final short offset_EResourceCount = 10;
+	private static final short offset_ID = 0;
+	private static final short offset_Flags = 2;
+	private static final short offset_QuestionCount = 4;
+	private static final short offset_ResourceCount = 6;
+	private static final short offset_AResourceCount = 8;
+	private static final short offset_EResourceCount = 10;
 
 	public short ID;
 	public DnsFlag flags;
@@ -46,7 +43,7 @@ public class DnsHeader {
 	public static DnsHeader fromBytes(ByteBuffer buffer) {
 		DnsHeader header = new DnsHeader(buffer.array(), buffer.arrayOffset() + buffer.position());
 		header.ID = buffer.getShort(); // short 16bit
-		header.flags = DnsFlag.Parse(buffer.getShort());
+		header.flags = DnsFlag.parse(buffer.getShort());
 		header.QuestionCount = buffer.getShort(); //问题数
 		header.ResourceCount = buffer.getShort(); //资源记录数
 		header.AResourceCount = buffer.getShort(); //授权资源记录数
@@ -56,7 +53,7 @@ public class DnsHeader {
 
 	public void toBytes(ByteBuffer buffer) {
 		buffer.putShort(this.ID);
-		buffer.putShort(this.flags.ToShort());
+		buffer.putShort(this.flags.toShort());
 		buffer.putShort(this.QuestionCount);
 		buffer.putShort(this.ResourceCount);
 		buffer.putShort(this.AResourceCount);

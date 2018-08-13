@@ -2,9 +2,6 @@ package com.protect.kid.core.dns;
 
 import java.nio.ByteBuffer;
 
-/**
- * Created by zengzheying on 15/12/29.
- */
 public class Question {
 
 	/**
@@ -46,9 +43,9 @@ public class Question {
 	 * 查询类： 通常为1，表示Internet数据
 	 */
 
-	public String Domain;
-	public short Type;
-	public short Class;
+	public String domain;
+	public short type;
+	public short clazz;
 
 	private int mOffset;
 	private int mLength;
@@ -56,9 +53,9 @@ public class Question {
 	public static Question fromBytes(ByteBuffer buffer) {
 		Question q = new Question();
 		q.mOffset = buffer.arrayOffset() + buffer.position();
-		q.Domain = DnsPacket.readDomain(buffer, buffer.arrayOffset());
-		q.Type = buffer.getShort();
-		q.Class = buffer.getShort();
+		q.domain = DnsPacket.readDomain(buffer, buffer.arrayOffset());
+		q.type = buffer.getShort();
+		q.clazz = buffer.getShort();
 		q.mLength = buffer.arrayOffset() + buffer.position() - q.mOffset;
 		return q;
 	}
@@ -73,9 +70,9 @@ public class Question {
 
 	public void toBytes(ByteBuffer buffer) {
 		this.mOffset = buffer.position();
-		DnsPacket.writeDomain(this.Domain, buffer);
-		buffer.putShort(this.Type);
-		buffer.putShort(this.Class);
+		DnsPacket.writeDomain(this.domain, buffer);
+		buffer.putShort(this.type);
+		buffer.putShort(this.clazz);
 		this.mLength = buffer.position() - this.mOffset;
 	}
 

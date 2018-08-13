@@ -108,7 +108,7 @@ public class DnsProxy implements Runnable {
 						ex.printStackTrace(System.err);
 					}
 
-					DebugLog.e("Parse dns error: %s\n", ex);
+					DebugLog.e("parse dns error: %s\n", ex);
 				}
 			}
 		} catch (Exception e) {
@@ -129,10 +129,10 @@ public class DnsProxy implements Runnable {
 	 * @return 第一个IP地址， 没有则返回0
 	 */
 	private int getFirstIP(DnsPacket dnsPacket) {
-		for (int i = 0; i < dnsPacket.Header.ResourceCount; i++) {
-			Resource resource = dnsPacket.Resources[i];
-			if (resource.Type == 1) {
-				int ip = CommonMethods.readInt(resource.Data, 0);
+		for (int i = 0; i < dnsPacket.header.ResourceCount; i++) {
+			Resource resource = dnsPacket.resources[i];
+			if (resource.type == 1) {
+				int ip = CommonMethods.readInt(resource.data, 0);
 				return ip;
 			}
 		}
@@ -146,11 +146,11 @@ public class DnsProxy implements Runnable {
 	 * @param newIP 返回的ip地址
 	 */
 	private void tamperDnsResponse(byte[] rawPacket, DnsPacket dnsPacket, int newIP) {
-		Question question = dnsPacket.Questions[0]; //DNS的一个问题
+		Question question = dnsPacket.questions[0]; //DNS的一个问题
 
-		dnsPacket.Header.setResourceCount((short) 1); //有ip返回
-		dnsPacket.Header.setAResourceCount((short) 0); //无信息
-		dnsPacket.Header.setEResourceCount((short) 0); //无信息
+		dnsPacket.header.setResourceCount((short) 1); //有ip返回
+		dnsPacket.header.setAResourceCount((short) 0); //无信息
+		dnsPacket.header.setEResourceCount((short) 0); //无信息
 
 		// 这里会有个疑问，在DNS报文中，只有头部是固定的，其他部分不一定，这个方法在DNS查询、回复中都有用到，
 		// 理论上应该出现数组控件不足的情况吧（查询的DNS包只有头部部分）
@@ -175,11 +175,11 @@ public class DnsProxy implements Runnable {
 		/**
 		 类型TYPE 2个字节表示资源记录的类型，指出RDATA数据的含义
 		 */
-		resourcePointer.setType(question.Type);
+		resourcePointer.setType(question.type);
 		/**
 		 类CLASS 2个字节表示RDATA的类
 		 */
-		resourcePointer.setClass(question.Class);
+		resourcePointer.setClass(question.clazz);
 		/**
 		 生存时间TTL 4字节无符号整数表示资源记录可以缓存的时间。0代表只能被传输，但是不能被缓存。
 		 */
@@ -191,7 +191,7 @@ public class DnsProxy implements Runnable {
 		resourcePointer.setIP(newIP);
 
 		// DNS报头长度 + 问题长度 + 资源记录长度（域名指针[2字节] + 类型[2字节] +
-		// 类[2字节] + TTL[4字节] + 资源数据长度[2字节] + content[4字节] = 16字节）
+		// 类[2字节] + ttl[4字节] + 资源数据长度[2字节] + content[4字节] = 16字节）
 		dnsPacket.Size = 12 + question.Length() + 16;
 	}
 
@@ -224,8 +224,8 @@ public class DnsProxy implements Runnable {
 	 * @return true: 修改了数据 false: 未修改数据
 	 */
 	private boolean dnsPollution(byte[] rawPacket, DnsPacket dnsPacket) {
-		if (dnsPacket.Header.ResourceCount > 0) {
-			Question question = dnsPacket.Questions[0];
+		if (dnsPacket.header.ResourceCount > 0) {
+			Question question = dnsPacket.questions[0];
 			/**
 			 名字	数值 	描述
 			 A		（1） 	期望获得查询名的IP地址。
@@ -237,15 +237,15 @@ public class DnsProxy implements Runnable {
 			 AXFR 	（252） 	对区域转换的请求。
 			 ANY 	（255） 	对所有记录的请求。
 			 */
-			if (question.Type == 1) { //希望获取域名的ip
+			if (question.type == 1) { //希望获取域名的ip
 				int realIP = getFirstIP(dnsPacket);
 				//过滤
-				if (ProxyConfig.Instance.filter(question.Domain, realIP, -1)) {
-					int fakeIP = getOrCreateFakeIP(question.Domain);
+				if (ProxyConfig.Instance.filter(question.domain, realIP, -1)) {
+					int fakeIP = getOrCreateFakeIP(question.domain);
 					//使用fakeIp
 					tamperDnsResponse(rawPacket, dnsPacket, fakeIP);
 
-					DebugLog.i("FakeDns: %s=>%s(%s)\n", question.Domain, CommonMethods.ipIntToString(realIP),
+					DebugLog.i("FakeDns: %s=>%s(%s)\n", question.domain, CommonMethods.ipIntToString(realIP),
 							CommonMethods.ipIntToString(fakeIP));
 					return true;
 				}
@@ -260,23 +260,23 @@ public class DnsProxy implements Runnable {
 	private void OnDnsResponseReceived(IPHeader ipHeader, UDPHeader udpHeader, DnsPacket dnsPacket) {
 		QueryState state = null;
 		synchronized (mQueryArray) {
-			state = mQueryArray.get(dnsPacket.Header.ID);
+			state = mQueryArray.get(dnsPacket.header.ID);
 			if (state != null) {
-				mQueryArray.remove(dnsPacket.Header.ID);
+				mQueryArray.remove(dnsPacket.header.ID);
 			}
 		}
 
 		if (state != null) {
 			DebugLog.i("Received DNS result form Remote DNS Server");
-			if (dnsPacket.Header.QuestionCount > 0 && dnsPacket.Header.ResourceCount > 0) {
-				DebugLog.i("Real IP: %s ==> %s", dnsPacket.Questions[0].Domain, CommonMethods.ipIntToString(getFirstIP
+			if (dnsPacket.header.QuestionCount > 0 && dnsPacket.header.ResourceCount > 0) {
+				DebugLog.i("Real IP: %s ==> %s", dnsPacket.questions[0].domain, CommonMethods.ipIntToString(getFirstIP
 						(dnsPacket)));
 			}
 			//DNS污染，如果在过滤清单里会填充虚假ip
 			dnsPollution(udpHeader.mData, dnsPacket);
 
 			//伪造应答packet
-			dnsPacket.Header.setID(state.mClientQueryID);
+			dnsPacket.header.setID(state.mClientQueryID);
 			ipHeader.setSourceIP(state.mRemoteIP);
 			ipHeader.setDestinationIP(state.mClientIP);
 			ipHeader.setProtocol(IPHeader.UDP);
@@ -317,16 +317,16 @@ public class DnsProxy implements Runnable {
 	 * @return 构建了一个虚假的DNS回复包给查询客户端则返回true，否则false
 	 */
 	private boolean interceptDns(IPHeader ipHeader, UDPHeader udpHeader, DnsPacket dnsPacket) {
-		Question question = dnsPacket.Questions[0];
+		Question question = dnsPacket.questions[0];
 
-		DebugLog.i("DNS query %s", question.Domain);
+		DebugLog.i("DNS query %s", question.domain);
 
-		if (question.Type == 1) {
-			if (ProxyConfig.Instance.filter(question.Domain, getIPFromCache(question.Domain), -1)) {
-				int fakeIP = getOrCreateFakeIP(question.Domain);
+		if (question.type == 1) {
+			if (ProxyConfig.Instance.filter(question.domain, getIPFromCache(question.domain), -1)) {
+				int fakeIP = getOrCreateFakeIP(question.domain);
 				tamperDnsResponse(ipHeader.mData, dnsPacket, fakeIP);
 
-				DebugLog.i("interceptDns FakeDns: %s=>%s\n", question.Domain, CommonMethods.ipIntToString(fakeIP));
+				DebugLog.i("interceptDns FakeDns: %s=>%s\n", question.domain, CommonMethods.ipIntToString(fakeIP));
 
 				int sourceIP = ipHeader.getSourceIP();
 				short sourcePort = udpHeader.getSourcePort();
@@ -364,7 +364,7 @@ public class DnsProxy implements Runnable {
 		if (!interceptDns(ipHeader, udpHeader, dnsPacket)) {
 			//转发DNS
 			QueryState state = new QueryState();
-			state.mClientQueryID = dnsPacket.Header.ID; //标示
+			state.mClientQueryID = dnsPacket.header.ID; //标示
 			state.mQueryNanoTime = System.nanoTime();
 			state.mClientIP = ipHeader.getSourceIP(); //源ip
 			state.mClientPort = udpHeader.getSourcePort(); //源端口
@@ -373,7 +373,7 @@ public class DnsProxy implements Runnable {
 
 			//转换QueryID //TODO 溢出
 			mQueryID++;
-			dnsPacket.Header.setID(mQueryID);
+			dnsPacket.header.setID(mQueryID);
 
 			synchronized (mQueryArray) {
 				clearExpiredQueries(); //清空过期的查询，减少内存消耗

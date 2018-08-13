@@ -2,9 +2,6 @@ package com.protect.kid.core.dns;
 
 import com.protect.kid.core.tcpip.CommonMethods;
 
-/**
- * Created by zengzheying on 15/12/29.
- */
 public class ResourcePointer {
 
 	static final short offset_Domain = 0;
