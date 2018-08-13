@@ -1,19 +1,16 @@
-package com.protect.kid.cache.db.dao;
+package com.protect.kid.db.dao;
 
 import android.app.Application;
 import android.content.Context;
 
 import com.j256.ormlite.dao.Dao;
-import com.protect.kid.cache.db.helper.DatabaseHelper;
-import com.protect.kid.cache.db.bean.Domain;
+import com.protect.kid.db.helper.DatabaseHelper;
+import com.protect.kid.db.bean.Domain;
 import com.protect.kid.constant.AppDebug;
 
 import java.sql.SQLException;
 import java.util.List;
 
-/**
- * Created by zengzheying on 16/1/14.
- */
 public class DomainDao {
 
 	private static DomainDao sIntance;

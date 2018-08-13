@@ -1,4 +1,4 @@
-package com.protect.kid.cache.db.helper;
+package com.protect.kid.db.helper;
 
 import android.app.Application;
 import android.content.Context;
@@ -8,15 +8,12 @@ import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
-import com.protect.kid.cache.db.bean.Domain;
-import com.protect.kid.cache.db.bean.IP;
+import com.protect.kid.db.bean.Domain;
+import com.protect.kid.db.bean.IP;
 import com.protect.kid.constant.AppDebug;
 
 import java.sql.SQLException;
 
-/**
- * Created by zengzheying on 16/1/14.
- */
 public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
 
 	private static final String DATA_BASE = "sqlite_blacklist.db";

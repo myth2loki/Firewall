@@ -1,12 +1,12 @@
-package com.protect.kid.cache.db.config;
+package com.protect.kid.db.config;
 
 import android.content.Context;
 
 import com.timedancing.easyfirewall.R;
-import com.protect.kid.cache.db.bean.Domain;
-import com.protect.kid.cache.db.bean.IP;
-import com.protect.kid.cache.db.dao.DomainDao;
-import com.protect.kid.cache.db.dao.IPDao;
+import com.protect.kid.db.bean.Domain;
+import com.protect.kid.db.bean.IP;
+import com.protect.kid.db.dao.DomainDao;
+import com.protect.kid.db.dao.IPDao;
 import com.protect.kid.constant.AppDebug;
 import com.protect.kid.core.tcpip.CommonMethods;
 
@@ -15,9 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-/**
- * Created by zengzheying on 16/1/15.
- */
+
 public class BlackListConfig {
 
 	public static void configBlackList(Context context) {

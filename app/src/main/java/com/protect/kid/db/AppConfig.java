@@ -1,4 +1,4 @@
-package com.protect.kid.cache;
+package com.protect.kid.db;
 
 import android.content.Context;
 import android.content.SharedPreferences;

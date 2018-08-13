@@ -19,7 +19,7 @@ import com.tencent.stat.StatConfig;
 import com.tencent.stat.StatService;
 import com.timedancing.easyfirewall.R;
 import com.protect.kid.activity.MainActivity1;
-import com.protect.kid.cache.AppConfig;
+import com.protect.kid.db.AppConfig;
 import com.protect.kid.constant.AppDebug;
 import com.protect.kid.core.logger.Logger;
 import com.protect.kid.view.NumberKeyboard;

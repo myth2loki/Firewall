@@ -1,4 +1,4 @@
-package com.protect.kid.cache.db.bean;
+package com.protect.kid.db.bean;
 
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;

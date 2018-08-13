@@ -7,10 +7,9 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 
-import com.timedancing.easyfirewall.R;
-import com.protect.kid.cache.AppCache;
 import com.protect.kid.core.util.VpnServiceHelper;
 import com.protect.kid.filter.BlackListHelper;
+import com.timedancing.easyfirewall.R;
 
 import de.greenrobot.event.EventBus;
 
@@ -39,8 +38,6 @@ public class MainActivity1 extends BaseActivity implements View.OnClickListener 
 	}
 
 	private void initData() {
-		AppCache.syncBlockCountWithLeanCloud(this);
-
 		boolean isRunning = VpnServiceHelper.vpnRunningStatus();
 		mProtectCheckbox.setChecked(isRunning);
 		mSubTitleProtect.setText(isRunning ? R.string.protect_feature_sub_title_started

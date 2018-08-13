@@ -1,18 +1,15 @@
-package com.protect.kid.cache.db.dao;
+package com.protect.kid.db.dao;
 
 import android.app.Application;
 import android.content.Context;
 
-import com.protect.kid.cache.db.bean.IP;
-import com.protect.kid.cache.db.helper.DatabaseHelper;
+import com.protect.kid.db.bean.IP;
+import com.protect.kid.db.helper.DatabaseHelper;
 import com.protect.kid.constant.AppDebug;
 
 import java.sql.SQLException;
 import java.util.List;
 
-/**
- * Created by zengzheying on 16/1/15.
- */
 public class IPDao {
 
 	private static IPDao sInstance;

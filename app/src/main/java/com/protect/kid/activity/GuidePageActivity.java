@@ -7,7 +7,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,7 +14,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 
 import com.timedancing.easyfirewall.R;
-import com.protect.kid.cache.AppConfig;
+import com.protect.kid.db.AppConfig;
 
 import me.relex.circleindicator.CircleIndicator;
 

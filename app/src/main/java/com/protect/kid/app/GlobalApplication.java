@@ -8,12 +8,10 @@ import android.content.Context;
 import android.os.Build;
 import android.util.Log;
 
-import com.avos.avoscloud.AVOSCloud;
-import com.timedancing.easyfirewall.BuildConfig;
-import com.protect.kid.constant.ApiConstant;
 import com.protect.kid.core.ProxyConfig;
 import com.protect.kid.core.util.VpnServiceHelper;
 import com.protect.kid.receiver.CheckJobService;
+import com.timedancing.easyfirewall.BuildConfig;
 
 import java.util.Properties;
 
@@ -52,8 +50,6 @@ public class GlobalApplication extends Application {
 		super.onCreate();
 //		LeakCanary.install(this);
 		sInstance = this;
-
-		AVOSCloud.initialize(this, ApiConstant.LEANCLOUND_APP_ID, ApiConstant.LEANCLOUD_APP_KEY);
 
 		ProxyConfig.Instance.setVpnStatusListener(new StatusListener());
 

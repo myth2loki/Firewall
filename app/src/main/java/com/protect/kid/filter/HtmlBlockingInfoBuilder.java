@@ -3,13 +3,13 @@ package com.protect.kid.filter;
 import android.content.Context;
 import android.text.TextUtils;
 
-import com.timedancing.easyfirewall.R;
 import com.protect.kid.app.GlobalApplication;
-import com.protect.kid.cache.AppCache;
+import com.protect.kid.db.AppCache;
 import com.protect.kid.core.builder.BlockingInfoBuilder;
 import com.protect.kid.core.builder.DefaultBlockingInfoBuilder;
 import com.protect.kid.core.http.HttpResponse;
 import com.protect.kid.util.AssetsUtil;
+import com.timedancing.easyfirewall.R;
 
 import java.nio.ByteBuffer;
 import java.util.HashMap;
@@ -30,9 +30,6 @@ public class HtmlBlockingInfoBuilder implements BlockingInfoBuilder {
 			mHtmlContent = AssetsUtil.readAssetsTextFile(context, "html/block.html");
 		}
 		if (!TextUtils.isEmpty(mHtmlContent)) {
-
-			AppCache.syncAndIncreaseBlockWithLeanCloud(GlobalApplication.getInstance());
-
 			int count = AppCache.getBlockCount(GlobalApplication.getInstance());
 			String result = mHtmlContent.replace(PLACEHOLDER_TITLE, context.getString(R.string.block_title));
 			result = result.replace(PLACEHOLDER_APP_NAME, context.getString(R.string.app_name));
