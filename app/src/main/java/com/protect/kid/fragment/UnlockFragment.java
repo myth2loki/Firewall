@@ -15,13 +15,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.tencent.stat.StatConfig;
-import com.tencent.stat.StatService;
 import com.protect.kid.R;
 import com.protect.kid.activity.MainActivity1;
-import com.protect.kid.db.AppConfig;
-import com.protect.kid.constant.AppDebug;
 import com.protect.kid.core.logger.Logger;
+import com.protect.kid.db.AppConfig;
 import com.protect.kid.view.NumberKeyboard;
 
 public class UnlockFragment extends BaseSettingFragment {
@@ -51,7 +48,6 @@ public class UnlockFragment extends BaseSettingFragment {
         mTvHint = (TextView) view.findViewById(R.id.tv_hint);
         mNumberKeyboard = (NumberKeyboard) view.findViewById(R.id.numberKeyboard);
 
-        setUpMta();
         setUpViews(view);
 
         AppConfig.setShouldShowGuidePage(getContext(), false);
@@ -165,11 +161,6 @@ public class UnlockFragment extends BaseSettingFragment {
         getActivity().finish();
     }
 
-    private void setUpMta() {
-        StatConfig.setDebugEnable(AppDebug.IS_DEBUG);
-
-        StatService.registerActivityLifecycleCallbacks(getActivity().getApplication());
-    }
 
     @Override
     public String getTitle() {
