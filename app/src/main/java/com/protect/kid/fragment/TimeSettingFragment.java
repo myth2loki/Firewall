@@ -19,8 +19,8 @@ import android.widget.EditText;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import com.timedancing.easyfirewall.BuildConfig;
-import com.timedancing.easyfirewall.R;
+import com.protect.kid.BuildConfig;
+import com.protect.kid.R;
 import com.protect.kid.constant.AppGlobal;
 import com.protect.kid.core.logger.Logger;
 import com.protect.kid.filter.TimeDurationFilter;

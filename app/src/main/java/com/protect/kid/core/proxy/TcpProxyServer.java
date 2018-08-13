@@ -2,7 +2,7 @@ package com.protect.kid.core.proxy;
 
 import android.util.Log;
 
-import com.timedancing.easyfirewall.BuildConfig;
+import com.protect.kid.BuildConfig;
 import com.protect.kid.constant.AppDebug;
 import com.protect.kid.core.ProxyConfig;
 import com.protect.kid.core.nat.NatSession;

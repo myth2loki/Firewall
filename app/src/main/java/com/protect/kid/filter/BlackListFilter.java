@@ -5,7 +5,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseIntArray;
 
-import com.timedancing.easyfirewall.R;
+import com.protect.kid.R;
 import com.protect.kid.app.GlobalApplication;
 import com.protect.kid.constant.AppDebug;
 import com.protect.kid.core.ProxyConfig;

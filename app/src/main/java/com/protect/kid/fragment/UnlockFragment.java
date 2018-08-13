@@ -17,7 +17,7 @@ import android.widget.Toast;
 
 import com.tencent.stat.StatConfig;
 import com.tencent.stat.StatService;
-import com.timedancing.easyfirewall.R;
+import com.protect.kid.R;
 import com.protect.kid.activity.MainActivity1;
 import com.protect.kid.db.AppConfig;
 import com.protect.kid.constant.AppDebug;

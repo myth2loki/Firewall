@@ -7,7 +7,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.util.Log;
 
-import com.timedancing.easyfirewall.BuildConfig;
+import com.protect.kid.BuildConfig;
 
 import java.net.NetworkInterface;
 import java.util.Collections;

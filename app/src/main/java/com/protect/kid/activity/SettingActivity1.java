@@ -16,11 +16,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.timedancing.easyfirewall.BuildConfig;
-import com.timedancing.easyfirewall.R;
+import com.protect.kid.BuildConfig;
+import com.protect.kid.R;
 import com.protect.kid.fragment.BaseSettingFragment;
 import com.protect.kid.fragment.BlackWhiteListSettingFragment;
-import com.protect.kid.fragment.PasswordSettingFragment;
 import com.protect.kid.fragment.TimeSettingFragment;
 import com.protect.kid.fragment.UnlockFragment;
 import com.protect.kid.receiver.NoUninstallReceiver;

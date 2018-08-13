@@ -3,7 +3,7 @@ package com.protect.kid.filter;
 import android.content.Context;
 import android.util.Log;
 
-import com.timedancing.easyfirewall.BuildConfig;
+import com.protect.kid.BuildConfig;
 import com.protect.kid.app.GlobalApplication;
 import com.protect.kid.constant.AppGlobal;
 import com.protect.kid.core.filter.DomainFilter;

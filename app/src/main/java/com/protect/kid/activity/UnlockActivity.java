@@ -2,7 +2,7 @@ package com.protect.kid.activity;
 
 import android.os.Bundle;
 
-import com.timedancing.easyfirewall.R;
+import com.protect.kid.R;
 import com.protect.kid.fragment.UnlockFragment;
 
 public class UnlockActivity extends BaseActivity {

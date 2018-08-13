@@ -1,6 +1,6 @@
 package com.protect.kid.constant;
 
-import com.timedancing.easyfirewall.BuildConfig;
+import com.protect.kid.BuildConfig;
 
 public class AppDebug {
 

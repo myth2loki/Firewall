@@ -7,9 +7,9 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 
+import com.protect.kid.R;
 import com.protect.kid.core.util.VpnServiceHelper;
 import com.protect.kid.filter.BlackListHelper;
-import com.timedancing.easyfirewall.R;
 
 import de.greenrobot.event.EventBus;
 

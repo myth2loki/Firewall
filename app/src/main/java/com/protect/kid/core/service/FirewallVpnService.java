@@ -29,7 +29,7 @@ import com.protect.kid.filter.HtmlBlockingInfoBuilder;
 import com.protect.kid.filter.TimeDurationFilter;
 import com.protect.kid.filter.TimeRangeFilter;
 import com.protect.kid.util.DebugLog;
-import com.timedancing.easyfirewall.BuildConfig;
+import com.protect.kid.BuildConfig;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;

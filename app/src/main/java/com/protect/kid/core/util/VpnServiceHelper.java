@@ -7,8 +7,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
-import com.timedancing.easyfirewall.BuildConfig;
-import com.timedancing.easyfirewall.R;
+import com.protect.kid.BuildConfig;
+import com.protect.kid.R;
 import com.protect.kid.constant.AppGlobal;
 import com.protect.kid.core.logger.Logger;
 import com.protect.kid.core.nat.NatSessionManager;

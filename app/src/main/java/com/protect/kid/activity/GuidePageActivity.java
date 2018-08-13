@@ -13,7 +13,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 
-import com.timedancing.easyfirewall.R;
+import com.protect.kid.R;
 import com.protect.kid.db.AppConfig;
 
 import me.relex.circleindicator.CircleIndicator;

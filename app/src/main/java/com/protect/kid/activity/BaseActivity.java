@@ -8,7 +8,8 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
-import com.timedancing.easyfirewall.R;
+import com.protect.kid.R;
+
 
 public class BaseActivity extends AppCompatActivity {
 

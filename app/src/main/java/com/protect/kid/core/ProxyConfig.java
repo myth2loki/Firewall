@@ -4,7 +4,7 @@ package com.protect.kid.core;
 import android.content.Context;
 import android.util.Log;
 
-import com.timedancing.easyfirewall.BuildConfig;
+import com.protect.kid.BuildConfig;
 import com.protect.kid.core.builder.BlockingInfoBuilder;
 import com.protect.kid.core.builder.DefaultBlockingInfoBuilder;
 import com.protect.kid.core.filter.DomainFilter;

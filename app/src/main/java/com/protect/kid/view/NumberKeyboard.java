@@ -13,7 +13,7 @@ import android.widget.FrameLayout;
 import android.widget.GridLayout;
 import android.widget.TextView;
 
-import com.timedancing.easyfirewall.R;
+import com.protect.kid.R;
 
 public class NumberKeyboard extends FrameLayout implements View.OnClickListener {
 

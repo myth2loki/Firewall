@@ -7,7 +7,7 @@ import com.protect.kid.core.ProxyConfig;
 import com.protect.kid.core.http.HttpResponse;
 import com.protect.kid.core.util.VpnServiceHelper;
 import com.protect.kid.util.DebugLog;
-import com.timedancing.easyfirewall.BuildConfig;
+import com.protect.kid.BuildConfig;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;

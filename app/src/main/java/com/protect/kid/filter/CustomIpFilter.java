@@ -3,8 +3,8 @@ package com.protect.kid.filter;
 import android.content.Context;
 import android.util.Log;
 
-import com.timedancing.easyfirewall.BuildConfig;
-import com.timedancing.easyfirewall.R;
+import com.protect.kid.BuildConfig;
+import com.protect.kid.R;
 import com.protect.kid.activity.SettingActivity1;
 import com.protect.kid.app.GlobalApplication;
 import com.protect.kid.core.blackwhite.BlackIP;

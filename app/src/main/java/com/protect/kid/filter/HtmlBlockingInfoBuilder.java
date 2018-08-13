@@ -9,7 +9,7 @@ import com.protect.kid.core.builder.BlockingInfoBuilder;
 import com.protect.kid.core.builder.DefaultBlockingInfoBuilder;
 import com.protect.kid.core.http.HttpResponse;
 import com.protect.kid.util.AssetsUtil;
-import com.timedancing.easyfirewall.R;
+import com.protect.kid.R;
 
 import java.nio.ByteBuffer;
 import java.util.HashMap;

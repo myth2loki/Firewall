@@ -6,7 +6,7 @@ import android.app.job.JobService;
 import android.os.Build;
 import android.util.Log;
 
-import com.timedancing.easyfirewall.BuildConfig;
+import com.protect.kid.BuildConfig;
 import com.protect.kid.constant.AppGlobal;
 import com.protect.kid.core.util.VpnServiceHelper;
 import com.protect.kid.util.SharedPrefUtil;

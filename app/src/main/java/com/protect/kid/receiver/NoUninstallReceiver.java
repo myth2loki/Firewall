@@ -4,7 +4,7 @@ import android.app.admin.DeviceAdminReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import com.timedancing.easyfirewall.R;
+import com.protect.kid.R;
 
 public class NoUninstallReceiver extends DeviceAdminReceiver {
 

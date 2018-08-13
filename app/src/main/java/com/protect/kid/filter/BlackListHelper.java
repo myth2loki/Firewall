@@ -4,7 +4,7 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.timedancing.easyfirewall.BuildConfig;
+import com.protect.kid.BuildConfig;
 import com.protect.kid.db.AppCache;
 import com.protect.kid.event.HostUpdateEvent;
 

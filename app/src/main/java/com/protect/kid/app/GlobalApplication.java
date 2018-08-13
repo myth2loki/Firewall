@@ -11,7 +11,7 @@ import android.util.Log;
 import com.protect.kid.core.ProxyConfig;
 import com.protect.kid.core.util.VpnServiceHelper;
 import com.protect.kid.receiver.CheckJobService;
-import com.timedancing.easyfirewall.BuildConfig;
+import com.protect.kid.BuildConfig;
 
 import java.util.Properties;
 

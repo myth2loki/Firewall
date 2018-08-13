@@ -3,7 +3,7 @@ package com.protect.kid.filter;
 import android.content.Context;
 import android.text.TextUtils;
 
-import com.timedancing.easyfirewall.R;
+import com.protect.kid.R;
 import com.protect.kid.activity.SettingActivity1;
 import com.protect.kid.app.GlobalApplication;
 import com.protect.kid.core.blackwhite.BlackContent;

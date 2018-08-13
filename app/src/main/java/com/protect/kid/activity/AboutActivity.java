@@ -6,7 +6,7 @@ import android.text.Html;
 import android.view.MenuItem;
 import android.widget.TextView;
 
-import com.timedancing.easyfirewall.R;
+import com.protect.kid.R;
 import com.protect.kid.util.PhoneStateUtil;
 
 public class AboutActivity extends BaseActivity {

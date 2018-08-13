@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-import com.timedancing.easyfirewall.BuildConfig;
+import com.protect.kid.BuildConfig;
 import com.protect.kid.constant.AppGlobal;
 import com.protect.kid.core.util.VpnServiceHelper;
 import com.protect.kid.util.DebugLog;

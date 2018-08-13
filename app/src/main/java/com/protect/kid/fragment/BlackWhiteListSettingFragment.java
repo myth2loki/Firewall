@@ -21,8 +21,8 @@ import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.timedancing.easyfirewall.BuildConfig;
-import com.timedancing.easyfirewall.R;
+import com.protect.kid.BuildConfig;
+import com.protect.kid.R;
 import com.protect.kid.activity.SettingActivity1;
 import com.protect.kid.component.InputDialog;
 import com.protect.kid.core.blackwhite.BlackContent;

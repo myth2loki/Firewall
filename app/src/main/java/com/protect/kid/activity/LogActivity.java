@@ -18,7 +18,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.timedancing.easyfirewall.R;
+import com.protect.kid.R;
 import com.protect.kid.constant.AppGlobal;
 import com.protect.kid.core.logger.Logger;
 import com.protect.kid.util.SharedPrefUtil;

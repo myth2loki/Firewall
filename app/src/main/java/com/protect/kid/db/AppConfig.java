@@ -6,9 +6,6 @@ import android.preference.PreferenceManager;
 
 import com.protect.kid.util.PhoneStateUtil;
 
-/**
- * Created by zengzheying on 16/1/14.
- */
 public class AppConfig {
 
 	private static final String IS_NEED_SHOW_TIPS = "isNeedShowTips";

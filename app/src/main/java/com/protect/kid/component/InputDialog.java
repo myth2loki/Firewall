@@ -7,7 +7,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.timedancing.easyfirewall.R;
+import com.protect.kid.R;
 
 public class InputDialog extends Dialog implements View.OnClickListener {
     private String title;

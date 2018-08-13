@@ -3,7 +3,7 @@ package com.protect.kid.core.http;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.timedancing.easyfirewall.BuildConfig;
+import com.protect.kid.BuildConfig;
 import com.protect.kid.constant.AppDebug;
 import com.protect.kid.util.Compressor;
 import com.protect.kid.util.CompressorFactory;

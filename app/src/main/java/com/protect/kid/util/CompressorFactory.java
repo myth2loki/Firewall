@@ -3,7 +3,7 @@ package com.protect.kid.util;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.timedancing.easyfirewall.BuildConfig;
+import com.protect.kid.BuildConfig;
 
 /**
  * Created by zengzheying on 15/12/31.
