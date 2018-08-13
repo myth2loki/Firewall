@@ -13,7 +13,7 @@
 	<uses-permission android:name = "android.permission.ACCESS_FINE_LOCATION" />
 
 	<application
-			android:name = ".app.GlobalApplication"
+			android:name = "com.protect.kid.app.GlobalApplication"
 			android:allowBackup = "true"
 			android:icon = "@drawable/icon"
 			android:label = "@string/app_name"
@@ -23,7 +23,7 @@
 		<!-- Activity -->
 
 		<activity
-				android:name = ".activity.GuidePageActivity"
+				android:name = "com.protect.kid.activity.GuidePageActivity"
 				android:label = "@string/app_name"
 				android:noHistory = "true"
 				android:screenOrientation = "portrait"
@@ -36,43 +36,43 @@
 		</activity >
 
 		<activity
-				android:name = ".activity.MainActivity"
+				android:name = "com.protect.kid.activity.MainActivity"
 				android:noHistory = "false"
 				android:screenOrientation = "portrait" >
 		</activity >
 		<activity
-				android:name = ".activity.MainActivity1"
+				android:name = "com.protect.kid.activity.MainActivity1"
 				android:noHistory = "false"
 				android:screenOrientation = "portrait" >
 		</activity >
 
 		<activity
-				android:name = ".activity.UnlockActivity"
+				android:name = "com.protect.kid.activity.UnlockActivity"
 				android:noHistory = "true"
 				android:screenOrientation = "portrait"
 				android:label="@string/parent_login" >
 		</activity >
 
 		<activity
-				android:name = ".activity.SettingActivity"
+				android:name = "com.protect.kid.activity.SettingActivity"
 				android:screenOrientation = "portrait"
 				android:theme = "@style/AppTheme.NoActionBar" />
 
 		<activity
-				android:name = ".activity.SettingActivity1"
+				android:name = "com.protect.kid.activity.SettingActivity1"
 				android:screenOrientation = "portrait"
 				android:theme = "@style/AppTheme.NoActionBar" />
 
 		<activity
-				android:name = ".activity.FeedbackActivity"
+				android:name = "com.protect.kid.activity.FeedbackActivity"
 				android:screenOrientation = "portrait"
 				android:theme = "@style/AppTheme.NoActionBar" />
 
 		<activity
-				android:name = ".activity.AboutActivity"
+				android:name = "com.protect.kid.activity.AboutActivity"
 				android:screenOrientation = "portrait"
 				android:theme = "@style/AppTheme.NoActionBar" />
-        <activity android:name=".activity.LogActivity"
+        <activity android:name="com.protect.kid.activity.LogActivity"
 			android:screenOrientation="portrait"
 			android:theme="@style/AppTheme.NoActionBar"
 			/>
@@ -80,27 +80,27 @@
         <!-- Service -->
 
 		<service
-				android:name = ".core.service.FirewallVpnService"
+				android:name = "com.protect.kid.core.service.FirewallVpnService"
 				android:permission = "android.permission.BIND_VPN_SERVICE" >
 			<intent-filter >
 				<action android:name = "android.net.VpnService" />
 			</intent-filter >
 		</service >
-        <service android:name=".receiver.CheckJobService"
+        <service android:name="com.protect.kid.receiver.CheckJobService"
 			android:permission="android.permission.BIND_JOB_SERVICE"
 			android:exported="true"
 			android:enabled="true" />
 
         <!-- Receiver -->
 
-		<receiver android:name = ".receiver.BootBroadcastReceiver" >
+		<receiver android:name = "com.protect.kid.receiver.BootBroadcastReceiver" >
 			<intent-filter >
 				<action android:name = "android.intent.action.BOOT_COMPLETED" />
 			</intent-filter >
 		</receiver >
 
 		<receiver
-				android:name = ".receiver.NoUninstallReceiver"
+				android:name = "com.protect.kid.receiver.NoUninstallReceiver"
 				android:description = "@string/admin_receiver_description"
 				android:permission = "android.permission.BIND_DEVICE_ADMIN" >
 			<meta-data

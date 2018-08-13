@@ -4,7 +4,7 @@
              android:layout_height = "match_parent"
              android:orientation = "vertical" >
 
-	<com.timedancing.easyfirewall.view.GuideImageView
+	<com.protect.kid.view.GuideImageView
 			android:id = "@+id/img_guide"
 			android:layout_width = "match_parent"
 			android:layout_height = "wrap_content"

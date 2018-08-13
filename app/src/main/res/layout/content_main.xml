@@ -14,7 +14,7 @@
 			android:scaleType = "centerCrop"
 			android:src = "@drawable/end" />
 
-	<com.timedancing.easyfirewall.view.RevealFrameLayout
+	<com.protect.kid.view.RevealFrameLayout
 
 			android:layout_width = "match_parent"
 			android:layout_height = "match_parent" >
@@ -26,7 +26,7 @@
 				android:scaleType = "centerCrop"
 				android:src = "@drawable/start" />
 
-	</com.timedancing.easyfirewall.view.RevealFrameLayout >
+	</com.protect.kid.view.RevealFrameLayout>
 
 	<ImageButton
 			android:id = "@+id/img_setting"
@@ -43,7 +43,7 @@
 			android:layout_height = "match_parent"
 			android:background = "#a4000000" />
 
-	<com.timedancing.easyfirewall.view.RippleBackground
+	<com.protect.kid.view.RippleBackground
 			android:id = "@+id/rippleView"
 			android:layout_width = "200dp"
 			android:layout_height = "200dp"
@@ -68,9 +68,9 @@
 				android:textColor = "#f2f2f6"
 				android:textSize = "24dp" />
 
-	</com.timedancing.easyfirewall.view.RippleBackground >
+	</com.protect.kid.view.RippleBackground>
 
-	<com.timedancing.easyfirewall.view.TipsLayout
+	<com.protect.kid.view.TipsLayout
 			android:id = "@+id/tipsLayout"
 			android:layout_width = "250dp"
 			android:layout_height = "67dp"
@@ -89,7 +89,7 @@
 				android:text = "@string/tips"
 				android:textColor = "#feffff"
 				android:textSize = "14sp" />
-	</com.timedancing.easyfirewall.view.TipsLayout >
+	</com.protect.kid.view.TipsLayout>
 
 
 </RelativeLayout >
