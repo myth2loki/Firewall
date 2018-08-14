@@ -69,10 +69,10 @@ public class FirewallVpnService extends VpnService implements Runnable {
 //		mPacket = new byte[20000];
 		//content, tcp, dns共享mPacket数组
 //		mIPHeader = new IPHeader(mPacket, 0);
-		//Offset = ip报文头部长度
+		//offset = ip报文头部长度
 //		mTCPHeader = new TCPHeader(mPacket, 20);
 //		mUDPHeader = new UDPHeader(mPacket, 20);
-		//Offset = ip报文头部长度 + udp报文头部长度 = 28
+		//offset = ip报文头部长度 + udp报文头部长度 = 28
 //		mDNSBuffer = ((ByteBuffer) ByteBuffer.wrap(mPacket).position(28)).slice();
 
 		VpnServiceHelper.onVpnServiceCreated(this);
@@ -297,7 +297,7 @@ public class FirewallVpnService extends VpnService implements Runnable {
 					ByteBuffer mDNSBuffer = ((ByteBuffer) ByteBuffer.wrap(buff).position(28)).slice();
 					mDNSBuffer.limit(udpHeader.getTotalLength() - 8);
 					DnsPacket dnsPacket = DnsPacket.fromBytes(mDNSBuffer);
-					if (dnsPacket != null && dnsPacket.header.QuestionCount > 0) {
+					if (dnsPacket != null && dnsPacket.header.questionCount > 0) {
 						DebugLog.i("let the DnsProxy to process DNS request...\n");
 						DebugLog.iWithTag("DNS", "Query " + dnsPacket.questions[0].domain);
 						mDnsProxy.onDnsRequestReceived(ipHeader, udpHeader, dnsPacket);

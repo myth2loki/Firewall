@@ -1,7 +1,9 @@
 package com.protect.kid.core.proxy;
 
+import android.util.Log;
 import android.util.SparseArray;
 
+import com.protect.kid.BuildConfig;
 import com.protect.kid.constant.AppDebug;
 import com.protect.kid.core.ProxyConfig;
 import com.protect.kid.core.dns.DnsPacket;
@@ -21,11 +23,9 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Created by zengzheying on 15/12/29.
- * DNS代理
- */
 public class DnsProxy implements Runnable {
+	private static final String TAG = "DnsProxy";
+	private static final boolean DEBUG = BuildConfig.DEBUG;
 
 	private static final ConcurrentHashMap<Integer, String> IPDomainMaps = new ConcurrentHashMap<>();
 	private static final ConcurrentHashMap<String, Integer> DomainIPMaps = new ConcurrentHashMap<>();
@@ -41,6 +41,10 @@ public class DnsProxy implements Runnable {
 	public DnsProxy() throws IOException {
 		mQueryArray = new SparseArray<>();
 		mClient = new DatagramSocket(0);
+		boolean result = VpnServiceHelper.protect(mClient);
+		if (!result) {
+			throw new IllegalStateException("protect DatagramSocket failed.");
+		}
 	}
 
 	/**
@@ -76,28 +80,29 @@ public class DnsProxy implements Runnable {
 	@Override
 	public void run() {
 		try {
-			byte[] buff = new byte[20000];
-			IPHeader ipHeader = new IPHeader(buff, 0);
-			ipHeader.defaultValue();
 			int ipHeaderLength = 20;
-			UDPHeader udpHeader = new UDPHeader(buff, ipHeaderLength);
-
 			int udpHeaderLength = 8;
-			ByteBuffer dnsBuffer = ByteBuffer.wrap(buff);
-			dnsBuffer.position(ipHeaderLength + udpHeaderLength);
-			dnsBuffer = dnsBuffer.slice(); //去除ip和udp头部
-
-			//不包含头部信息
+			byte[] buff = new byte[20000];
+			//映射buff数组到DatagramPacket，但不包含头部
 			DatagramPacket packet = new DatagramPacket(buff, 28, buff.length - (ipHeaderLength +
 					udpHeaderLength));
 
-			//不包含头部信息，减去ip和udp头部长度
-			packet.setLength(buff.length - (ipHeaderLength + udpHeaderLength));
+			IPHeader ipHeader = new IPHeader(buff, 0);
+			ipHeader.defaultValue();
+			UDPHeader udpHeader = new UDPHeader(buff, ipHeaderLength);
+
+			ByteBuffer dnsBuffer = ByteBuffer.wrap(buff);
+			dnsBuffer.position(ipHeaderLength + udpHeaderLength);
+			dnsBuffer = dnsBuffer.slice(); //去除ip和udp头部
+			//设置packet长度，不包含头部长度，减去ip和udp头部长度
+			packet.setLength(dnsBuffer.limit());
 			while (mClient != null && !mClient.isClosed()) {
 				mClient.receive(packet); //获取说道的udp数据报文
 
+				//清除buffer的标志位、偏移量、长度
+				int length = dnsBuffer.limit();
 				dnsBuffer.clear();
-				dnsBuffer.limit(packet.getLength()); //设置dnsBuffer的长度
+				dnsBuffer.limit(length); //设置dnsBuffer的长度
 				try {
 					DnsPacket dnsPacket = DnsPacket.fromBytes(dnsBuffer);
 					if (dnsPacket != null) {
@@ -129,7 +134,7 @@ public class DnsProxy implements Runnable {
 	 * @return 第一个IP地址， 没有则返回0
 	 */
 	private int getFirstIP(DnsPacket dnsPacket) {
-		for (int i = 0; i < dnsPacket.header.ResourceCount; i++) {
+		for (int i = 0; i < dnsPacket.header.resourceCount; i++) {
 			Resource resource = dnsPacket.resources[i];
 			if (resource.type == 1) {
 				int ip = CommonMethods.readInt(resource.data, 0);
@@ -160,7 +165,7 @@ public class DnsProxy implements Runnable {
 		// 在DNS回复的时候，这里的rawPacket其实是本类run方法的RECEIVE_BUFFER数组的空间
 		// 两者的空间都足够大，所以不用增加数组空间
 		//TODO 详细解释 http://www.cnblogs.com/cobbliu/archive/2013/04/02/2996333.html
-		ResourcePointer resourcePointer = new ResourcePointer(rawPacket, question.Offset() + question.Length());
+		ResourcePointer resourcePointer = new ResourcePointer(rawPacket, question.offset() + question.length());
 		/**
 		 域名字段（不定长或2字节）：记录中资源数据对应的名字，它的格式和查询名字段格式相同。当报文中域名重复出现时，
 		 就需要使用2字节的偏移指针来替换。例如，在资源记录中，域名通常是查询问题部分的域名的重复，
@@ -192,7 +197,7 @@ public class DnsProxy implements Runnable {
 
 		// DNS报头长度 + 问题长度 + 资源记录长度（域名指针[2字节] + 类型[2字节] +
 		// 类[2字节] + ttl[4字节] + 资源数据长度[2字节] + content[4字节] = 16字节）
-		dnsPacket.Size = 12 + question.Length() + 16;
+		dnsPacket.size = 12 + question.length() + 16;
 	}
 
 	/**
@@ -224,7 +229,7 @@ public class DnsProxy implements Runnable {
 	 * @return true: 修改了数据 false: 未修改数据
 	 */
 	private boolean dnsPollution(byte[] rawPacket, DnsPacket dnsPacket) {
-		if (dnsPacket.header.ResourceCount > 0) {
+		if (dnsPacket.header.resourceCount > 0) {
 			Question question = dnsPacket.questions[0];
 			/**
 			 名字	数值 	描述
@@ -268,7 +273,7 @@ public class DnsProxy implements Runnable {
 
 		if (state != null) {
 			DebugLog.i("Received DNS result form Remote DNS Server");
-			if (dnsPacket.header.QuestionCount > 0 && dnsPacket.header.ResourceCount > 0) {
+			if (dnsPacket.header.questionCount > 0 && dnsPacket.header.resourceCount > 0) {
 				DebugLog.i("Real IP: %s ==> %s", dnsPacket.questions[0].domain, CommonMethods.ipIntToString(getFirstIP
 						(dnsPacket)));
 			}
@@ -281,10 +286,10 @@ public class DnsProxy implements Runnable {
 			ipHeader.setDestinationIP(state.mClientIP);
 			ipHeader.setProtocol(IPHeader.UDP);
 			// IP头部长度 + UDP头部长度 + DNS报文长度
-			udpHeader.setTotalLength(20 + 8 + dnsPacket.Size);
+			udpHeader.setTotalLength(20 + 8 + dnsPacket.size);
 			udpHeader.setSourcePort(state.mRemotePort);
 			udpHeader.setDestinationPort(state.mClientPort);
-			udpHeader.setTotalLength(8 + dnsPacket.Size);
+			udpHeader.setTotalLength(8 + dnsPacket.size);
 
 			//输出到请求发起者
 			VpnServiceHelper.sendUDPPacket(ipHeader, udpHeader);
@@ -333,10 +338,10 @@ public class DnsProxy implements Runnable {
 				ipHeader.setSourceIP(ipHeader.getDestinationIP());
 				ipHeader.setDestinationIP(sourceIP);
 				//IP数据包数据长度 = ip数据报报头长度 + udp报头长度 + DNS报文长度
-				ipHeader.setTotalLength(20 + 8 + dnsPacket.Size);
+				ipHeader.setTotalLength(20 + 8 + dnsPacket.size);
 				udpHeader.setSourcePort(udpHeader.getDestinationPort());
 				udpHeader.setDestinationPort(sourcePort);
-				udpHeader.setTotalLength(8 + dnsPacket.Size);
+				udpHeader.setTotalLength(8 + dnsPacket.size);
 				VpnServiceHelper.sendUDPPacket(ipHeader, udpHeader);
 				return true;
 			}
@@ -345,13 +350,13 @@ public class DnsProxy implements Runnable {
 	}
 
 	/**
-	 * 清楚超时的查询
+	 * 清除超时的查询
 	 */
 	private void clearExpiredQueries() {
 		long now = System.nanoTime();
 		for (int i = mQueryArray.size() - 1; i >= 0; i--) {
-//			QueryState state = mQueryArray.valueAt(i);
-			if ((now - System.nanoTime()) > QUERY_TIMEOUT_NS) {
+			QueryState state = mQueryArray.valueAt(i);
+			if ((now - state.mQueryNanoTime) > QUERY_TIMEOUT_NS) {
 				mQueryArray.removeAt(i);
 			}
 		}
@@ -384,24 +389,18 @@ public class DnsProxy implements Runnable {
 			InetSocketAddress remoteAddress = new InetSocketAddress(CommonMethods.ipIntToInet4Address(state.mRemoteIP),
 					state.mRemotePort);
 			//只需要把DNS数据报发送过去，不含UDP头部
-			DatagramPacket packet = new DatagramPacket(udpHeader.mData, udpHeader.mOffset + 8, dnsPacket.Size);
+			DatagramPacket packet = new DatagramPacket(udpHeader.mData, udpHeader.mOffset + 8, dnsPacket.size);
 			packet.setSocketAddress(remoteAddress);
 
 			try {
-				//TODO 保护socket不被vpn拦截
-				if (VpnServiceHelper.protect(mClient)) {
-					//使用DatagramSocket发送DatagramPacket，读取也是用该DatagramSocket
-					mClient.send(packet);
-					DebugLog.i("Send an DNS Request Package to Remote DNS Server(%s)\n", CommonMethods.ipIntToString
-							(state.mRemoteIP));
-				} else {
-					DebugLog.e("VpnService protect udp socket failed.");
-				}
+				//使用DatagramSocket发送DatagramPacket，读取也是用该DatagramSocket
+				mClient.send(packet);
+				DebugLog.i("Send an DNS Request Package to Remote DNS Server(%s)\n", CommonMethods.ipIntToString
+						(state.mRemoteIP));
 			} catch (IOException e) {
-				if (AppDebug.IS_DEBUG) {
-					e.printStackTrace(System.err);
+				if (DEBUG) {
+					Log.e(TAG, "onDnsRequestReceived: send failed", e);
 				}
-				DebugLog.e("Send Dns Request Package catch an exception %s\n", e);
 			}
 		}
 	}
@@ -411,11 +410,11 @@ public class DnsProxy implements Runnable {
 	}
 
 	private static class QueryState {
-		public short mClientQueryID;
-		public long mQueryNanoTime;
-		public int mClientIP;
-		public short mClientPort;
-		public int mRemoteIP;
-		public short mRemotePort;
+		short mClientQueryID;
+		long mQueryNanoTime;
+		int mClientIP;
+		short mClientPort;
+		int mRemoteIP;
+		short mRemotePort;
 	}
 }

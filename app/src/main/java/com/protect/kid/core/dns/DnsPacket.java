@@ -37,7 +37,11 @@ public class DnsPacket {
 	public Resource[] aResources;
 	public Resource[] eResources;
 
-	public int Size;
+	public int size;
+
+	private DnsPacket() {
+		//NO OP
+	}
 
 	/**
 	 * 构造DnsPacket实例
@@ -53,20 +57,20 @@ public class DnsPacket {
 		}
 
 		DnsPacket packet = new DnsPacket();
-		packet.Size = buffer.limit();
+		packet.size = buffer.limit();
 		packet.header = DnsHeader.fromBytes(buffer);
 
-		if (packet.header.QuestionCount > 2 || packet.header.ResourceCount > 50
-				|| packet.header.AResourceCount > 50
-				|| packet.header.EResourceCount > 50) {
+		if (packet.header.questionCount > 2 || packet.header.resourceCount > 50
+				|| packet.header.aResourceCount > 50
+				|| packet.header.eResourceCount > 50) {
 			return null;
 		}
 
 		//申请记录问题和资源数的数组空间
-		packet.questions = new Question[packet.header.QuestionCount];
-		packet.resources = new Resource[packet.header.ResourceCount];
-		packet.aResources = new Resource[packet.header.AResourceCount];
-		packet.eResources = new Resource[packet.header.EResourceCount];
+		packet.questions = new Question[packet.header.questionCount];
+		packet.resources = new Resource[packet.header.resourceCount];
+		packet.aResources = new Resource[packet.header.aResourceCount];
+		packet.eResources = new Resource[packet.header.eResourceCount];
 
 		for (int i = 0; i < packet.questions.length; i++) {
 			packet.questions[i] = Question.fromBytes(buffer);
@@ -93,18 +97,19 @@ public class DnsPacket {
 		while (buffer.hasRemaining() && (len = (buffer.get() & 0xFF)) > 0) {
 			if ((len & 0xC0) == 0xC0) { //pointer 高2位为11表示是指针。如：1100 0000
 				// 指针的取值是前一字节的后6位加后一字节的8位共14的值
-				int pointer = buffer.get() & 0xFF; //低8位
-				pointer |= (len & 0x3F) << 8;
+				int domainOffset = buffer.get() & 0xFF; //低8位
+				domainOffset |= (len & 0x3F) << 8;
 
-				ByteBuffer newBuffer = ByteBuffer.wrap(buffer.array(), dnsHeaderOffset + pointer, dnsHeaderOffset +
-						buffer.limit());
+				int totalOffset = dnsHeaderOffset + domainOffset;
+				ByteBuffer newBuffer = ByteBuffer.wrap(buffer.array(), totalOffset, buffer.limit() - totalOffset);
 //				ByteBuffer newBuffer = ByteBuffer.wrap(buffer.array(), dnsHeaderOffset + pointer, buffer.limit() -
 //						(dnsHeaderOffset + pointer));
-				sb.append(readDomain(newBuffer, dnsHeaderOffset));
+//				sb.append(readDomain(newBuffer, dnsHeaderOffset));
+				sb.append(readDomain(newBuffer, 0));
 				return sb.toString();
 			} else {
 				while (len > 0 && buffer.hasRemaining()) {
-					sb.append((char) (buffer.get() & 0xFF));
+					sb.append((char) (buffer.get() & 0xFF)); //一个字节一个字节的读取
 					len--;
 				}
 				sb.append(".");
@@ -136,39 +141,39 @@ public class DnsPacket {
 	}
 
 	public void toBytes(ByteBuffer buffer) {
-		header.QuestionCount = 0;
-		header.ResourceCount = 0;
-		header.AResourceCount = 0;
-		header.EResourceCount = 0;
+		header.questionCount = 0;
+		header.resourceCount = 0;
+		header.aResourceCount = 0;
+		header.eResourceCount = 0;
 
 		if (questions != null) {
-			header.QuestionCount = (short) questions.length;
+			header.questionCount = (short) questions.length;
 		}
 		if (resources != null) {
-			header.ResourceCount = (short) resources.length;
+			header.resourceCount = (short) resources.length;
 		}
 		if (aResources != null) {
-			header.AResourceCount = (short) aResources.length;
+			header.aResourceCount = (short) aResources.length;
 		}
 		if (eResources != null) {
-			header.EResourceCount = (short) eResources.length;
+			header.eResourceCount = (short) eResources.length;
 		}
 
 		this.header.toBytes(buffer);
 
-		for (int i = 0; i < header.QuestionCount; i++) {
+		for (int i = 0; i < header.questionCount; i++) {
 			this.questions[i].toBytes(buffer);
 		}
 
-		for (int i = 0; i < header.ResourceCount; i++) {
+		for (int i = 0; i < header.resourceCount; i++) {
 			this.resources[i].toBytes(buffer);
 		}
 
-		for (int i = 0; i < header.AResourceCount; i++) {
+		for (int i = 0; i < header.aResourceCount; i++) {
 			this.aResources[i].toBytes(buffer);
 		}
 
-		for (int i = 0; i < header.EResourceCount; i++) {
+		for (int i = 0; i < header.eResourceCount; i++) {
 			this.eResources[i].toBytes(buffer);
 		}
 	}

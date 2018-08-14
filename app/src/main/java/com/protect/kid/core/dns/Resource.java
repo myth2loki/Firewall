@@ -69,11 +69,11 @@ public class Resource {
 		return r;
 	}
 
-	public int Offset() {
+	public int offset() {
 		return mOffset;
 	}
 
-	public int Length() {
+	public int length() {
 		return mLength;
 	}
 
