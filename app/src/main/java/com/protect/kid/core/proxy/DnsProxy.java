@@ -261,48 +261,6 @@ public class DnsProxy implements Runnable {
 	}
 
 	/**
-	 * 收到Dns查询回复，对指定域名进行污染后，转发给发起请求的客户端
-	 */
-	private void OnDnsResponseReceived(IPHeader ipHeader, UDPHeader udpHeader, DnsPacket dnsPacket) {
-		QueryState state;
-		synchronized (mQueryArray) {
-			//取出缓存的DNS信息
-			state = mQueryArray.get(dnsPacket.header.ID);
-			if (state != null) {
-				mQueryArray.remove(dnsPacket.header.ID);
-			}
-		}
-
-		if (state != null) {
-			if (DEBUG) {
-				DebugLog.i("Received DNS result form Remote DNS Server");
-				if (dnsPacket.header.questionCount > 0 && dnsPacket.header.resourceCount > 0) {
-					Log.d(TAG, String.format("OnDnsResponseReceived: Real IP: %s ==> %s",
-							dnsPacket.questions[0].domain, CommonMethods.ipIntToString(getFirstIP(dnsPacket))));
-				}
-			}
-			//DNS污染，如果在过滤清单里会填充虚假ip
-			dnsPollutionIfNeeded(udpHeader.mData, dnsPacket);
-
-			//伪造应答packet，将请求的Dns服务器信息设置为源
-			dnsPacket.header.setID(state.mClientQueryID);
-			ipHeader.setSourceIP(state.mRemoteIP);
-			ipHeader.setDestinationIP(state.mClientIP);
-			ipHeader.setProtocol(IPHeader.UDP);
-			// IP头部长度 + UDP头部长度 + DNS报文长度
-			udpHeader.setTotalLength(20 + 8 + dnsPacket.size);
-			udpHeader.setSourcePort(state.mRemotePort);
-			udpHeader.setDestinationPort(state.mClientPort);
-			udpHeader.setTotalLength(8 + dnsPacket.size);
-
-			//输出到请求发起者
-			VpnServiceHelper.sendUDPPacket(ipHeader, udpHeader);
-		} else {
-			throw new IllegalStateException("can not get state from mQueryArray");
-		}
-	}
-
-	/**
 	 * 从缓冲中获取指定的域名的IP
 	 *
 	 * @param domain 指定域名
@@ -407,6 +365,45 @@ public class DnsProxy implements Runnable {
 				}
 			}
 		}
+	}
+
+	/**
+	 * 收到Dns查询回复，对指定域名进行污染后，转发给发起请求的客户端
+	 */
+	private void OnDnsResponseReceived(IPHeader ipHeader, UDPHeader udpHeader, DnsPacket dnsPacket) {
+		QueryState state;
+		synchronized (mQueryArray) {
+			//取出缓存的DNS信息
+			state = mQueryArray.get(dnsPacket.header.ID);
+			if (state != null) {
+				mQueryArray.remove(dnsPacket.header.ID);
+			}
+		}
+
+		if (state != null) {
+			if (DEBUG) {
+				DebugLog.i("Received DNS result form Remote DNS Server");
+				if (dnsPacket.header.questionCount > 0 && dnsPacket.header.resourceCount > 0) {
+					Log.d(TAG, String.format("OnDnsResponseReceived: Real IP: %s ==> %s",
+							dnsPacket.questions[0].domain, CommonMethods.ipIntToString(getFirstIP(dnsPacket))));
+				}
+			}
+			//DNS污染，如果在过滤清单里会填充虚假ip
+			dnsPollutionIfNeeded(udpHeader.mData, dnsPacket);
+
+			//伪造应答packet，将请求的Dns服务器信息设置为源
+			dnsPacket.header.setID(state.mClientQueryID);
+			ipHeader.setSourceIP(state.mRemoteIP);
+			ipHeader.setDestinationIP(state.mClientIP);
+			ipHeader.setProtocol(IPHeader.UDP);
+			ipHeader.setTotalLength(20 + 8 + dnsPacket.size);
+			// IP头部长度 + UDP头部长度 + DNS报文长度
+			udpHeader.setSourcePort(state.mRemotePort);
+			udpHeader.setDestinationPort(state.mClientPort);
+			udpHeader.setTotalLength(8 + dnsPacket.size);
+		}
+		//输出到请求发起者
+		VpnServiceHelper.sendUDPPacket(ipHeader, udpHeader);
 	}
 
 	public boolean isStopped() {

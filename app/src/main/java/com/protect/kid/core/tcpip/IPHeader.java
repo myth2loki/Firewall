@@ -45,6 +45,7 @@ public class IPHeader {
 	static final byte offset_ttl = 8; //8：生存时间偏移
 	static final short offset_crc = 10; //10：首部校验和偏移
 	static final int offset_op_pad = 20; //20：选项 + 填充
+	public static final int SIZE = 20;
 
 	public byte[] mData;
 	public int mOffset;

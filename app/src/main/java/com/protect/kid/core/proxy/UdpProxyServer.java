@@ -1,30 +1,36 @@
 package com.protect.kid.core.proxy;
 
+import android.support.v4.util.LongSparseArray;
 import android.util.Log;
 
 import com.protect.kid.BuildConfig;
-import com.protect.kid.constant.AppDebug;
+import com.protect.kid.core.ProxyConfig;
 import com.protect.kid.core.tcpip.CommonMethods;
 import com.protect.kid.core.tcpip.IPHeader;
 import com.protect.kid.core.tcpip.UDPHeader;
 import com.protect.kid.core.util.VpnServiceHelper;
-import com.protect.kid.util.DebugLog;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class UdpProxyServer implements Runnable {
     private static final boolean DEBUG = BuildConfig.DEBUG;
     private static final String TAG = "UdpProxyServer";
+    private static final long QUERY_TIMEOUT_NS = 10 * 1000 * 1000 * 1000L;
 
     private boolean mStop;
     private DatagramSocket mClient;
+    private final LongSparseArray<QueryState> mQueryArray = new LongSparseArray<>();
 
     public UdpProxyServer() throws IOException {
-        mClient = new DatagramSocket(0);
+        mClient = new DatagramSocket();
         VpnServiceHelper.protect(mClient);
     }
 
@@ -45,33 +51,28 @@ public class UdpProxyServer implements Runnable {
             byte[] buff = new byte[20000];
             IPHeader ipHeader = new IPHeader(buff, 0);
             ipHeader.defaultValue();
-            int ipHeaderLength = 20;
-            UDPHeader udpHeader = new UDPHeader(buff, ipHeaderLength);
+            int totalHeaderSize = IPHeader.SIZE + UDPHeader.SIZE;
+            UDPHeader udpHeader = new UDPHeader(buff, IPHeader.SIZE);
 
-            int udpHeaderLenght = 8;
             ByteBuffer udpBuffer = ByteBuffer.wrap(buff);
-            udpBuffer.position(ipHeaderLength + udpHeaderLenght);
-            udpBuffer = udpBuffer.slice(); //去除ip和udp头部
+            udpBuffer.position(totalHeaderSize);
 
             //不包含头部信息
-            DatagramPacket packet = new DatagramPacket(buff, 28, buff.length - (ipHeaderLength +
-                    udpHeaderLenght));
+            DatagramPacket packet = new DatagramPacket(buff, 28, buff.length - totalHeaderSize);
             //不包含头部信息，减去ip和udp头部长度
-            packet.setLength(buff.length - (ipHeaderLength + udpHeaderLenght));
+            packet.setLength(buff.length - totalHeaderSize);
             while (mClient != null && !mClient.isClosed()) {
-                mClient.receive(packet); //获取说道的udp数据报文
-
-//                udpBuffer.clear();
-//                udpBuffer.limit(packet.getLength()); //设置dnsBuffer的长度
-                OnUdpResponseReceived(ipHeader, udpHeader);
+                mClient.receive(packet); //获取收到的udp数据报文
+                OnUdpResponseReceived(ipHeader, udpHeader, packet);
             }
         } catch (Exception e) {
-            if (AppDebug.IS_DEBUG) {
-                e.printStackTrace(System.err);
+            if (DEBUG) {
+                Log.e(TAG, "run: UdpProxy thread catch an exception", e);
             }
-            DebugLog.e("DnsProxy Thread catch an exception %s\n", e);
         } finally {
-            DebugLog.i("DnsProxy Thread Exited.\n");
+            if (DEBUG) {
+                Log.d(TAG, "run: UdpProxy thread exited");
+            }
             this.stop();
         }
     }
@@ -91,17 +92,29 @@ public class UdpProxyServer implements Runnable {
             }
             return;
         }
+
+        QueryState state = new QueryState();
+        state.mClientQueryID = ipHeader.getDestinationIP() << 8 | udpHeader.getDestinationPort();; //标示
+        state.mQueryNanoTime = System.nanoTime();
+        state.mClientIP = ipHeader.getSourceIP(); //源ip
+        state.mClientPort = udpHeader.getSourcePort(); //源端口
+        state.mRemoteIP = ipHeader.getDestinationIP(); //目的ip
+        state.mRemotePort = udpHeader.getDestinationPort(); //目的端口
+
+        clearExpiredQueries();
+        mQueryArray.put(state.mClientQueryID, state);
+
         InetSocketAddress socketAddress = new InetSocketAddress(CommonMethods.ipIntToInet4Address(destIp),
                 destPort);
         if (DEBUG) {
             Log.d(TAG, "onUdpRequestReceived: udpHeader = " + udpHeader);
             Log.d(TAG, "onUdpRequestReceived: offset = " + udpHeader.mOffset);
-            Log.d(TAG, "onUdpRequestReceived: length = " + udpHeader.mData.length);
-            Log.d(TAG, "onUdpRequestReceived: total length = " + udpHeader.getTotalLength());
+            Log.d(TAG, "onUdpRequestReceived: length = " + udpHeader.getTotalLength());
         }
         DatagramPacket packet = new DatagramPacket(udpHeader.mData, udpHeader.mOffset + 8, udpHeader.getTotalLength() - 8);
         packet.setSocketAddress(socketAddress);
         try {
+            //转发请求到外网
             mClient.send(packet);
         } catch (IOException e) {
             if (DEBUG) {
@@ -111,11 +124,10 @@ public class UdpProxyServer implements Runnable {
     }
 
     private boolean filter(int ip, int port) {
-
-        return false;
+        return ProxyConfig.Instance.filter(CommonMethods.ipIntToString(ip), ip, port);
     }
 
-    public void OnUdpResponseReceived(IPHeader ipHeader, UDPHeader udpHeader) {
+    private void OnUdpResponseReceived(IPHeader ipHeader, UDPHeader udpHeader, DatagramPacket packet) {
         int srcIp = ipHeader.getSourceIP();
         int srcPort = udpHeader.getSourcePort();
         if (DEBUG) {
@@ -127,7 +139,51 @@ public class UdpProxyServer implements Runnable {
             }
             return;
         }
+
+        QueryState state;
+        synchronized (mQueryArray) {
+            //取出缓存的DNS信息
+            long id = ipHeader.getDestinationIP() << 8 | udpHeader.getDestinationPort();
+            state = mQueryArray.get(id);
+            if (state != null) {
+                mQueryArray.remove(id);
+            }
+        }
+
+        //如果是自己发出的UDP的回执，则改造
+        if (state != null) {
+            ipHeader.setSourceIP(state.mRemoteIP);
+            ipHeader.setDestinationIP(state.mClientIP);
+            ipHeader.setProtocol(IPHeader.UDP);
+            ipHeader.setTotalLength(20 + 8 + packet.getLength());
+            // IP头部长度 + UDP头部长度 + DNS报文长度
+            udpHeader.setTotalLength(8 + packet.getLength());
+            udpHeader.setSourcePort(state.mRemotePort);
+            udpHeader.setDestinationPort(state.mClientPort);
+        }
         //输出到请求发起者
         VpnServiceHelper.sendUDPPacket(ipHeader, udpHeader);
+    }
+
+    /**
+     * 清除超时的查询
+     */
+    private void clearExpiredQueries() {
+        long now = System.nanoTime();
+        for (int i = mQueryArray.size() - 1; i >= 0; i--) {
+            QueryState state = mQueryArray.valueAt(i);
+            if ((now - state.mQueryNanoTime) > QUERY_TIMEOUT_NS) {
+                mQueryArray.removeAt(i);
+            }
+        }
+    }
+
+    private static class QueryState {
+        long mClientQueryID;
+        long mQueryNanoTime;
+        int mClientIP;
+        short mClientPort;
+        int mRemoteIP;
+        short mRemotePort;
     }
 }
