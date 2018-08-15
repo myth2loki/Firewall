@@ -6,6 +6,7 @@ import android.net.VpnService;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
+import com.protect.kid.BuildConfig;
 import com.protect.kid.activity.MainActivity1;
 import com.protect.kid.constant.AppDebug;
 import com.protect.kid.core.ProxyConfig;
@@ -29,7 +30,6 @@ import com.protect.kid.filter.HtmlBlockingInfoBuilder;
 import com.protect.kid.filter.TimeDurationFilter;
 import com.protect.kid.filter.TimeRangeFilter;
 import com.protect.kid.util.DebugLog;
-import com.protect.kid.BuildConfig;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -298,8 +298,9 @@ public class FirewallVpnService extends VpnService implements Runnable {
 					mDNSBuffer.limit(udpHeader.getTotalLength() - 8);
 					DnsPacket dnsPacket = DnsPacket.fromBytes(mDNSBuffer);
 					if (dnsPacket != null && dnsPacket.header.questionCount > 0) {
-						DebugLog.i("let the DnsProxy to process DNS request...\n");
-						DebugLog.iWithTag("DNS", "Query " + dnsPacket.questions[0].domain);
+						if (DEBUG) {
+							Log.d(TAG, "onIPPacketReceived: query dns " + dnsPacket.questions[0].domain);
+						}
 						mDnsProxy.onDnsRequestReceived(ipHeader, udpHeader, dnsPacket);
 					}
 				} else {

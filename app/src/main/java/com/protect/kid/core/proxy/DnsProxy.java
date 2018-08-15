@@ -4,7 +4,6 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import com.protect.kid.BuildConfig;
-import com.protect.kid.constant.AppDebug;
 import com.protect.kid.core.ProxyConfig;
 import com.protect.kid.core.dns.DnsPacket;
 import com.protect.kid.core.dns.Question;
@@ -108,21 +107,20 @@ public class DnsProxy implements Runnable {
 					if (dnsPacket != null) {
 						OnDnsResponseReceived(ipHeader, udpHeader, dnsPacket);
 					}
-				} catch (Exception ex) {
-					if (AppDebug.IS_DEBUG) {
-						ex.printStackTrace(System.err);
+				} catch (Exception e) {
+					if (DEBUG) {
+						Log.e(TAG, "run: parse dns error", e);
 					}
-
-					DebugLog.e("parse dns error: %s\n", ex);
 				}
 			}
 		} catch (Exception e) {
-			if (AppDebug.IS_DEBUG) {
-				e.printStackTrace(System.err);
+			if (DEBUG) {
+				Log.e(TAG, "run: DnsProxy Thread catch an exception", e);
 			}
-			DebugLog.e("DnsProxy Thread catch an exception %s\n", e);
 		} finally {
-			DebugLog.i("DnsProxy Thread Exited.\n");
+			if (DEBUG) {
+				Log.d(TAG, "run: DnsProxy thread exited.");
+			}
 			this.stop();
 		}
 	}
@@ -222,13 +220,13 @@ public class DnsProxy implements Runnable {
 	}
 
 	/**
-	 * 对收到的DNS答复进行修改，以达到DNS污染的目的
+	 * 对收到的DNS答复进行检查，如果需要就修改，以达到DNS污染的目的
 	 *
 	 * @param rawPacket ip包的数据部分
 	 * @param dnsPacket DNS数据包
 	 * @return true: 修改了数据 false: 未修改数据
 	 */
-	private boolean dnsPollution(byte[] rawPacket, DnsPacket dnsPacket) {
+	private boolean dnsPollutionIfNeeded(byte[] rawPacket, DnsPacket dnsPacket) {
 		if (dnsPacket.header.resourceCount > 0) {
 			Question question = dnsPacket.questions[0];
 			/**
@@ -250,8 +248,11 @@ public class DnsProxy implements Runnable {
 					//使用fakeIp
 					tamperDnsResponse(rawPacket, dnsPacket, fakeIP);
 
-					DebugLog.i("FakeDns: %s=>%s(%s)\n", question.domain, CommonMethods.ipIntToString(realIP),
-							CommonMethods.ipIntToString(fakeIP));
+					if (DEBUG) {
+						Log.d(TAG, String.format("dnsPollutionIfNeeded: FakeDns: %s=>%s(%s)",
+								question.domain, CommonMethods.ipIntToString(realIP),
+								CommonMethods.ipIntToString(fakeIP)));
+					}
 					return true;
 				}
 			}
@@ -263,8 +264,9 @@ public class DnsProxy implements Runnable {
 	 * 收到Dns查询回复，对指定域名进行污染后，转发给发起请求的客户端
 	 */
 	private void OnDnsResponseReceived(IPHeader ipHeader, UDPHeader udpHeader, DnsPacket dnsPacket) {
-		QueryState state = null;
+		QueryState state;
 		synchronized (mQueryArray) {
+			//取出缓存的DNS信息
 			state = mQueryArray.get(dnsPacket.header.ID);
 			if (state != null) {
 				mQueryArray.remove(dnsPacket.header.ID);
@@ -272,15 +274,17 @@ public class DnsProxy implements Runnable {
 		}
 
 		if (state != null) {
-			DebugLog.i("Received DNS result form Remote DNS Server");
-			if (dnsPacket.header.questionCount > 0 && dnsPacket.header.resourceCount > 0) {
-				DebugLog.i("Real IP: %s ==> %s", dnsPacket.questions[0].domain, CommonMethods.ipIntToString(getFirstIP
-						(dnsPacket)));
+			if (DEBUG) {
+				DebugLog.i("Received DNS result form Remote DNS Server");
+				if (dnsPacket.header.questionCount > 0 && dnsPacket.header.resourceCount > 0) {
+					Log.d(TAG, String.format("OnDnsResponseReceived: Real IP: %s ==> %s",
+							dnsPacket.questions[0].domain, CommonMethods.ipIntToString(getFirstIP(dnsPacket))));
+				}
 			}
 			//DNS污染，如果在过滤清单里会填充虚假ip
-			dnsPollution(udpHeader.mData, dnsPacket);
+			dnsPollutionIfNeeded(udpHeader.mData, dnsPacket);
 
-			//伪造应答packet
+			//伪造应答packet，将请求的Dns服务器信息设置为源
 			dnsPacket.header.setID(state.mClientQueryID);
 			ipHeader.setSourceIP(state.mRemoteIP);
 			ipHeader.setDestinationIP(state.mClientIP);
