@@ -1,5 +1,8 @@
 package com.protect.kid.core.tunel;
 
+import com.protect.kid.core.nat.NatSession;
+import com.protect.kid.core.nat.NatSessionManager;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.Selector;
@@ -15,10 +18,11 @@ public class TunnelFactory {
 	 */
 	public static LocalTunnel createLocalTunnel(SocketChannel localChannel, Selector selector) {
 		LocalTunnel tunnel = new LocalTunnel(localChannel, selector);
-//		NatSession session = NatSessionManager.getSession((short) channel.socket().getPort());
-////		if (session != null) {
-////			tunnel.setIsHttpsRequest(session.isHttpsSession);
-////		}
+		//获取是否是https
+		NatSession session = NatSessionManager.getSession((short) localChannel.socket().getPort());
+		if (session != null) {
+			tunnel.setIsHttpsRequest(session.isHttpsSession);
+		}
 		return tunnel;
 	}
 
@@ -30,7 +34,6 @@ public class TunnelFactory {
 	 * @throws IOException
 	 */
 	public static RemoteTunnel createRemoteTunnel(InetSocketAddress destAddress, Selector selector) throws IOException {
-		//TODO 这里只是简单创建一个RawTunnel，日后可以根据代理类型创建不同的Tunnel
 		return new RemoteTunnel(destAddress, selector);
 	}
 }

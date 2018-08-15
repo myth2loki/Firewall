@@ -174,7 +174,9 @@ public class HttpRequestHeaderParser {
 						return null;
 					}
 					String serverName = new String(buffer, offset, length);
-					DebugLog.i("SNI: %s\n", serverName);
+					if (DEBUG) {
+						Log.d(TAG, "getSNI: " + serverName);
+					}
 					session.isHttpsSession = true;
 					return serverName;
 				} else {
