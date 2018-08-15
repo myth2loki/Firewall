@@ -6,17 +6,14 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 
-/**
- * Created by zengzheying on 15/12/30.
- */
-public class RawTunnel extends Tunnel {
+public class RawTunnel extends BaseTunnel {
 
 	RawTunnel(SocketChannel innerChannel, Selector selector) {
 		super(innerChannel, selector);
 	}
 
-	RawTunnel(InetSocketAddress serverAddress, Selector selector) throws IOException {
-		super(serverAddress, selector);
+	RawTunnel(Selector selector) throws IOException {
+		super(selector);
 	}
 
 	@Override

@@ -16,7 +16,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 
-public abstract class Tunnel {
+public abstract class BaseTunnel {
 	private static final boolean DEBUG = BuildConfig.DEBUG;
 	private static final String TAG = "Tunnel";
 
@@ -24,7 +24,7 @@ public abstract class Tunnel {
 	 * 用于保存数据，因为是单线程所以可以共用一个缓存
 	 */
 	private final static ByteBuffer GL_BUFFER = ByteBuffer.allocate(2000000);
-	public static long SessionCount;
+	public static long sSessionCount;
 	private boolean isRemoteTunnel = false;
 	private SocketChannel mInnerChannel; //自己的Channel，受保护的，用于真正向外发送和接收数据
 	private ByteBuffer mSendRemainBuffer; //发送数据缓存
@@ -35,16 +35,15 @@ public abstract class Tunnel {
 	 * 与外网的通信两个Tunnel负责，一个负责Apps与TCP代理服务器的通信，一个负责TCP代理服务器
 	 * 与外网服务器的通信，Apps与外网服务器的数据交换靠这两个Tunnel来进行
 	 */
-	private Tunnel mBrotherTunnel;
+	private BaseTunnel mBrotherTunnel;
 	private boolean mDisposed;
-	private InetSocketAddress mServerEP; //连接方地址
 
 	/**
 	 * 创建tunnel
-	 * @param innerChannel 内部channel，受vpn protect
+	 * @param innerChannel 内部channel
 	 * @param selector
 	 */
-	Tunnel(SocketChannel innerChannel, Selector selector) {
+	BaseTunnel(SocketChannel innerChannel, Selector selector) {
 		mInnerChannel = innerChannel;
 		mSelector = selector;
 		incSessionCount();
@@ -52,16 +51,14 @@ public abstract class Tunnel {
 
 	/**
 	 * 创建tunnel
-	 * @param serverAddress 要连接的服务器地址
 	 * @param selector
 	 * @throws IOException
 	 */
-	Tunnel(InetSocketAddress serverAddress, Selector selector) throws IOException {
+	BaseTunnel(Selector selector) throws IOException {
 		SocketChannel innerChannel = SocketChannel.open(); //开启SocketChannel
 		innerChannel.configureBlocking(false); //设置为非阻塞模式
 		this.mInnerChannel = innerChannel; //此channel为真正向外请求的socket
 		this.mSelector = selector;
-		this.mServerEP = serverAddress;
 		incSessionCount();
 	}
 
@@ -69,10 +66,10 @@ public abstract class Tunnel {
 	 * 增加session count
 	 */
 	private synchronized static void incSessionCount() {
-		++SessionCount;
+		++sSessionCount;
 	}
 
-	protected void setRemoteTunnel(boolean enabled) {
+	void setRemoteTunnel(boolean enabled) {
 		isRemoteTunnel = enabled;
 	}
 
@@ -92,7 +89,7 @@ public abstract class Tunnel {
 
 	protected abstract void onDispose();
 
-	private void setBrotherTunnel(Tunnel brotherTunnel) {
+	private void setBrotherTunnel(BaseTunnel brotherTunnel) {
 		this.mBrotherTunnel = brotherTunnel;
 	}
 
@@ -100,7 +97,7 @@ public abstract class Tunnel {
 	 * 配对tunnel
 	 * @param brotherTunnel
 	 */
-	public void pair(Tunnel brotherTunnel) {
+	public void pair(BaseTunnel brotherTunnel) {
 		setBrotherTunnel(brotherTunnel);
 		brotherTunnel.setBrotherTunnel(this);
 	}
@@ -111,16 +108,8 @@ public abstract class Tunnel {
 		}
 	}
 
-	/**
-	 * 连接到真实服务器
-	 * @throws IOException
-	 */
-	public void connect() throws Exception {
-		mInnerChannel.register(mSelector, SelectionKey.OP_CONNECT, this); //注册连接事件
-		mInnerChannel.connect(mServerEP);
-		if (DEBUG) {
-			Log.d(TAG, String.format("connect: to %s", mServerEP));
-		}
+	protected SocketChannel getInnerChannel() {
+		return mInnerChannel;
 	}
 
 	public void onConnectable() {
@@ -135,7 +124,7 @@ public abstract class Tunnel {
 			while (!mInnerChannel.finishConnect()) {
 				Thread.sleep(500); //如果没有连接成功，则休眠500毫秒
 			}
-			onConnected(GL_BUFFER);
+			onConnected(GL_BUFFER); //通知双方注册OP_READ
 		} catch (Exception e) {
 			if (DEBUG) {
                 Log.e(TAG, "onConnectable: Connect to %s failed.", e);
@@ -144,7 +133,7 @@ public abstract class Tunnel {
 		}
 	}
 
-	protected void beginReceived() throws Exception {
+	private void beginReceived() throws Exception {
 		if (mInnerChannel.isBlocking()) {
 			mInnerChannel.configureBlocking(false);
 		}
@@ -277,7 +266,7 @@ public abstract class Tunnel {
 			mBrotherTunnel.beforeSend(buffer); //发送之前，先让子类处理，例如做加密等。
 			if (!mBrotherTunnel.write(buffer, true)) {
 				key.cancel(); //兄弟吃不消，就取消读取事件
-				DebugLog.w("%s can not write more.\n", mServerEP);
+				DebugLog.w("%s can not write more.\n", mBrotherTunnel.mInnerChannel.socket().getInetAddress());
 			}
 		}
 	}
@@ -308,7 +297,7 @@ public abstract class Tunnel {
 		}
 	}
 
-	protected void onTunnelEstablished() throws Exception {
+	void onTunnelEstablished() throws Exception {
 		this.beginReceived(); //开始接收数据
 		mBrotherTunnel.beginReceived(); //兄弟也开始接收数据吧
 	}
@@ -338,7 +327,7 @@ public abstract class Tunnel {
 			mBrotherTunnel = null;
 			mHttpResponse = null;
 			mDisposed = true;
-			SessionCount--;
+			sSessionCount--;
 
 			onDispose();
 		}

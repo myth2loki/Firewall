@@ -8,7 +8,9 @@ import com.protect.kid.core.ProxyConfig;
 import com.protect.kid.core.nat.NatSession;
 import com.protect.kid.core.nat.NatSessionManager;
 import com.protect.kid.core.tcpip.CommonMethods;
-import com.protect.kid.core.tunel.Tunnel;
+import com.protect.kid.core.tunel.BaseTunnel;
+import com.protect.kid.core.tunel.LocalTunnel;
+import com.protect.kid.core.tunel.RemoteTunnel;
 import com.protect.kid.core.tunel.TunnelFactory;
 import com.protect.kid.util.DebugLog;
 
@@ -46,8 +48,11 @@ public class TcpProxyServer implements Runnable {
 		mProxyServerSocketChannel.register(mProxySelector, SelectionKey.OP_ACCEPT, mProxyServerSocketChannel);
 		this.mPort = (short) mProxyServerSocketChannel.socket().getLocalPort();
 
-		DebugLog.i("AsyncTcpServer listen on %s:%d success.\n", mProxyServerSocketChannel.socket().getInetAddress()
-				.toString(), this.mPort & 0xFFFF);
+		if (DEBUG) {
+			Log.d(TAG, String.format("TcpProxyServer: AsyncTcpServer listen on %s:%d success.",
+					mProxyServerSocketChannel.socket().getInetAddress()
+					.toString(), this.mPort & 0xFFFF));
+		}
 	}
 
 	/**
@@ -74,26 +79,24 @@ public class TcpProxyServer implements Runnable {
 					if (key.isValid()) {
 						try {
 							//来自tunnel的操作
-							if (key.isReadable()) {
+							if (key.isReadable()) { // a channel is ready for reading
 //								Log.d(TAG, "run: onReadable");
-								((Tunnel) key.attachment()).onReadable(key);
-							} else if (key.isWritable()) {
+								((BaseTunnel) key.attachment()).onReadable(key);
+							} else if (key.isWritable()) { // a channel is ready for writing
 //								Log.d(TAG, "run: onWritable");
-								((Tunnel) key.attachment()).onWritable(key);
-							} else if (key.isConnectable()) {
+								((BaseTunnel) key.attachment()).onWritable(key);
+							} else if (key.isConnectable()) { // a connection was established with a remote server.
 //								Log.d(TAG, "run: onConnectable");
-								((Tunnel) key.attachment()).onConnectable();
-							//来自tunnel的操作
-							} else if (key.isAcceptable()) {
+								((BaseTunnel) key.attachment()).onConnectable();
+							//来自ProxyServer的Accept操作
+							} else if (key.isAcceptable()) { // a connection was accepted by a ServerSocketChannel.
 //								Log.d(TAG, "run: onAccepted");
 								onAccepted(key);
 							}
-						} catch (Exception ex) {
-							if (AppDebug.IS_DEBUG) {
-								ex.printStackTrace(System.err);
+						} catch (Exception e) {
+							if (DEBUG) {
+								Log.e(TAG, "run: TcpProxyServer iterate SelectionKey catch an exception", e);
 							}
-
-							DebugLog.e("TcpProxyServer iterate SelectionKey catch an exception: %s", ex);
 						}
 					}
 					keyIterator.remove();
@@ -153,7 +156,7 @@ public class TcpProxyServer implements Runnable {
 			if (ProxyConfig.Instance.filter(session.remoteHost, session.remoteIP, session.remotePort)) {
 				//TODO 完成跟具体的拦截策略？？？
 				if (DEBUG) {
-					Log.d(TAG, String.format("getCachedDestAddress: %d/%d:[BLOCK] %s=>%s:%d\n", NatSessionManager.getSessionCount(), Tunnel.SessionCount,
+					Log.d(TAG, String.format("getCachedDestAddress: %d/%d:[BLOCK] %s=>%s:%d\n", NatSessionManager.getSessionCount(), BaseTunnel.sSessionCount,
 							session.remoteHost,
 							CommonMethods.ipIntToString(session.remoteIP), session.remotePort & 0xFFFF));
 				}
@@ -170,20 +173,22 @@ public class TcpProxyServer implements Runnable {
 	 * @param key
 	 */
 	private void onAccepted(SelectionKey key) {
-		Tunnel localTunnel = null;
+		LocalTunnel localTunnel = null;
 		try {
 			//获取local server的通道
 //			SocketChannel localChannel = mProxyServerSocketChannel.accept();
+			// channel of APP -> ProxyServer
 			SocketChannel localChannel = ((ServerSocketChannel) key.attachment()).accept();
 			//tcp代理服务器有连接进来，localChannel代表应用与代理服务器的连接
-			localTunnel = TunnelFactory.wrap(localChannel, mProxySelector); //TODO 为何要调用wrap方法？ 因为需要将连接方和受vpn保护的socket配对
+			localTunnel = TunnelFactory.createLocalTunnel(localChannel, mProxySelector); //TODO 为何要调用wrap方法？ 因为需要将连接方和受vpn保护的socket配对
 
 			//有连接连进来，获取到目的地址。其实就是连接方地址，因为在转发的时候已经将目的地址和端口写入到源地址和端口上
 			// dstIp = localChannel.socket().getInetAddress dstPort = localChannel.socket().getPort()
+			// channel of ProxyServer to RemoteServer
 			InetSocketAddress destAddress = getCachedDestAddress(localChannel);
 			if (destAddress != null) {
 				//创建远程tunnel，受vpn protect
-				Tunnel remoteTunnel = TunnelFactory.wrap(destAddress, mProxySelector);
+				RemoteTunnel remoteTunnel = TunnelFactory.createRemoteTunnel(destAddress, mProxySelector);
 				//关联兄弟
 				remoteTunnel.setIsHttpsRequest(localTunnel.isHttpsRequest());
 				remoteTunnel.pair(localTunnel);
@@ -198,9 +203,9 @@ public class TcpProxyServer implements Runnable {
 				}
 				localTunnel.dispose();
 			}
-		} catch (Exception ex) {
+		} catch (Exception e) {
 			if (DEBUG) {
-				Log.e(TAG, "onAccepted: TcpProxyServer onAccepted catch an exception: %s", ex);
+				Log.e(TAG, "onAccepted: TcpProxyServer onAccepted catch an exception", e);
 			}
 			if (localTunnel != null) {
 				localTunnel.dispose();

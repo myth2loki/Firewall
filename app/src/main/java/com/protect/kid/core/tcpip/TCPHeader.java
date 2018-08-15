@@ -36,15 +36,15 @@ public class TCPHeader {
 	private  static final int ACK = 16;
 	private  static final int URG = 32;
 
-	private static final short offset_src_port = 0; // 16位源端口
-	private static final short offset_dest_port = 2; // 16位目的端口
-	private static final int offset_seq = 4; //32位序列号
-	private static final int offset_ack = 8; //32位确认号
-	private static final byte offset_lenres = 12; //4位首部长度 + 4位保留位
-	private static final byte offset_flag = 13; //2位保留字 + 6位标志位
-	private static final short offset_win = 14; //16位窗口大小
-	private static final short offset_crc = 16; //16位校验和
-	private static final short offset_urp = 18; //16位紧急偏移量
+	private static final short OFFSET_SRC_PORT = 0; // 16位源端口
+	private static final short OFFSET_DEST_PORT = 2; // 16位目的端口
+	private static final int OFFSET_SEQ = 4; //32位序列号
+	private static final int OFFSET_ACK = 8; //32位确认号
+	private static final byte OFFSET_LENRES = 12; //4位首部长度 + 4位保留位
+	private static final byte OFFSET_FLAG = 13; //2位保留字 + 6位标志位
+	private static final short OFFSET_WIN = 14; //16位窗口大小
+	private static final short OFFSET_CRC = 16; //16位校验和
+	private static final short OFFSET_URP = 18; //16位紧急偏移量
 
 	public byte[] mData;
 	public int mOffset;
@@ -55,44 +55,44 @@ public class TCPHeader {
 	}
 
 	public int getHeaderLength() {
-		int lenres = mData[mOffset + offset_lenres] & 0xFF;
+		int lenres = mData[mOffset + OFFSET_LENRES] & 0xFF;
 		return (lenres >> 4) * 4;
 	}
 
 	public short getSourcePort() {
-		return CommonMethods.readShort(mData, mOffset + offset_src_port);
+		return CommonMethods.readShort(mData, mOffset + OFFSET_SRC_PORT);
 	}
 
 	public void setSourcePort(short value) {
-		CommonMethods.writeShort(mData, mOffset + offset_src_port, value);
+		CommonMethods.writeShort(mData, mOffset + OFFSET_SRC_PORT, value);
 	}
 
 	public short getDestinationPort() {
-		return CommonMethods.readShort(mData, mOffset + offset_dest_port);
+		return CommonMethods.readShort(mData, mOffset + OFFSET_DEST_PORT);
 	}
 
 	public void setDestinationPort(short value) {
-		CommonMethods.writeShort(mData, mOffset + offset_dest_port, value);
+		CommonMethods.writeShort(mData, mOffset + OFFSET_DEST_PORT, value);
 	}
 
 	public byte getFlag() {
-		return mData[mOffset + offset_flag];
+		return mData[mOffset + OFFSET_FLAG];
 	}
 
 	public short getCrc() {
-		return CommonMethods.readShort(mData, mOffset + offset_crc);
+		return CommonMethods.readShort(mData, mOffset + OFFSET_CRC);
 	}
 
 	public void setCrc(short value) {
-		CommonMethods.writeShort(mData, mOffset + offset_crc, value);
+		CommonMethods.writeShort(mData, mOffset + OFFSET_CRC, value);
 	}
 
 	public int getSeqID() {
-		return CommonMethods.readInt(mData, mOffset + offset_seq);
+		return CommonMethods.readInt(mData, mOffset + OFFSET_SEQ);
 	}
 
 	public int getAckID() {
-		return CommonMethods.readInt(mData, mOffset + offset_ack);
+		return CommonMethods.readInt(mData, mOffset + OFFSET_ACK);
 	}
 
 	@Override

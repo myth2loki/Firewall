@@ -12,9 +12,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Created by zengzheying on 16/1/5.
- */
 public class URL {
 
 	private static Pattern typeprog = Pattern.compile("^([^/:]+):.*");
