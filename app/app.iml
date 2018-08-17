@@ -79,6 +79,8 @@
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/bundles" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/classes" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/dependency-cache" />
+      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/cn.jiguang.sdk/jcore/1.2.3/jars" />
+      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/cn.jiguang.sdk/jpush/3.1.5/jars" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.1.0/jars" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.android.support/design/23.1.0/jars" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.android.support/multidex-instrumentation/1.0.1/jars" />
@@ -124,6 +126,8 @@
     <orderEntry type="library" exported="" name="Gradle: com.android.support:design-23.1.0" level="project" />
     <orderEntry type="library" exported="" name="Gradle: me.relex:circleindicator-1.1.8" level="project" />
     <orderEntry type="library" exported="" name="Gradle: de.greenrobot:eventbus:2.4.0@jar" level="project" />
+    <orderEntry type="library" exported="" name="Gradle: cn.jiguang.sdk:jpush-3.1.5" level="project" />
+    <orderEntry type="library" exported="" name="Gradle: cn.jiguang.sdk:jcore-1.2.3" level="project" />
     <orderEntry type="library" exported="" name="Gradle: org.apache.http.legacy-android-23" level="project" />
   </component>
 </module>

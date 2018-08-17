@@ -15,6 +15,8 @@ import com.protect.kid.BuildConfig;
 
 import java.util.Properties;
 
+import cn.jpush.android.api.JPushInterface;
+
 public class GlobalApplication extends Application {
 	public static final String TAG = "GlobalApplication";
 	public static final boolean DEBUG = BuildConfig.DEBUG;
@@ -49,6 +51,7 @@ public class GlobalApplication extends Application {
 //		}
 		super.onCreate();
 //		LeakCanary.install(this);
+		initJpush();
 		sInstance = this;
 
 		ProxyConfig.Instance.setVpnStatusListener(new StatusListener());
@@ -73,6 +76,13 @@ public class GlobalApplication extends Application {
 				}
 			}
 		}
+	}
+
+	private void initJpush() {
+		// 设置开启日志,发布时请关闭日志
+		JPushInterface.setDebugMode(DEBUG);
+		// 初始化 JPush
+		JPushInterface.init(this);
 	}
 
 
