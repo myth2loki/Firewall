@@ -1,16 +1,16 @@
 package com.protect.kid.core.tcpip;
 
-import com.protect.kid.constant.AppDebug;
-import com.protect.kid.util.DebugLog;
+import android.util.Log;
+
+import com.protect.kid.BuildConfig;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-/**
- * Created by zengzheying on 15/12/28.
- */
 public class CommonMethods {
+	private static final String TAG = "CommonMethods";
+	private static final boolean DEBUG = BuildConfig.DEBUG;
 
 	public static InetAddress ipIntToInet4Address(int ip) {
 		byte[] ipAddress = new byte[4];
@@ -18,10 +18,9 @@ public class CommonMethods {
 		try {
 			return Inet4Address.getByAddress(ipAddress);
 		} catch (UnknownHostException e) {
-			if (AppDebug.IS_DEBUG) {
-				e.printStackTrace();
+			if (DEBUG) {
+				Log.e(TAG, "ipIntToInet4Address: IP int to InetAddress parse failed", e);
 			}
-			DebugLog.e("IP int to InetAddress parse error!");
 			return null;
 		}
 	}
@@ -78,14 +77,16 @@ public class CommonMethods {
 	public static short checksum(long sum, byte[] buf, int offset, int len) {
 		sum += getsum(buf, offset, len);
 		while ((sum >> 16) > 0) {
+			//高16位和低16位相加
 			sum = (sum & 0xFFFF) + (sum >> 16);
 		}
-		return (short) ~sum;
+		return (short) ~sum; //取反
 	}
 
 	public static long getsum(byte[] buf, int offset, int len) {
 		long sum = 0;
 		while (len > 1) {
+			//每16bit数读出来相加
 			sum += readShort(buf, offset) & 0xFFFF;
 			offset += 2;
 			len -= 2;
@@ -116,7 +117,7 @@ public class CommonMethods {
 			return false;
 		}
 
-		long sum = getsum(ipHeader.mData, ipHeader.mOffset + IPHeader.offset_src_ip, 8);
+		long sum = getsum(ipHeader.mData, ipHeader.mOffset + IPHeader.OFFSET_SRC_IP, 8);
 		sum += ipHeader.getProtocol() & 0xFF;
 		sum += ipData_len;
 
@@ -139,7 +140,7 @@ public class CommonMethods {
 		}
 
 		//计算伪首部和
-		long sum = getsum(ipHeader.mData, ipHeader.mOffset + IPHeader.offset_src_ip, 8);
+		long sum = getsum(ipHeader.mData, ipHeader.mOffset + IPHeader.OFFSET_SRC_IP, 8);
 		sum += ipHeader.getProtocol() & 0xFF;
 		sum += ipData_len;
 		short oldCrc = udpHeader.getCrc();
