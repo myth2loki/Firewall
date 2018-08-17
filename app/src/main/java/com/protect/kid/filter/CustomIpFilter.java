@@ -11,6 +11,7 @@ import com.protect.kid.core.blackwhite.BlackIP;
 import com.protect.kid.core.blackwhite.WhiteIP;
 import com.protect.kid.core.filter.DomainFilter;
 import com.protect.kid.core.logger.Logger;
+import com.protect.kid.core.tcpip.CommonMethods;
 import com.protect.kid.db.DAOFactory;
 import com.protect.kid.db.GeneralDAO;
 import com.protect.kid.util.SharedPrefUtil;
@@ -34,6 +35,16 @@ public class CustomIpFilter implements DomainFilter {
     public static void reload() {
         isReload = true;
     }
+
+    private static int[] IGNORED_IP_ARRAY = {CommonMethods.ipStringToInt("113.31.17.107"),
+                                                CommonMethods.ipStringToInt("113.31.136.60"),
+                                                CommonMethods.ipStringToInt("124.202.138.31"),
+                                                CommonMethods.ipStringToInt("103.229.215.60"),
+                                                CommonMethods.ipStringToInt("118.145.3.80"),
+                                                CommonMethods.ipStringToInt("117.121.49.100"),
+                                                CommonMethods.ipStringToInt("121.46.20.41"),
+                                                CommonMethods.ipStringToInt("139.198.14.15"),
+                                                CommonMethods.ipStringToInt("183.232.57.12")};
 
     @Override
     public void prepare() {
@@ -60,6 +71,25 @@ public class CustomIpFilter implements DomainFilter {
         }
     }
 
+    private static boolean isIgnored(int ip) {
+        for (int ignoredIp : IGNORED_IP_ARRAY) {
+            if (ignoredIp == ip) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isIgnoredPort(int port) {
+        if (port == 19000 ||
+                (port >= 3000 && port <= 3020) ||
+                (port >= 7000 && port <= 7020) ||
+                (port >= 8000 && port <= 8020)) {
+            return true;
+        }
+        return false;
+    }
+
     @Override
     public boolean needFilter(String ipAddress, int ip, int port) {
         if (isReload) {
@@ -68,6 +98,15 @@ public class CustomIpFilter implements DomainFilter {
             mWhiteList.clear();
             prepare();
         }
+
+//        if (isIgnored(ip)) {
+//            return false;
+//        }
+
+        if (isIgnoredPort(port)) {
+            return false;
+        }
+
         if (ipAddress == null) {
             return false;
         }
@@ -75,6 +114,7 @@ public class CustomIpFilter implements DomainFilter {
             ipAddress = ipAddress + ":" + port;
         }
         if (isWhite) {
+
             Context context = GlobalApplication.getInstance();
             Logger logger = Logger.getInstance(context);
             for (String white : mWhiteList) {

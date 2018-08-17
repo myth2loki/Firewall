@@ -20,8 +20,8 @@ android {
 
 		manifestPlaceholders = [
 				JPUSH_PKGNAME : applicationId,
-				JPUSH_APPKEY : "",     // JPush的key.
-				JPUSH_CHANNEL: "",
+				JPUSH_APPKEY : "0673b9ff454643bd9f634868",     // JPush的key.
+				JPUSH_CHANNEL: "protectKid",
 		]
 	}
 	buildTypes {

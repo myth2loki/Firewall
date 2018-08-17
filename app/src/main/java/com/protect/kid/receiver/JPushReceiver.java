@@ -111,7 +111,7 @@ public class JPushReceiver extends BroadcastReceiver {
                     Iterator<String> it =  json.keys();
 
                     while (it.hasNext()) {
-                        String myKey = it.next().toString();
+                        String myKey = it.next();
                         sb.append("\nkey:" + key + ", value: [" +
                                 myKey + " - " +json.optString(myKey) + "]");
                     }
@@ -132,6 +132,7 @@ public class JPushReceiver extends BroadcastReceiver {
      * @param bundle
      */
     private void processCustomMessage(Context context, Bundle bundle) {
-
+        String message = bundle.getString(JPushInterface.EXTRA_MESSAGE);
+        String extras = bundle.getString(JPushInterface.EXTRA_EXTRA);
     }
 }
