@@ -12,7 +12,7 @@ import com.protect.kid.R;
 import com.protect.kid.constant.AppGlobal;
 import com.protect.kid.core.logger.Logger;
 import com.protect.kid.core.nat.NatSessionManager;
-import com.protect.kid.core.service.FirewallVpnService;
+import com.protect.kid.core.service.IpProtectVpnService;
 import com.protect.kid.core.tcpip.IPHeader;
 import com.protect.kid.core.tcpip.UDPHeader;
 import com.protect.kid.filter.TimeDurationFilter;
@@ -27,9 +27,9 @@ public class VpnServiceHelper {
 	public static final boolean DEBUG = BuildConfig.DEBUG;
 
 	public static final int START_VPN_SERVICE_REQUEST_CODE = 2015;
-	private static FirewallVpnService sVpnService;
+	private static IpProtectVpnService sVpnService;
 
-	public static void onVpnServiceCreated(FirewallVpnService vpnService) {
+	public static void onVpnServiceCreated(IpProtectVpnService vpnService) {
 		sVpnService = vpnService;
 	}
 
@@ -69,7 +69,7 @@ public class VpnServiceHelper {
 			return;
 		}
 		if (isStart) {
-			Intent intent = FirewallVpnService.prepare(context);
+			Intent intent = IpProtectVpnService.prepare(context);
 			if (intent == null) {
 				startVpnService(context);
 			} else {
@@ -120,7 +120,7 @@ public class VpnServiceHelper {
 			return;
 		}
 
-		context.startService(new Intent(context, FirewallVpnService.class));
+		context.startService(new Intent(context, IpProtectVpnService.class));
 		SharedPrefUtil.saveValue(context, AppGlobal.GLOBAL_PREF_NAME, AppGlobal.IS_PROTECTED, "true");
 		SharedPrefUtil.saveLong(context, AppGlobal.GLOBAL_PREF_NAME, TimeDurationFilter.PROTECT_START_TIME, System.currentTimeMillis());
 		Logger.getInstance(context).insert(context.getString(R.string.start_protect));

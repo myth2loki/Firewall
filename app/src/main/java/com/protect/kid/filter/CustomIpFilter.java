@@ -1,6 +1,7 @@
 package com.protect.kid.filter;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.protect.kid.BuildConfig;
@@ -44,7 +45,13 @@ public class CustomIpFilter implements DomainFilter {
                                                 CommonMethods.ipStringToInt("117.121.49.100"),
                                                 CommonMethods.ipStringToInt("121.46.20.41"),
                                                 CommonMethods.ipStringToInt("139.198.14.15"),
-                                                CommonMethods.ipStringToInt("183.232.57.12")};
+                                                CommonMethods.ipStringToInt("183.232.57.12")
+    };
+
+    private static String[] IGNORED_DOMAIN_ARRAY = {
+                                                "jpush.cn",
+                                                "jiguang.cn"
+    };
 
     @Override
     public void prepare() {
@@ -71,7 +78,7 @@ public class CustomIpFilter implements DomainFilter {
         }
     }
 
-    private static boolean isIgnored(int ip) {
+    private static boolean isIpIgnored(int ip) {
         for (int ignoredIp : IGNORED_IP_ARRAY) {
             if (ignoredIp == ip) {
                 return true;
@@ -80,7 +87,19 @@ public class CustomIpFilter implements DomainFilter {
         return false;
     }
 
-    private static boolean isIgnoredPort(int port) {
+    private static boolean isDomainIgnored(String domain) {
+        if (TextUtils.isEmpty(domain)) {
+            return false;
+        }
+        for (String d : IGNORED_DOMAIN_ARRAY) {
+            if (d.equals(domain)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isPortIgnored(int port) {
         if (port == 19000 ||
                 (port >= 3000 && port <= 3020) ||
                 (port >= 7000 && port <= 7020) ||
@@ -99,11 +118,15 @@ public class CustomIpFilter implements DomainFilter {
             prepare();
         }
 
-//        if (isIgnored(ip)) {
+//        if (isIpIgnored(ip)) {
 //            return false;
 //        }
 
-        if (isIgnoredPort(port)) {
+        if (isDomainIgnored(ipAddress)) {
+            return false;
+        }
+
+        if (isPortIgnored(port)) {
             return false;
         }
 

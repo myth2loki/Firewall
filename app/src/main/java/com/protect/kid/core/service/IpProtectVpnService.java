@@ -27,6 +27,8 @@ import com.protect.kid.filter.BlackListFilter;
 import com.protect.kid.filter.CustomContentFilter;
 import com.protect.kid.filter.CustomIpFilter;
 import com.protect.kid.filter.HtmlBlockingInfoBuilder;
+import com.protect.kid.filter.PushBlackContentFilter;
+import com.protect.kid.filter.PushBlackIpFilter;
 import com.protect.kid.filter.TimeDurationFilter;
 import com.protect.kid.filter.TimeRangeFilter;
 import com.protect.kid.util.DebugLog;
@@ -40,7 +42,7 @@ import java.util.ArrayList;
 
 import de.greenrobot.event.EventBus;
 
-public class FirewallVpnService extends VpnService implements Runnable {
+public class IpProtectVpnService extends VpnService implements Runnable {
 	private static final String TAG = "FirewallVpnService";
 	private static final boolean DEBUG = BuildConfig.DEBUG;
 
@@ -63,7 +65,7 @@ public class FirewallVpnService extends VpnService implements Runnable {
 	private long mSentBytes;
 	private long mReceivedBytes;
 
-	public FirewallVpnService() {
+	public IpProtectVpnService() {
 		ID++;
 //		mHandler = new Handler();
 //		mPacket = new byte[20000];
@@ -94,7 +96,9 @@ public class FirewallVpnService extends VpnService implements Runnable {
 	@Override
 	public void run() {
 		try {
-			DebugLog.i("VPNService(%s) work thread is Running...\n", ID);
+			if (DEBUG) {
+				Log.d(TAG, "run: VPNService(" + ID + ") work thread is Running...");
+			}
 
 			waitUntilPrepared();
 
@@ -102,6 +106,9 @@ public class FirewallVpnService extends VpnService implements Runnable {
 			ProxyConfig.Instance.addDomainFilter(new BlackListFilter());
 			ProxyConfig.Instance.addDomainFilter(new CustomIpFilter());
 			ProxyConfig.Instance.addHtmlFilter(new CustomContentFilter());
+			//设置推送黑名单
+			ProxyConfig.Instance.addDomainFilter(new PushBlackIpFilter());
+			ProxyConfig.Instance.addHtmlFilter(new PushBlackContentFilter());
 			//设置时间规则
 			ProxyConfig.Instance.addDomainFilter(new TimeRangeFilter());
 			ProxyConfig.Instance.addDomainFilter(new TimeDurationFilter());

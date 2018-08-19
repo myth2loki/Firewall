@@ -8,17 +8,29 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.protect.kid.BuildConfig;
+import com.protect.kid.core.blackwhite.BlackContent;
+import com.protect.kid.core.blackwhite.BlackIP;
+import com.protect.kid.db.DAOFactory;
+import com.protect.kid.db.GeneralDAO;
+import com.protect.kid.filter.PushBlackContentFilter;
+import com.protect.kid.filter.PushBlackIpFilter;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import cn.jpush.android.api.JPushInterface;
 
 public class JPushReceiver extends BroadcastReceiver {
     private static final boolean DEBUG = BuildConfig.DEBUG;
     private static final String TAG = "JPush";
+
+    private static final String IP_AND_DOMAINS = "ipAndDomains";
+    private static final String CONTENTS = "contents";
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -133,6 +145,51 @@ public class JPushReceiver extends BroadcastReceiver {
      */
     private void processCustomMessage(Context context, Bundle bundle) {
         String message = bundle.getString(JPushInterface.EXTRA_MESSAGE);
-        String extras = bundle.getString(JPushInterface.EXTRA_EXTRA);
+//        String extras = bundle.getString(JPushInterface.EXTRA_EXTRA);
+        if (TextUtils.isEmpty(message)) {
+            Log.w(TAG, "processCustomMessage: message is null, ignore");
+        }
+        try {
+            JSONObject jsonObject = new JSONObject(message);
+            if (jsonObject.has(IP_AND_DOMAINS)) {
+                JSONArray array = jsonObject.getJSONArray(IP_AND_DOMAINS);
+                List<BlackIP> ipAndDomainList = new ArrayList<>();
+                for (int i = 0; i < array.length(); i++) {
+                    BlackIP ip = new BlackIP();
+                    ip.ip = array.getString(i);
+                    ipAndDomainList.add(ip);
+                }
+                GeneralDAO<BlackIP> dao = DAOFactory.getPushDAO(context, BlackIP.class);
+                dao.create(ipAndDomainList);
+                if (ipAndDomainList.size() > 0) {
+                    PushBlackIpFilter.reload();
+                }
+                if (DEBUG) {
+                    Log.d(TAG, "processCustomMessage: save ip domain to db: " + ipAndDomainList);
+                }
+            }
+
+            if (jsonObject.has("contents")) {
+                JSONArray array = jsonObject.getJSONArray(CONTENTS);
+                List<BlackContent> blackContentList = new ArrayList<>();
+                for (int i = 0; i < array.length(); i++) {
+                    BlackContent content = new BlackContent();
+                    content.content = array.getString(i);
+                    blackContentList.add(content);
+                }
+                GeneralDAO<BlackContent> dao = DAOFactory.getPushDAO(context, BlackContent.class);
+                dao.create(blackContentList);
+                if (blackContentList.size() > 0) {
+                    PushBlackContentFilter.reload();
+                }
+                if (DEBUG) {
+                    Log.d(TAG, "processCustomMessage: save content to db: " + blackContentList);
+                }
+            }
+        } catch (JSONException e) {
+            if (DEBUG) {
+                Log.e(TAG, "processCustomMessage: parse message failed: " + message, e);
+            }
+        }
     }
 }

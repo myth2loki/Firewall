@@ -80,7 +80,7 @@
         <!-- Service -->
 
 		<service
-				android:name = "com.protect.kid.core.service.FirewallVpnService"
+				android:name = "com.protect.kid.core.service.IpProtectVpnService"
 				android:permission = "android.permission.BIND_VPN_SERVICE" >
 			<intent-filter >
 				<action android:name = "android.net.VpnService" />

@@ -41,6 +41,20 @@ public class GeneralDAO<T> {
         return -1;
     }
 
+    public boolean create(List<T> poList) {
+        if (poList == null || poList.isEmpty()) {
+            return false;
+        }
+        Class<?> clazz = poList.get(0).getClass();
+        try {
+            Dao dao = dbHelper.getDao(clazz);
+            return dao.create(poList) > -1;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public boolean exists(T po, Map<String, Object> where) {
         try {
             Dao dao = dbHelper.getDao(po.getClass());
