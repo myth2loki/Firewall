@@ -23,7 +23,6 @@ public class HttpRequestHeaderParser {
 				case 'O': //OPTIONS
 				case 'T': //TRACE
 				case 'C': //CONNECT
-//					DebugLog.iWithTag("Debug", new String(buffer, offset, count));
 					getHttpHostAndRequestUrl(session, buffer, offset, count);
 					break;
 				case 0x16: //SSL

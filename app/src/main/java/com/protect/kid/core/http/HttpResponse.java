@@ -78,8 +78,7 @@ public class HttpResponse {
 			}
 		}
 
-		if (isParsedHeader && !isCompleted) { //解析了头部，不能和上面的if 合并成 if...else...结构，因为想处理了头部，若条件
-			//合适，可以一并处理报文
+		if (isParsedHeader && !isCompleted) { //解析了头部
 			if (isParsedHeader && shouldHaveNoBody()) { //不允许带有实体的报文类型
 				isCompleted = true;
 			}

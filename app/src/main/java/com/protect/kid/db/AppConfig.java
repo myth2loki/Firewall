@@ -8,35 +8,8 @@ import com.protect.kid.util.PhoneStateUtil;
 
 public class AppConfig {
 
-	private static final String IS_NEED_SHOW_TIPS = "isNeedShowTips";
-	private static final String SHOULD_AUTO_RUN_WHEN_BOOT_COMPLETED = "shouldAutoRunWhenBootCompleted";
 	private static final String LOCK_PASSWORD = "lockPassword";
 	private static final String SHOW_GUIDE_PAGE = "shouldShowGuidePage";
-
-	public static void setIsNeedShowTips(Context context, boolean isNeedShowTips) {
-		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-		SharedPreferences.Editor editor = sp.edit();
-		editor.putBoolean(IS_NEED_SHOW_TIPS, isNeedShowTips);
-		editor.apply();
-	}
-
-
-	public static boolean isNeedShowTips(Context context) {
-		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-		return sp.getBoolean(IS_NEED_SHOW_TIPS, true);
-	}
-
-	public static void setShouldAutoRunWhenBootCompleted(Context context, boolean autoRun) {
-		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-		SharedPreferences.Editor editor = sp.edit();
-		editor.putBoolean(SHOULD_AUTO_RUN_WHEN_BOOT_COMPLETED, autoRun);
-		editor.apply();
-	}
-
-	public static boolean isShouldAutoRunWhenBootCompleted(Context context) {
-		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-		return sp.getBoolean(SHOULD_AUTO_RUN_WHEN_BOOT_COMPLETED, true);
-	}
 
 	public static String getLockPassword(Context context) {
 		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
