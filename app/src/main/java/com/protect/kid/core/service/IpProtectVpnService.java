@@ -8,7 +8,6 @@ import android.util.Log;
 
 import com.protect.kid.BuildConfig;
 import com.protect.kid.activity.MainActivity;
-import com.protect.kid.constant.AppDebug;
 import com.protect.kid.core.ProxyConfig;
 import com.protect.kid.core.dns.DnsPacket;
 import com.protect.kid.core.http.HttpRequestHeaderParser;
@@ -31,7 +30,6 @@ import com.protect.kid.filter.PushBlackContentFilter;
 import com.protect.kid.filter.PushBlackIpFilter;
 import com.protect.kid.filter.TimeDurationFilter;
 import com.protect.kid.filter.TimeRangeFilter;
-import com.protect.kid.util.DebugLog;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -56,36 +54,17 @@ public class IpProtectVpnService extends VpnService implements Runnable {
 	private DnsProxy mDnsProxy;
 	private FileOutputStream mVPNOutputStream;
 
-//	private byte[] mPacket;
-//	private IPHeader mIPHeader;
-//	private TCPHeader mTCPHeader;
-//	private UDPHeader mUDPHeader;
-//	private ByteBuffer mDNSBuffer;
-//	private Handler mHandler;
 	private long mSentBytes;
 	private long mReceivedBytes;
 
 	public IpProtectVpnService() {
 		ID++;
-//		mHandler = new Handler();
-//		mPacket = new byte[20000];
-		//content, tcp, dns共享mPacket数组
-//		mIPHeader = new IPHeader(mPacket, 0);
-		//offset = ip报文头部长度
-//		mTCPHeader = new TCPHeader(mPacket, 20);
-//		mUDPHeader = new UDPHeader(mPacket, 20);
-		//offset = ip报文头部长度 + udp报文头部长度 = 28
-//		mDNSBuffer = ((ByteBuffer) ByteBuffer.wrap(mPacket).position(28)).slice();
-
 		VpnServiceHelper.onVpnServiceCreated(this);
-
-		DebugLog.i("New VPNService(%d)\n", ID);
 	}
 
 	//启动Vpn工作线程
 	@Override
 	public void onCreate() {
-		DebugLog.i("VPNService(%s) created.\n", ID);
 		mVPNThread = new Thread(this, "VPNServiceThread");
 		mVPNThread.start();
 		setVpnRunningStatus(true);
@@ -120,22 +99,23 @@ public class IpProtectVpnService extends VpnService implements Runnable {
 			//启动TCP代理服务
 			mTcpProxyServer = new TcpProxyServer(0);
 			mTcpProxyServer.start();
+			Log.i(TAG, "run: TcpProxy started");
 
 			//启动udp代理服务
 			mUdpProxyServer = new UdpProxyServer();
 			mUdpProxyServer.start();
+			Log.i(TAG, "run: UdpProxy started");
 
 			//启动dns代理服务
 			mDnsProxy = new DnsProxy();
 			mDnsProxy.start();
-			DebugLog.i("DnsProxy started.\n");
+			Log.i(TAG, "run: DnsProxy started");
 
 			//回调vpn启动
 			ProxyConfig.Instance.onVpnStart(this);
-			//TODO 多余
-//			while (IsRunning) {
+
 			runVPN();
-//			}
+
 			//回调vpn停止
 			ProxyConfig.Instance.onVpnEnd(this);
 
@@ -219,12 +199,7 @@ public class IpProtectVpnService extends VpnService implements Runnable {
 		IPHeader ipHeader = new IPHeader(buff, 0);
 		switch (ipHeader.getProtocol()) {
 			case IPHeader.TCP:
-//				TCPHeader tcpHeader = mTCPHeader;
 				TCPHeader tcpHeader = new TCPHeader(buff, 20);
-//				if (BuildConfig.DEBUG) {
-//					Log.d(TAG, "onIPPacketReceived: just tcp packet = " + tcpHeader);
-//				}
-//				tcpHeader.mOffset = ipHeader.getHeaderLength(); //矫正TCPHeader里的偏移量，使它指向真正的TCP数据地址
 				if (tcpHeader.getSourcePort() == mTcpProxyServer.getPort()) { //tcp proxy发来的报文
 
 					//从session中取出缓存的请求信息，比如：目的ip、端口等
@@ -238,7 +213,9 @@ public class IpProtectVpnService extends VpnService implements Runnable {
 						mVPNOutputStream.write(ipHeader.mData, ipHeader.mOffset, size); //写到真实的应用
 						mReceivedBytes += size;
 					} else {
-						DebugLog.i("NoSession: %s %s\n", ipHeader.toString(), tcpHeader.toString());
+						if (DEBUG) {
+							Log.i(TAG, String.format("onIPPacketReceived NoSession: %s %s\n", ipHeader.toString(), tcpHeader.toString()));
+						}
 					}
 
 				} else {
@@ -270,12 +247,6 @@ public class IpProtectVpnService extends VpnService implements Runnable {
 						//解析http请求头，将信息存储到session中
 						HttpRequestHeaderParser.parseHttpRequestHeader(session, tcpHeader.mData, dataOffset,
 								tcpDataSize);
-//						boolean isFiltered = ProxyConfig.Instance.filter(session.remoteHost, session.remoteIP);
-//						if (DEBUG) {
-//                            Log.d(TAG, "onIPPacketReceived: filter: Host = " + session.remoteHost
-//                                    + ", request = " + session.method + " " + session.requestUrl
-//                                    + ", isFiltered = " + isFiltered);
-//                        }
 					}
 
 					//转发给本地TCP代理服务器
@@ -284,23 +255,18 @@ public class IpProtectVpnService extends VpnService implements Runnable {
 					tcpHeader.setDestinationPort(mTcpProxyServer.getPort()); //目的端口
 
 					CommonMethods.ComputeTCPChecksum(ipHeader, tcpHeader);
-//					if (BuildConfig.DEBUG) {
-//						Log.d("xxx--->", "onIPPacketReceived: send tcp to proxy " + ipHeader);
-//					}
 					mVPNOutputStream.write(ipHeader.mData, ipHeader.mOffset, size);
 					session.bytesSent += tcpDataSize; //注意顺序
 					mSentBytes += size;
 				}
 				break;
 			case IPHeader.UDP:
-//				UDPHeader udpHeader = mUDPHeader;
 				UDPHeader udpHeader = new UDPHeader(buff, 0);
 				if (BuildConfig.DEBUG) {
 					Log.d(TAG, "onIPPacketReceived: just udp packet = " + udpHeader);
 				}
 				udpHeader.mOffset = ipHeader.getHeaderLength();
 				if (ipHeader.getSourceIP() == LOCAL_IP && udpHeader.getDestinationPort() == 53) {
-//					mDNSBuffer.clear();
 					ByteBuffer mDNSBuffer = ((ByteBuffer) ByteBuffer.wrap(buff).position(28)).slice();
 					mDNSBuffer.limit(udpHeader.getTotalLength() - 8);
 					DnsPacket dnsPacket = DnsPacket.fromBytes(mDNSBuffer);
@@ -311,12 +277,10 @@ public class IpProtectVpnService extends VpnService implements Runnable {
 						mDnsProxy.onDnsRequestReceived(ipHeader, udpHeader, dnsPacket);
 					}
 				} else {
-					//TODO 其他的udp包需要转发，创建UdpProxyServer用于转发
+					// 其他的udp包需要转发，创建UdpProxyServer用于转发
 					if (BuildConfig.DEBUG) {
 						Log.d(TAG, "onIPPacketReceived: old content header = " + ipHeader + " | " + udpHeader.getSourcePort() + "->" + udpHeader.getDestinationPort());
 					}
-//					ByteBuffer mUDPBuffer = ((ByteBuffer) ByteBuffer.wrap(buff).position(28)).slice();
-//					mUDPBuffer.limit(udpHeader.getTotalLength() - 8);
 					mUdpProxyServer.onUdpRequestReceived(ipHeader, udpHeader);
 				}
 				break;
@@ -329,10 +293,9 @@ public class IpProtectVpnService extends VpnService implements Runnable {
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException e) {
-				if (AppDebug.IS_DEBUG) {
-					e.printStackTrace();
+				if (DEBUG) {
+					Log.e(TAG, "waitUntilPrepared: ", e);
 				}
-				DebugLog.e("waitUntilPrepared catch an exception %s\n", e);
 			}
 		}
 	}
@@ -346,29 +309,21 @@ public class IpProtectVpnService extends VpnService implements Runnable {
 		Builder builder = new Builder();
 		builder.setMtu(ProxyConfig.Instance.getMTU());
 
-		DebugLog.i("setMtu: %d\n", ProxyConfig.Instance.getMTU());
-
 		ProxyConfig.IPAddress ipAddress = ProxyConfig.Instance.getDefaultLocalIP();
 		LOCAL_IP = CommonMethods.ipStringToInt(ipAddress.Address);
 		builder.addAddress(ipAddress.Address, ipAddress.PrefixLength);
-		DebugLog.i("addAddress: %s/%d\n", ipAddress.Address, ipAddress.PrefixLength);
 
 		for (ProxyConfig.IPAddress dns : ProxyConfig.Instance.getDnsList()) {
 			builder.addDnsServer(dns.Address);
-			DebugLog.i("addDnsServer: %s\n", dns.Address);
 		}
 
 		if (ProxyConfig.Instance.getRouteList().size() > 0) {
 			for (ProxyConfig.IPAddress routeAddress : ProxyConfig.Instance.getRouteList()) {
 				builder.addRoute(routeAddress.Address, routeAddress.PrefixLength);
-				DebugLog.i("addRoute: %s/%d\n", routeAddress.Address, routeAddress.PrefixLength);
 			}
 			builder.addRoute(CommonMethods.ipIntToInet4Address(ProxyConfig.FAKE_NETWORK_IP), 16);
-			DebugLog.i("addRoute for FAKE_NETWORK: %s/%d\n", CommonMethods.ipIntToString(ProxyConfig.FAKE_NETWORK_IP),
-					16);
 		} else {
 			builder.addRoute("0.0.0.0", 0);
-			DebugLog.i("addDefaultRoute: 0.0.0.0/0\n");
 		}
 
 		Class<?> SystemProperties = Class.forName("android.os.SystemProperties");
@@ -379,8 +334,6 @@ public class IpProtectVpnService extends VpnService implements Runnable {
 			if (value != null && !"".equals(value) && !servers.contains(value)) {
 				servers.add(value);
 				builder.addRoute(value, 32); //添加路由，使得DNS查询流量也走该VPN接口
-
-				DebugLog.i("%s=%s\n", name, value);
 			}
 		}
 
@@ -415,18 +368,15 @@ public class IpProtectVpnService extends VpnService implements Runnable {
 		if (mTcpProxyServer != null) {
 			mTcpProxyServer.stop();
 			mTcpProxyServer = null;
-			DebugLog.i("TcpProxyServer stopped.\n");
 		}
 
 		if (mDnsProxy != null) {
 			mDnsProxy.stop();
 			mDnsProxy = null;
-			DebugLog.i("DnsProxy stopped.\n");
 		}
 
 		stopSelf();
 		setVpnRunningStatus(false);
-//		System.exit(0);
 	}
 
 	private void notifyStatus(VPNEvent event) {

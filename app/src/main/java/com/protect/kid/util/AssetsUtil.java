@@ -3,8 +3,9 @@ package com.protect.kid.util;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.text.TextUtils;
+import android.util.Log;
 
-import com.protect.kid.constant.AppDebug;
+import com.protect.kid.BuildConfig;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -15,6 +16,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 
 public class AssetsUtil {
+	private static final String TAG = "AssetsUtil";
+	private static final boolean DEBUG = BuildConfig.DEBUG;
 
 	public static void copyFileOrDir(Context context, String path) {
 		AssetManager assetManager = context.getAssets();
@@ -33,9 +36,9 @@ public class AssetsUtil {
 					copyFileOrDir(context, newFileName);
 				}
 			}
-		} catch (IOException ex) {
-			if (AppDebug.IS_DEBUG) {
-				ex.printStackTrace(System.err);
+		} catch (IOException e) {
+			if (DEBUG) {
+				Log.e(TAG, "copyFileOrDir: failed", e);
 			}
 		}
 	}
@@ -58,9 +61,9 @@ public class AssetsUtil {
 			in.close();
 			out.flush();
 			out.close();
-		} catch (IOException ex) {
-			if (AppDebug.IS_DEBUG) {
-				ex.printStackTrace(System.err);
+		} catch (IOException e) {
+			if (DEBUG) {
+				Log.e(TAG, "copyFile: failed", e);
 			}
 		}
 	}
@@ -79,9 +82,9 @@ public class AssetsUtil {
 			}
 			reader.close();
 			in.close();
-		} catch (IOException ex) {
-			if (AppDebug.IS_DEBUG) {
-				ex.printStackTrace(System.err);
+		} catch (IOException e) {
+			if (DEBUG) {
+				Log.e(TAG, "readAssetsTextFile: failed", e);
 			}
 		}
 		return sb.toString();

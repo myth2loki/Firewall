@@ -3,7 +3,6 @@ package com.protect.kid.core.proxy;
 import android.util.Log;
 
 import com.protect.kid.BuildConfig;
-import com.protect.kid.constant.AppDebug;
 import com.protect.kid.core.ProxyConfig;
 import com.protect.kid.core.nat.NatSession;
 import com.protect.kid.core.nat.NatSessionManager;
@@ -12,7 +11,6 @@ import com.protect.kid.core.tunel.BaseTunnel;
 import com.protect.kid.core.tunel.LocalTunnel;
 import com.protect.kid.core.tunel.RemoteTunnel;
 import com.protect.kid.core.tunel.TunnelFactory;
-import com.protect.kid.util.DebugLog;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -119,11 +117,10 @@ public class TcpProxyServer implements Runnable {
 			try {
 				mProxySelector.close();
 				mProxySelector = null;
-			} catch (Exception ex) {
-				if (AppDebug.IS_DEBUG) {
-					ex.printStackTrace(System.err);
+			} catch (Exception e) {
+				if (DEBUG) {
+					Log.e(TAG, "stop: ", e);
 				}
-				DebugLog.e("TcpProxyServer mProxySelector.close() catch an exception: %s", ex);
 			}
 		}
 
@@ -131,12 +128,10 @@ public class TcpProxyServer implements Runnable {
 			try {
 				mProxyServerSocketChannel.close();
 				mProxyServerSocketChannel = null;
-			} catch (Exception ex) {
-				if (AppDebug.IS_DEBUG) {
-					ex.printStackTrace(System.err);
+			} catch (Exception e) {
+				if (DEBUG) {
+					Log.e(TAG, "stop: ", e);
 				}
-
-				DebugLog.e("TcpProxyServer mProxyServerSocketChannel.close() catch an exception: %s", ex);
 			}
 		}
 	}

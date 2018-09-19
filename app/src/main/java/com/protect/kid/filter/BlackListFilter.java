@@ -5,9 +5,9 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseIntArray;
 
+import com.protect.kid.BuildConfig;
 import com.protect.kid.R;
 import com.protect.kid.app.GlobalApplication;
-import com.protect.kid.constant.AppDebug;
 import com.protect.kid.core.ProxyConfig;
 import com.protect.kid.core.filter.DomainFilter;
 import com.protect.kid.core.logger.Logger;
@@ -26,6 +26,7 @@ import java.util.regex.Pattern;
 
 public class BlackListFilter implements DomainFilter {
 	private static final String TAG = "BlackListFilter";
+	private static final boolean DEBUG = BuildConfig.DEBUG;
 
 	private Map<String, Integer> mDomainMap = new HashMap<>();
 	/**
@@ -64,7 +65,7 @@ public class BlackListFilter implements DomainFilter {
 				in.close();
 			}
 		} catch (IOException e) {
-			if (AppDebug.IS_DEBUG) {
+			if (DEBUG) {
 				Log.e(TAG, "prepare: failed", e);
 			}
 		}
@@ -106,9 +107,9 @@ public class BlackListFilter implements DomainFilter {
 		if (file.exists()) {
 			try {
 				in = new FileInputStream(file);
-			} catch (IOException ex) {
-				if (AppDebug.IS_DEBUG) {
-					ex.printStackTrace(System.err);
+			} catch (IOException e) {
+				if (DEBUG) {
+					Log.e(TAG, "getHostInputStream: failed", e);
 				}
 			}
 		}

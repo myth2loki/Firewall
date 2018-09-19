@@ -13,7 +13,6 @@ import com.protect.kid.core.tcpip.CommonMethods;
 import com.protect.kid.core.tcpip.IPHeader;
 import com.protect.kid.core.tcpip.UDPHeader;
 import com.protect.kid.core.util.VpnServiceHelper;
-import com.protect.kid.util.DebugLog;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -286,14 +285,14 @@ public class DnsProxy implements Runnable {
 	private boolean interceptDns(IPHeader ipHeader, UDPHeader udpHeader, DnsPacket dnsPacket) {
 		Question question = dnsPacket.questions[0];
 
-		DebugLog.i("DNS query %s", question.domain);
+		Log.i(TAG, "interceptDns: got domain " + question.domain);
 
 		if (question.type == 1) {
 			if (ProxyConfig.Instance.filter(question.domain, getIPFromCache(question.domain), -1)) {
 				int fakeIP = getOrCreateFakeIP(question.domain);
 				tamperDnsResponse(ipHeader.mData, dnsPacket, fakeIP);
 
-				DebugLog.i("interceptDns FakeDns: %s=>%s\n", question.domain, CommonMethods.ipIntToString(fakeIP));
+				Log.i(TAG, "interceptDns: fake dns " + question.domain + ", " + CommonMethods.ipIntToString(fakeIP));
 
 				int sourceIP = ipHeader.getSourceIP();
 				short sourcePort = udpHeader.getSourcePort();
@@ -357,8 +356,8 @@ public class DnsProxy implements Runnable {
 			try {
 				//使用DatagramSocket发送DatagramPacket，读取也是用该DatagramSocket
 				mClient.send(packet);
-				DebugLog.i("Send an DNS Request Package to Remote DNS Server(%s)\n", CommonMethods.ipIntToString
-						(state.mRemoteIP));
+				Log.i(TAG, String.format("onDnsRequestReceived: Send an DNS Request to DNS Server(%s)",  CommonMethods.ipIntToString
+						(state.mRemoteIP)));
 			} catch (IOException e) {
 				if (DEBUG) {
 					Log.e(TAG, "onDnsRequestReceived: send failed", e);
@@ -382,7 +381,7 @@ public class DnsProxy implements Runnable {
 
 		if (state != null) {
 			if (DEBUG) {
-				DebugLog.i("Received DNS result form Remote DNS Server");
+				Log.i(TAG, "OnDnsResponseReceived: got DNS result from remote DNS");
 				if (dnsPacket.header.questionCount > 0 && dnsPacket.header.resourceCount > 0) {
 					Log.d(TAG, String.format("OnDnsResponseReceived: Real IP: %s ==> %s",
 							dnsPacket.questions[0].domain, CommonMethods.ipIntToString(getFirstIP(dnsPacket))));

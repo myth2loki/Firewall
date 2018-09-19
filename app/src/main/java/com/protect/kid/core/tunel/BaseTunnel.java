@@ -2,15 +2,12 @@ package com.protect.kid.core.tunel;
 
 import android.util.Log;
 
-import com.protect.kid.constant.AppDebug;
+import com.protect.kid.BuildConfig;
 import com.protect.kid.core.ProxyConfig;
 import com.protect.kid.core.http.HttpResponse;
 import com.protect.kid.core.util.VpnServiceHelper;
-import com.protect.kid.util.DebugLog;
-import com.protect.kid.BuildConfig;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -224,11 +221,10 @@ public abstract class BaseTunnel {
 				}
 				this.dispose();
 			}
-		} catch (Exception ex) {
-			if (AppDebug.IS_DEBUG) {
-				ex.printStackTrace(System.err);
+		} catch (Exception e) {
+			if (DEBUG) {
+				Log.e(TAG, "onReadable: failed", e);
 			}
-			DebugLog.e("onReadable catch an exception: %s, " + mInnerChannel.socket().getInetAddress(), ex);
 			this.dispose();
 		}
 	}
@@ -244,13 +240,10 @@ public abstract class BaseTunnel {
 					this.beginReceived(); //开始接受代理服务器的响应数据
 				}
 			}
-		} catch (Exception ex) {
-			if (AppDebug.IS_DEBUG) {
-				ex.printStackTrace(System.err);
+		} catch (Exception e) {
+			if (DEBUG) {
+				Log.e(TAG, "onWritable: failed", e);
 			}
-
-			DebugLog.e("onWritable catch an exception: %s", ex);
-
 			this.dispose();
 		}
 	}
@@ -265,8 +258,10 @@ public abstract class BaseTunnel {
 		if (isTunnelEstablished() && buffer.hasRemaining()) { //将读到的数据，转发给兄弟
 			mBrotherTunnel.beforeSend(buffer); //发送之前，先让子类处理，例如做加密等。
 			if (!mBrotherTunnel.write(buffer, true)) {
-				key.cancel(); //兄弟吃不消，就取消读取事件
-				DebugLog.w("%s can not write more.\n", mBrotherTunnel.mInnerChannel.socket().getInetAddress());
+				key.cancel(); //写入失败，就取消读取事件
+				if (DEBUG) {
+					Log.w(TAG, "sendToBrother: cannot write data to " + mBrotherTunnel.mInnerChannel.socket().getInetAddress());
+				}
 			}
 		}
 	}
@@ -310,11 +305,10 @@ public abstract class BaseTunnel {
 		if (!mDisposed) {
 			try {
 				mInnerChannel.close();
-			} catch (Exception ex) {
-				if (AppDebug.IS_DEBUG) {
-					ex.printStackTrace(System.err);
+			} catch (Exception e) {
+				if (DEBUG) {
+					Log.e(TAG, "disposeInternal: failed", e);
 				}
-				DebugLog.e("InnerChannel close catch an exception: %s", ex);
 			}
 
 			if (mBrotherTunnel != null && disposeBrother) {

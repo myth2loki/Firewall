@@ -33,8 +33,6 @@ public class GlobalApplication extends Application {
 		initJpush();
 		sInstance = this;
 
-		ProxyConfig.Instance.setVpnStatusListener(new StatusListener());
-
 		boolean should = VpnServiceHelper.shouldStartVPNService(this);
 		VpnServiceHelper.changeVpnRunningStatus(this, should);
 
@@ -62,21 +60,5 @@ public class GlobalApplication extends Application {
 		JPushInterface.setDebugMode(DEBUG);
 		// 初始化 JPush
 		JPushInterface.init(this);
-	}
-
-
-	static class StatusListener implements ProxyConfig.VpnStatusListener {
-
-		Properties mProperties = new Properties();
-
-		@Override
-		public void onVpnStart(Context context) {
-//			StatService.trackCustomBeginKVEvent(context, "VPN_OPEN", mProperties);
-		}
-
-		@Override
-		public void onVpnEnd(Context context) {
-//			StatService.trackCustomEndKVEvent(context, "VPN_OPEN", mProperties);
-		}
 	}
 }

@@ -4,7 +4,6 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.protect.kid.BuildConfig;
-import com.protect.kid.constant.AppDebug;
 import com.protect.kid.util.Compressor;
 import com.protect.kid.util.CompressorFactory;
 
@@ -162,18 +161,18 @@ public class HttpResponse {
 						if (source != null) {
 							mBody = new String(source, mCharset);
 						}
-					} catch (Exception ex) {
-						if (AppDebug.IS_DEBUG) {
-							ex.printStackTrace(System.err);
+					} catch (Exception e) {
+						if (DEBUG) {
+							Log.e(TAG, "parseHttpBody: failed", e);
 						}
 					}
 				}
 			} else {
 				try {
 					mBody = new String(mBodyByteArray.toByteArray(), mCharset);
-				} catch (UnsupportedEncodingException ex) {
-					if (AppDebug.IS_DEBUG) {
-						ex.printStackTrace(System.err);
+				} catch (UnsupportedEncodingException e) {
+					if (DEBUG) {
+						Log.e(TAG, "parseHttpBody: failed", e);
 					}
 				}
 			}
@@ -183,8 +182,8 @@ public class HttpResponse {
 				mBodyByteArray.close();
 			}
 		} catch (IOException e) {
-			if (AppDebug.IS_DEBUG) {
-				e.printStackTrace();
+			if (DEBUG) {
+				Log.e(TAG, "parseHttpBody: failed", e);
 			}
 		}
 		mBodyByteArray = null;
@@ -307,9 +306,9 @@ public class HttpResponse {
 				} else {
 					buffer.put(mBody.getBytes(mCharset));
 				}
-			} catch (Exception ex) {
-				if (AppDebug.IS_DEBUG) {
-					ex.printStackTrace(System.err);
+			} catch (Exception e) {
+				if (DEBUG) {
+					Log.e(TAG, "getBuffer: failed", e);
 				}
 			}
 

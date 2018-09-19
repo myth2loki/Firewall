@@ -8,7 +8,6 @@ import android.util.Log;
 import com.protect.kid.BuildConfig;
 import com.protect.kid.constant.AppGlobal;
 import com.protect.kid.core.util.VpnServiceHelper;
-import com.protect.kid.util.DebugLog;
 import com.protect.kid.util.SharedPrefUtil;
 
 public class BootBroadcastReceiver extends BroadcastReceiver {

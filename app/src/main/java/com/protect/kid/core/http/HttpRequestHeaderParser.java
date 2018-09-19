@@ -4,10 +4,8 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.protect.kid.BuildConfig;
-import com.protect.kid.constant.AppDebug;
 import com.protect.kid.core.nat.NatSession;
 import com.protect.kid.core.tcpip.CommonMethods;
-import com.protect.kid.util.DebugLog;
 
 import java.util.Locale;
 
@@ -142,7 +140,9 @@ public class HttpRequestHeaderParser {
 			int compressionMethodLength = buffer[offset++] & 0xFF;
 			offset += compressionMethodLength;
 			if (offset == limit) {
-				DebugLog.w("TLS Client Hello packet doesn't contains SNI info.(offset == limit)");
+				if (DEBUG) {
+					Log.w(TAG, "getSNI: no SNI found in TLS Client Hello packet");
+				}
 				return null;
 			}
 
@@ -154,7 +154,9 @@ public class HttpRequestHeaderParser {
 			offset += 2;
 
 			if (offset + extensionsLength > limit) {
-				DebugLog.w("TLS Client Hello packet is incomplete.");
+				if (DEBUG) {
+					Log.w(TAG, "getSNI: TLS Client Hello packet is incomplete.");
+				}
 				return null;
 			}
 
@@ -179,12 +181,15 @@ public class HttpRequestHeaderParser {
 				} else {
 					offset += length;
 				}
-
 			}
-			DebugLog.e("TLS Client Hello packet doesn't contains Host field info.");
+			if (DEBUG) {
+				Log.e(TAG, "getSNI: TLS Client Hello packet has no Host info.");
+			}
 			return null;
 		} else {
-			DebugLog.e("Bad TLS Client Hello packet.");
+			if (DEBUG) {
+				Log.e(TAG, "getSNI: Incorrect TLS Client Hello packet.");
+			}
 			return null;
 		}
 	}
