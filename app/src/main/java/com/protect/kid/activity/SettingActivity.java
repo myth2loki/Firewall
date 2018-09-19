@@ -39,7 +39,7 @@ public class SettingActivity extends BaseActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setTitle(getString(R.string.settings_page));
-		setContentView(R.layout.activity_setting1);
+		setContentView(R.layout.activity_setting);
 
 		initViews();
 	}

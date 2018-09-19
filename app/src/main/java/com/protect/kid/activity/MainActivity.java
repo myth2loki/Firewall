@@ -23,7 +23,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setTitle(getString(R.string.home_page));
-		setContentView(R.layout.activity_main_1);
+		setContentView(R.layout.activity_main);
 		mSubTitleProtect = (TextView) findViewById(R.id.sub_title_protect);
 		mProtectCheckbox = (CheckBox) findViewById(R.id.checkbox);
 		mProtectCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
