@@ -6,10 +6,6 @@ import com.protect.kid.core.ProxyConfig;
 import com.protect.kid.core.proxy.DnsProxy;
 import com.protect.kid.core.tcpip.CommonMethods;
 
-/**
- * Created by zengzheying on 15/12/29.
- * NAT管理对象
- */
 public class NatSessionManager {
 
 	private static final int MAX_SESSION_COUNT = 64; //会话保存的最大个数

@@ -16,7 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.protect.kid.R;
-import com.protect.kid.activity.MainActivity1;
+import com.protect.kid.activity.MainActivity;
 import com.protect.kid.core.logger.Logger;
 import com.protect.kid.db.AppConfig;
 import com.protect.kid.view.NumberKeyboard;
@@ -156,7 +156,7 @@ public class UnlockFragment extends BaseSettingFragment {
 
     private void navigateToMainActivity() {
         Logger.getInstance(getContext()).insert(getString(R.string.parent_password_login));
-        Intent intent = new Intent(getContext(), MainActivity1.class);
+        Intent intent = new Intent(getContext(), MainActivity.class);
         startActivity(intent);
         getActivity().finish();
     }

@@ -4,15 +4,12 @@ import android.content.Context;
 import android.text.TextUtils;
 
 import com.protect.kid.R;
-import com.protect.kid.activity.SettingActivity1;
 import com.protect.kid.app.GlobalApplication;
 import com.protect.kid.core.blackwhite.BlackContent;
-import com.protect.kid.core.blackwhite.WhiteContent;
 import com.protect.kid.core.filter.HtmlFilter;
 import com.protect.kid.core.logger.Logger;
 import com.protect.kid.db.DAOFactory;
 import com.protect.kid.db.GeneralDAO;
-import com.protect.kid.util.SharedPrefUtil;
 
 import java.util.ArrayList;
 import java.util.List;

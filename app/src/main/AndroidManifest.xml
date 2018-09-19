@@ -51,7 +51,7 @@
 		</activity >
 
 		<activity
-				android:name = "com.protect.kid.activity.MainActivity1"
+				android:name = "com.protect.kid.activity.MainActivity"
 				android:noHistory = "false"
 				android:screenOrientation = "portrait" >
 		</activity >
@@ -64,7 +64,7 @@
 		</activity >
 
 		<activity
-				android:name = "com.protect.kid.activity.SettingActivity1"
+				android:name = "com.protect.kid.activity.SettingActivity"
 				android:screenOrientation = "portrait"
 				android:theme = "@style/AppTheme.NoActionBar" />
 

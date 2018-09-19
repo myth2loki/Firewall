@@ -72,7 +72,7 @@ public class JPushReceiver extends BroadcastReceiver {
             if (DEBUG) {
                 Log.d(TAG, "onReceive: 用户点击打开了通知");
             }
-            startSalesActivity(context, bundle);
+            startActivity(context, bundle);
 
 
         } else if (JPushInterface.ACTION_RICHPUSH_CALLBACK.equals(intent.getAction())) {
@@ -94,11 +94,11 @@ public class JPushReceiver extends BroadcastReceiver {
     }
 
     /**
-     * 打开推送信息
+     * 打开推送信息对应的窗口
      * @param context
      * @param bundle
      */
-    private void startSalesActivity(Context context, Bundle bundle) {
+    private void startActivity(Context context, Bundle bundle) {
 
     }
 

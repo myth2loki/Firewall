@@ -4,7 +4,7 @@ import android.content.Context;
 import android.text.TextUtils;
 
 import com.protect.kid.R;
-import com.protect.kid.activity.SettingActivity1;
+import com.protect.kid.activity.SettingActivity;
 import com.protect.kid.app.GlobalApplication;
 import com.protect.kid.core.blackwhite.BlackContent;
 import com.protect.kid.core.blackwhite.WhiteContent;
@@ -35,7 +35,7 @@ public class CustomContentFilter implements HtmlFilter {
     @Override
     public void prepare() {
         Context context = GlobalApplication.getInstance();
-        String str = SharedPrefUtil.getValue(context, SettingActivity1.PREF_NAME, "isWhiteList", "false");
+        String str = SharedPrefUtil.getValue(context, SettingActivity.PREF_NAME, "isWhiteList", "false");
         isWhite = "true".equals(str);
 
         GeneralDAO<BlackContent> blackDAO = DAOFactory.getDAO(context, BlackContent.class);

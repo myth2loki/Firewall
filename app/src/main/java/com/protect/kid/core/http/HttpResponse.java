@@ -15,9 +15,6 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Set;
 
-/**
- * Created by zengzheying on 15/12/31.
- */
 public class HttpResponse {
 	private static final String TAG = "HttpResponse";
 	private static final boolean DEBUG = BuildConfig.DEBUG;

@@ -29,28 +29,7 @@ public class GlobalApplication extends Application {
 
 	@Override
 	public void onCreate() {
-//		if (BuildConfig.DEBUG) {
-//			StrictMode.VmPolicy vmPolicy = null;
-//			if (Build.VERSION.SDK_INT >= 16) {
-//				vmPolicy = new StrictMode.VmPolicy.Builder()
-//						.detectActivityLeaks()
-//						.detectLeakedSqlLiteObjects()
-//						.detectLeakedClosableObjects()
-//						.detectLeakedRegistrationObjects()
-//						.penaltyLog()
-//						.build();
-//			} else {
-//				vmPolicy = new StrictMode.VmPolicy.Builder()
-//						.detectActivityLeaks()
-//						.detectLeakedSqlLiteObjects()
-//						.detectLeakedClosableObjects()
-//						.penaltyLog()
-//						.build();
-//			}
-//			StrictMode.setVmPolicy(vmPolicy);
-//		}
 		super.onCreate();
-//		LeakCanary.install(this);
 		initJpush();
 		sInstance = this;
 

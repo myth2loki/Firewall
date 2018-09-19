@@ -13,7 +13,7 @@ import com.protect.kid.filter.BlackListHelper;
 
 import de.greenrobot.event.EventBus;
 
-public class MainActivity1 extends BaseActivity implements View.OnClickListener {
+public class MainActivity extends BaseActivity implements View.OnClickListener {
 	private static final String TAG = "MainActivity";
 
 	private CheckBox mProtectCheckbox;
@@ -59,7 +59,7 @@ public class MainActivity1 extends BaseActivity implements View.OnClickListener 
 				openActivity(LogActivity.class);
 				break;
 			case R.id.setting_bar:
-				openActivity(SettingActivity1.class);
+				openActivity(SettingActivity.class);
 				break;
 			case R.id.about_bar:
 				openActivity(AboutActivity.class);

@@ -2,10 +2,6 @@ package com.protect.kid.core.nat;
 
 import com.protect.kid.core.tcpip.CommonMethods;
 
-/**
- * 保存回话，重复利用一些资源
- * Created by zengzheying on 15/12/29.
- */
 public class NatSession {
 
 	public int remoteIP;

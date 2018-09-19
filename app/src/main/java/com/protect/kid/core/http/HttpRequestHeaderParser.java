@@ -11,9 +11,6 @@ import com.protect.kid.util.DebugLog;
 
 import java.util.Locale;
 
-/**
- * Created by zengzheying on 15/12/30.
- */
 public class HttpRequestHeaderParser {
 	private static final String TAG = "HttpRequestHeaderParser";
 	private static final boolean DEBUG = BuildConfig.DEBUG;

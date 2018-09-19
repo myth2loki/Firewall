@@ -29,7 +29,6 @@ public class ProxyConfig {
 	private ArrayList<IPAddress> mRouteList;
 	private int mDnsTtl;
 
-//	HashMap<String, Boolean> mDomainMap;
 	private String mSessionName;
 	private int mMtu;
 	private List<DomainFilter> mDomainFilterList = new ArrayList<>();
@@ -42,9 +41,6 @@ public class ProxyConfig {
 		mIpList = new ArrayList<>();
 		mDnsList = new ArrayList<>();
 		mRouteList = new ArrayList<>();
-
-//		mDomainMap = new HashMap<>();
-//		mDomainFilter = new BlackListFilter();
 	}
 
 	public static boolean isFakeIP(int ip) {

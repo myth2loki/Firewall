@@ -1,8 +1,5 @@
 package com.protect.kid.core.tcpip;
 
-/**
- * Created by zengzheying on 15/12/28.
- */
 public class IPHeader {
 
 	/**

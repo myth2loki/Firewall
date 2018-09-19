@@ -47,8 +47,8 @@
 	<string name="about_feature_title">关于</string>
 	<string name="about_feature_sub_title">查看软件信息</string>
     <string name="white_list">白名单</string>
-    <string name="IP_domian_list">IP、域名列表</string>
-	<string name="content_list">内容列表</string>
+    <string name="IP_domian_list">添加IP、域名</string>
+	<string name="content_list">添加内容</string>
     <string name="parent_password_login">家长密码登录</string>
 	<string name="stop_navigate_x">阻止访问%s</string>
 	<string name="stop_navigate_content_with_x">阻止访问%1$s - %2$s</string>

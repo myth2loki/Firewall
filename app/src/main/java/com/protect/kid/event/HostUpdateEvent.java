@@ -1,8 +1,5 @@
 package com.protect.kid.event;
 
-/**
- * Created by zengzheying on 16/1/29.
- */
 public class HostUpdateEvent {
 
 	private Status mStatus;

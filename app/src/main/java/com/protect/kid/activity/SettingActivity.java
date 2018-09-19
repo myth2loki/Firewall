@@ -27,7 +27,7 @@ import com.protect.kid.receiver.NoUninstallReceiver;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SettingActivity1 extends BaseActivity {
+public class SettingActivity extends BaseActivity {
 	private static final String TAG = "SettingActivity";
 	private static final boolean DEBUG = BuildConfig.DEBUG;
 

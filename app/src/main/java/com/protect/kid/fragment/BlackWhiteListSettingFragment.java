@@ -23,7 +23,7 @@ import android.widget.TextView;
 
 import com.protect.kid.BuildConfig;
 import com.protect.kid.R;
-import com.protect.kid.activity.SettingActivity1;
+import com.protect.kid.activity.SettingActivity;
 import com.protect.kid.component.InputDialog;
 import com.protect.kid.core.blackwhite.BlackContent;
 import com.protect.kid.core.blackwhite.BlackIP;
@@ -86,7 +86,7 @@ public class BlackWhiteListSettingFragment extends BaseSettingFragment implement
         mWhiteContentDAO = DAOFactory.getDAO(getContext(), WhiteContent.class);
 
         mBlackWhiteListCb = new CheckBox(getContext());
-        String str = SharedPrefUtil.getValue(getContext(), SettingActivity1.PREF_NAME, "isWhiteList", "false");
+        String str = SharedPrefUtil.getValue(getContext(), SettingActivity.PREF_NAME, "isWhiteList", "false");
         isWhiteList = "true".equals(str);
         mBlackWhiteListCb.setChecked(isWhiteList);
         int paddingRight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10,
@@ -103,7 +103,7 @@ public class BlackWhiteListSettingFragment extends BaseSettingFragment implement
                 initData();
                 CustomContentFilter.setWhiteEnabled(isWhiteList);
                 CustomIpFilter.setWhiteEnabled(isWhiteList);
-                SharedPrefUtil.saveValue(buttonView.getContext(), SettingActivity1.PREF_NAME,
+                SharedPrefUtil.saveValue(buttonView.getContext(), SettingActivity.PREF_NAME,
                         "isWhiteList", isChecked + "");
                 Logger.getInstance(buttonView.getContext())
                         .insert(isWhiteList ? getString(R.string.change_to_white_list) : getString(R.string.change_to_black_list));

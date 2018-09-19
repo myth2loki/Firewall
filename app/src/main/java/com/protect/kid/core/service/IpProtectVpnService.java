@@ -7,7 +7,7 @@ import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
 import com.protect.kid.BuildConfig;
-import com.protect.kid.activity.MainActivity1;
+import com.protect.kid.activity.MainActivity;
 import com.protect.kid.constant.AppDebug;
 import com.protect.kid.core.ProxyConfig;
 import com.protect.kid.core.dns.DnsPacket;
@@ -384,7 +384,7 @@ public class IpProtectVpnService extends VpnService implements Runnable {
 			}
 		}
 
-		Intent intent = new Intent(this, MainActivity1.class);
+		Intent intent = new Intent(this, MainActivity.class);
 		PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
 		builder.setConfigureIntent(pendingIntent);
 
