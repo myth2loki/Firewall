@@ -25,7 +25,8 @@ import com.protect.kid.event.VPNEvent;
 import com.protect.kid.filter.BlackListFilter;
 import com.protect.kid.filter.CustomContentFilter;
 import com.protect.kid.filter.CustomIpFilter;
-import com.protect.kid.filter.HtmlBlockingInfoBuilder;
+import com.protect.kid.filter.HtmlBlockingListInfoBuilder;
+import com.protect.kid.filter.HtmlBlockingTimeInfoBuilder;
 import com.protect.kid.filter.PushBlackContentFilter;
 import com.protect.kid.filter.PushBlackIpFilter;
 import com.protect.kid.filter.TimeDurationFilter;
@@ -94,7 +95,8 @@ public class IpProtectVpnService extends VpnService implements Runnable {
 
 			//设置网页内容过滤
 			ProxyConfig.Instance.prepare();
-			ProxyConfig.Instance.setBlockingInfoBuilder(new HtmlBlockingInfoBuilder());
+			ProxyConfig.Instance.addBlockingInfoBuilder(new HtmlBlockingListInfoBuilder());
+			ProxyConfig.Instance.addBlockingInfoBuilder(new HtmlBlockingTimeInfoBuilder());
 
 			//启动TCP代理服务
 			mTcpProxyServer = new TcpProxyServer(0);

@@ -42,7 +42,7 @@ public class PushBlackIpFilter implements DomainFilter {
     }
 
     @Override
-    public boolean needFilter(String ipAddress, int ip, int port) {
+    public int filter(String ipAddress, int ip, int port) {
         if (isReload) {
             isReload = false;
             mBlackList.clear();
@@ -50,7 +50,7 @@ public class PushBlackIpFilter implements DomainFilter {
         }
 
         if (ipAddress == null) {
-            return false;
+            return NO_FILTER;
         }
         if (port > -1) {
             ipAddress = ipAddress + ":" + port;
@@ -60,9 +60,9 @@ public class PushBlackIpFilter implements DomainFilter {
                 Context context = GlobalApplication.getInstance();
                 Logger logger = Logger.getInstance(context);
                 logger.insert(context.getString(R.string.stop_navigate_x, black));
-                return true;
+                return FILTER_LIST;
             }
         }
-        return false;
+        return NO_FILTER;
     }
 }

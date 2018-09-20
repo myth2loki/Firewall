@@ -17,6 +17,11 @@ public class DefaultBlockingInfoBuilder implements BlockingInfoBuilder {
 	}
 
 	@Override
+	public boolean match(int result) {
+		return true;
+	}
+
+	@Override
 	public ByteBuffer getBlockingInformation() {
 		HttpResponse httpResponse = new HttpResponse(false);
 		HashMap<String, String> header = new HashMap<>();
@@ -26,7 +31,7 @@ public class DefaultBlockingInfoBuilder implements BlockingInfoBuilder {
 		header.put("Content-Length", Integer.toString(body.getBytes().length));
 		httpResponse.setHeaders(header);
 		httpResponse.setBody(body);
-		httpResponse.setStateLine("HTTP/1.1 200 OK");
+		httpResponse.setStateLine("HTTP/1.1 200 NO_FILTER");
 		return httpResponse.getBuffer();
 	}
 }

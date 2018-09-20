@@ -9,6 +9,7 @@ import com.protect.kid.core.dns.DnsPacket;
 import com.protect.kid.core.dns.Question;
 import com.protect.kid.core.dns.Resource;
 import com.protect.kid.core.dns.ResourcePointer;
+import com.protect.kid.core.filter.Filter;
 import com.protect.kid.core.tcpip.CommonMethods;
 import com.protect.kid.core.tcpip.IPHeader;
 import com.protect.kid.core.tcpip.UDPHeader;
@@ -242,7 +243,7 @@ public class DnsProxy implements Runnable {
 			if (question.type == 1) { //希望获取域名的ip
 				int realIP = getFirstIP(dnsPacket);
 				//过滤
-				if (ProxyConfig.Instance.filter(question.domain, realIP, -1)) {
+				if (ProxyConfig.Instance.filter(question.domain, realIP, -1) != Filter.NO_FILTER) {
 					int fakeIP = getOrCreateFakeIP(question.domain);
 					//使用fakeIp
 					tamperDnsResponse(rawPacket, dnsPacket, fakeIP);
@@ -288,7 +289,7 @@ public class DnsProxy implements Runnable {
 		Log.i(TAG, "interceptDns: got domain " + question.domain);
 
 		if (question.type == 1) {
-			if (ProxyConfig.Instance.filter(question.domain, getIPFromCache(question.domain), -1)) {
+			if (ProxyConfig.Instance.filter(question.domain, getIPFromCache(question.domain), -1) != Filter.NO_FILTER) {
 				int fakeIP = getOrCreateFakeIP(question.domain);
 				tamperDnsResponse(ipHeader.mData, dnsPacket, fakeIP);
 

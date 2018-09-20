@@ -1,7 +1,7 @@
 package com.protect.kid.core.filter;
 
 
-public interface HtmlFilter {
+public interface HtmlFilter extends Filter {
     void prepare();
-    boolean needFilter(String content);
+    int filter(String content);
 }

@@ -110,7 +110,7 @@ public class CustomIpFilter implements DomainFilter {
     }
 
     @Override
-    public boolean needFilter(String ipAddress, int ip, int port) {
+    public int filter(String ipAddress, int ip, int port) {
         if (isReload) {
             isReload = false;
             mBlackList.clear();
@@ -118,46 +118,41 @@ public class CustomIpFilter implements DomainFilter {
             prepare();
         }
 
-//        if (isIpIgnored(ip)) {
-//            return false;
-//        }
-
         if (isDomainIgnored(ipAddress)) {
-            return false;
+            return NO_FILTER;
         }
 
         if (isPortIgnored(port)) {
-            return false;
+            return NO_FILTER;
         }
 
         if (ipAddress == null) {
-            return false;
+            return NO_FILTER;
         }
         if (port > -1) {
             ipAddress = ipAddress + ":" + port;
         }
         if (isWhite) {
-
             Context context = GlobalApplication.getInstance();
             Logger logger = Logger.getInstance(context);
             for (String white : mWhiteList) {
                 if (ipAddress.contains(white)) {
                     logger.insert(context.getString(R.string.allow_to_navigate_x, white));
-                    return false;
+                    return NO_FILTER;
                 }
             }
             logger.insert(context.getString(R.string.stop_navigate_x, ipAddress));
-            return true;
+            return FILTER_LIST;
         } else {
             for (String black : mBlackList) {
                 if (ipAddress.contains(black)) {
                     Context context = GlobalApplication.getInstance();
                     Logger logger = Logger.getInstance(context);
                     logger.insert(context.getString(R.string.stop_navigate_x, black));
-                    return true;
+                    return FILTER_LIST;
                 }
             }
-            return false;
+            return NO_FILTER;
         }
     }
 }

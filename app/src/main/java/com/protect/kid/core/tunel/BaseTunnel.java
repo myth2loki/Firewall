@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.protect.kid.BuildConfig;
 import com.protect.kid.core.ProxyConfig;
+import com.protect.kid.core.filter.Filter;
 import com.protect.kid.core.http.HttpResponse;
 import com.protect.kid.core.util.VpnServiceHelper;
 
@@ -184,21 +185,29 @@ public abstract class BaseTunnel {
 					if (mHttpResponse != null) {
 						if (DEBUG) {
 							Log.d(TAG, "onReadable: isShouldAbandon = " + mHttpResponse.isShouldAbandon() + ", isCompleted = " + mHttpResponse.isCompleted());
-//							Log.d(TAG, "onReadable: contentType = " + mHttpResponse.getHeaderString());
 						}
 						ByteBuffer httpBuffer = null;
 						if (mHttpResponse.isShouldAbandon()) { //不过滤
 							httpBuffer = mHttpResponse.getBuffer();
 						} else if (mHttpResponse.isCompleted()) {  //已经完整地接收了HTTP报文
 							String body = mHttpResponse.getBody();
-//							if (body.contains("4566")) {
-//								mHttpResponse.setBody(body.replace("4566", "修改之后的标题"));
-//							}
-							boolean isFiltered = ProxyConfig.Instance.filterContent(body);
-							if (isFiltered) {
-								httpBuffer = ProxyConfig.Instance.getBlockingInfo();
-							} else {
-								httpBuffer = mHttpResponse.getBuffer();
+							int result = ProxyConfig.Instance.filterContent(body);
+							if (DEBUG) {
+								Log.d(TAG, "onReadable: result = " + result);
+							}
+							switch (result) {
+								case Filter.NO_FILTER:
+									httpBuffer = mHttpResponse.getBuffer();
+									break;
+								case Filter.FILTER_LIST:
+								case Filter.FILTER_TIME:
+									httpBuffer = ProxyConfig.Instance.getBlockingInfo(result);
+									break;
+								default:
+									if (DEBUG) {
+										Log.w(TAG, "onReadable: unknwon result = " + result);
+									}
+									break;
 							}
 						}
 						if (httpBuffer != null) {
@@ -335,8 +344,8 @@ public abstract class BaseTunnel {
 		return isHttpsRequest;
 	}
 
-	public void sendBlockInformation() throws IOException {
-		ByteBuffer buffer = ProxyConfig.Instance.getBlockingInfo();
+	public void sendBlockInformation(int result) throws IOException {
+		ByteBuffer buffer = ProxyConfig.Instance.getBlockingInfo(result);
 		mInnerChannel.write(buffer);
 	}
 }

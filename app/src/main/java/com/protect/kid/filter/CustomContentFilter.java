@@ -52,7 +52,7 @@ public class CustomContentFilter implements HtmlFilter {
     }
 
     @Override
-    public boolean needFilter(String content) {
+    public int filter(String content) {
         if (isReload) {
             isReload = false;
             mBlackContentList.clear();
@@ -60,15 +60,15 @@ public class CustomContentFilter implements HtmlFilter {
             prepare();
         }
         if (TextUtils.isEmpty(content)) {
-            return false;
+            return NO_FILTER;
         }
         if (isWhite) {
             for (String white : mWhiteContentList) {
                 if (content.contains(white)) {
-                    return false;
+                    return NO_FILTER;
                 }
             }
-            return true;
+            return FILTER_LIST;
         } else {
             for (String black : mBlackContentList) {
                 if (content.contains(black)) {
@@ -76,10 +76,10 @@ public class CustomContentFilter implements HtmlFilter {
                     Logger logger = Logger.getInstance(context);
                     logger.insert(context
                             .getString(R.string.stop_navigate_content_with_x, black, ""));
-                    return true;
+                    return FILTER_LIST;
                 }
             }
-            return false;
+            return NO_FILTER;
         }
     }
 }

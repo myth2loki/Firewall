@@ -14,7 +14,6 @@ import java.util.Date;
 
 import static com.protect.kid.fragment.TimeSettingFragment.END_TIME;
 import static com.protect.kid.fragment.TimeSettingFragment.START_TIME;
-import static com.protect.kid.fragment.TimeSettingFragment.TIME_RANGE;
 import static com.protect.kid.fragment.TimeSettingFragment.TYPE;
 
 public class TimeRangeFilter implements DomainFilter {
@@ -48,21 +47,24 @@ public class TimeRangeFilter implements DomainFilter {
     }
 
     @Override
-    public boolean needFilter(String domain, int ip, int port) {
+    public int filter(String domain, int ip, int port) {
         if (isReload) {
             isReload = false;
             prepare();
         }
         if (!mEnabled) {
-            return false;
+            return NO_FILTER;
         }
         if (mStartDate == null || mEndDate == null) {
-            return false;
+            return NO_FILTER;
         }
         long curTime = System.currentTimeMillis();
-        boolean result = curTime < mStartDate.getTime() || curTime > mEndDate.getTime();
+        int result = NO_FILTER;
+        if (curTime < mStartDate.getTime() || curTime > mEndDate.getTime()) {
+            result = FILTER_TIME;
+        }
         if (DEBUG) {
-            Log.d(TAG, "needFilter: result = " + result + "， domain = " + domain + ", ip = " + ip);
+            Log.d(TAG, "filter: result = " + result + "， domain = " + domain + ", ip = " + ip);
         }
         return result;
     }

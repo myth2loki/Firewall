@@ -72,11 +72,12 @@ public class BlackListFilter implements DomainFilter {
 	}
 
 	@Override
-	public boolean needFilter(String ipAddress, int ip, int port) {
+	public int filter(String ipAddress, int ip, int port) {
 		if (ipAddress == null) {
-			return false;
+			return NO_FILTER;
 		}
 
+		int result = NO_FILTER;
 		boolean isFiltered = mIpMask.get(ip, -1) == 1;
 		ipAddress = ipAddress.trim();
 		if (Pattern.matches("\\d+\\.\\d+\\.\\d+\\.\\d+", ipAddress)) { //判断符合ip地址格式
@@ -94,10 +95,11 @@ public class BlackListFilter implements DomainFilter {
 			}
 		}
 		if (isFiltered) {
+			result = FILTER_LIST;
 			Context context = GlobalApplication.getInstance();
 			Logger.getInstance(context).insert(context.getString(R.string.stop_navigate_x, ipAddress));
 		}
-		return isFiltered;
+		return result;
 	}
 
 	private InputStream getHostInputStream() {

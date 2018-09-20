@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.protect.kid.BuildConfig;
 import com.protect.kid.core.ProxyConfig;
+import com.protect.kid.core.filter.Filter;
 import com.protect.kid.core.tcpip.CommonMethods;
 import com.protect.kid.core.tcpip.IPHeader;
 import com.protect.kid.core.tcpip.UDPHeader;
@@ -15,10 +16,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class UdpProxyServer implements Runnable {
     private static final boolean DEBUG = BuildConfig.DEBUG;
@@ -86,7 +83,7 @@ public class UdpProxyServer implements Runnable {
         if (DEBUG) {
             Log.d(TAG, "onUdpRequestReceived: dest content = " + CommonMethods.ipIntToString(destIp) + ":" + destPort);
         }
-        if (filter(destIp, destPort)) {
+        if (filter(destIp, destPort) != Filter.NO_FILTER) {
             if (DEBUG) {
                 Log.d(TAG, "onUdpRequestReceived: be filtered, ignore, dest content = " + destIp + ", dest port = " + destPort);
             }
@@ -123,7 +120,7 @@ public class UdpProxyServer implements Runnable {
         }
     }
 
-    private boolean filter(int ip, int port) {
+    private int filter(int ip, int port) {
         return ProxyConfig.Instance.filter(CommonMethods.ipIntToString(ip), ip, port);
     }
 
@@ -133,7 +130,7 @@ public class UdpProxyServer implements Runnable {
         if (DEBUG) {
             Log.d(TAG, "OnUdpResponseReceived: srcIp = " + CommonMethods.ipIntToString(srcIp) + ", srcPort = " + srcPort);
         }
-        if (filter(srcIp, srcPort)) {
+        if (filter(srcIp, srcPort) != Filter.NO_FILTER) {
             if (DEBUG) {
                 Log.d(TAG, "OnUdpResponseReceived: be filtered, ignore, src content = " + srcIp + ", src port = " + srcPort);
             }

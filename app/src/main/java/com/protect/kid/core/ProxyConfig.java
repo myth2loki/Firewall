@@ -8,6 +8,7 @@ import com.protect.kid.BuildConfig;
 import com.protect.kid.core.builder.BlockingInfoBuilder;
 import com.protect.kid.core.builder.DefaultBlockingInfoBuilder;
 import com.protect.kid.core.filter.DomainFilter;
+import com.protect.kid.core.filter.Filter;
 import com.protect.kid.core.filter.HtmlFilter;
 import com.protect.kid.core.tcpip.CommonMethods;
 
@@ -33,7 +34,7 @@ public class ProxyConfig {
 	private int mMtu;
 	private List<DomainFilter> mDomainFilterList = new ArrayList<>();
 	private List<HtmlFilter> mHtmlFilterList = new ArrayList<>();
-	private BlockingInfoBuilder mBlockingInfoBuilder;
+	private List<BlockingInfoBuilder> mBlockingInfoBuilderList = new ArrayList<>();
 	private VpnStatusListener mVpnStatusListener;
 
 
@@ -110,45 +111,52 @@ public class ProxyConfig {
 	 * @param port 端口号
 	 * @return true代表被过滤，否则false
 	 */
-	public boolean filter(String host, int ip, int port) {
-		boolean isFiltered = false;
+	public int filter(String host, int ip, int port) {
+		int result = Filter.NO_FILTER;
 		for (DomainFilter filter : mDomainFilterList) {
-			isFiltered = isFiltered || filter.needFilter(host, ip, port);
-			if (isFiltered) {
+			result = filter.filter(host, ip, port);
+			if (result != Filter.NO_FILTER) {
 				break;
 			}
+		}
+		if (isFakeIP(ip)) {
+			result = Filter.FILTER_LIST;
 		}
 		if (DEBUG) {
 			Log.d(TAG, String.format("filter: host %s content %s %s",
-					host, CommonMethods.ipIntToString(ip), isFiltered));
+					host, CommonMethods.ipIntToString(ip), result));
 		}
-		return isFiltered || isFakeIP(ip);
+		return result;
 	}
 
-	public boolean filterContent(String content) {
-		boolean isFiltered = false;
+	public int filterContent(String content) {
+		int result = Filter.NO_FILTER;
 		for (HtmlFilter filter : mHtmlFilterList) {
-			isFiltered = isFiltered || filter.needFilter(content);
-			if (isFiltered) {
+			result = filter.filter(content);
+			if (result != Filter.NO_FILTER) {
 				break;
 			}
 		}
 		if (DEBUG) {
-			Log.d(TAG, String.format("filterContent: content %s %s", content, isFiltered));
+			Log.d(TAG, String.format("filterContent: content %s %s", content, result));
 		}
-		return isFiltered;
+		return result;
 	}
 
-	public void setBlockingInfoBuilder(BlockingInfoBuilder blockingInfoBuilder) {
-		mBlockingInfoBuilder = blockingInfoBuilder;
+	public void addBlockingInfoBuilder(BlockingInfoBuilder blockingInfoBuilder) {
+		mBlockingInfoBuilderList.add(blockingInfoBuilder);
 	}
 
-	public ByteBuffer getBlockingInfo() {
-		if (mBlockingInfoBuilder != null) {
-			return mBlockingInfoBuilder.getBlockingInformation();
-		} else {
-			return DefaultBlockingInfoBuilder.get().getBlockingInformation();
+	public ByteBuffer getBlockingInfo(int result) {
+		for (BlockingInfoBuilder builder : mBlockingInfoBuilderList) {
+			if (DEBUG) {
+				Log.d(TAG, "getBlockingInfo: match " + builder.match(result) + " with " + builder);
+			}
+			if (builder.match(result)) {
+				return builder.getBlockingInformation();
+			}
 		}
+		return DefaultBlockingInfoBuilder.get().getBlockingInformation();
 	}
 
 	public void setVpnStatusListener(VpnStatusListener vpnStatusListener) {

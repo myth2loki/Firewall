@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.protect.kid.BuildConfig;
 import com.protect.kid.core.ProxyConfig;
+import com.protect.kid.core.filter.Filter;
 import com.protect.kid.core.nat.NatSession;
 import com.protect.kid.core.nat.NatSessionManager;
 import com.protect.kid.core.tcpip.CommonMethods;
@@ -141,27 +142,32 @@ public class TcpProxyServer implements Runnable {
 	 * @param localChannel
 	 * @return
 	 */
-	private InetSocketAddress getCachedDestAddress(SocketChannel localChannel) {
-		int portKey = localChannel.socket().getPort();
-		NatSession session = NatSessionManager.getSession((short)portKey);
-		if (session != null) {
-			if (DEBUG) {
-				Log.d(TAG, "getCachedDestAddress: session = " + session);
-			}
-			if (ProxyConfig.Instance.filter(session.remoteHost, session.remoteIP, session.remotePort)) {
-				//TODO 完成跟具体的拦截策略？？？
-				if (DEBUG) {
-					Log.d(TAG, String.format("getCachedDestAddress: %d/%d:[BLOCK] %s=>%s:%d\n", NatSessionManager.getSessionCount(), BaseTunnel.sSessionCount,
-							session.remoteHost,
-							CommonMethods.ipIntToString(session.remoteIP), session.remotePort & 0xFFFF));
-				}
-				return null;
-			} else {
-				return new InetSocketAddress(localChannel.socket().getInetAddress(), session.remotePort & 0xFFFF);
-			}
-		}
-		return null;
+	private NatSession getNatSession(SocketChannel localChannel) {
+		int port = localChannel.socket().getPort();
+		return NatSessionManager.getSession((short) port);
 	}
+
+//	private InetSocketAddress getCachedDestAddress(SocketChannel localChannel) {
+//		int portKey = localChannel.socket().getPort();
+//		NatSession session = NatSessionManager.getSession((short)portKey);
+//		if (session != null) {
+//			if (DEBUG) {
+//				Log.d(TAG, "getCachedDestAddress: session = " + session);
+//			}
+//			if (ProxyConfig.Instance.filter(session.remoteHost, session.remoteIP, session.remotePort)) {
+//				//完成具体的拦截
+//				if (DEBUG) {
+//					Log.d(TAG, String.format("getCachedDestAddress: %d/%d:[BLOCK] %s=>%s:%d\n", NatSessionManager.getSessionCount(), BaseTunnel.sSessionCount,
+//							session.remoteHost,
+//							CommonMethods.ipIntToString(session.remoteIP), session.remotePort & 0xFFFF));
+//				}
+//				return null;
+//			} else {
+//				return new InetSocketAddress(localChannel.socket().getInetAddress(), session.remotePort & 0xFFFF);
+//			}
+//		}
+//		return null;
+//	}
 
 	/**
 	 * 连接成功，绑定
@@ -171,26 +177,49 @@ public class TcpProxyServer implements Runnable {
 		LocalTunnel localTunnel = null;
 		try {
 			//获取local server的通道
-//			SocketChannel localChannel = mProxyServerSocketChannel.accept();
-			// channel of APP -> ProxyServer
 			SocketChannel localChannel = ((ServerSocketChannel) key.attachment()).accept();
 			//tcp代理服务器有连接进来，localChannel代表应用与代理服务器的连接
-			localTunnel = TunnelFactory.createLocalTunnel(localChannel, mProxySelector); //TODO 为何要调用wrap方法？ 因为需要将连接方和受vpn保护的socket配对
+			localTunnel = TunnelFactory.createLocalTunnel(localChannel, mProxySelector); //将连接方和受vpn保护的socket配对
 
 			//有连接连进来，获取到目的地址。其实就是连接方地址，因为在转发的时候已经将目的地址和端口写入到源地址和端口上
-			// dstIp = localChannel.socket().getInetAddress dstPort = localChannel.socket().getPort()
-			// channel of ProxyServer to RemoteServer
-			InetSocketAddress destAddress = getCachedDestAddress(localChannel);
-			if (destAddress != null) {
-				//创建远程tunnel，受vpn protect
-				RemoteTunnel remoteTunnel = TunnelFactory.createRemoteTunnel(destAddress, mProxySelector);
-				//关联兄弟
-				remoteTunnel.setIsHttpsRequest(localTunnel.isHttpsRequest());
-				remoteTunnel.pair(localTunnel);
-				remoteTunnel.protect();
-				remoteTunnel.connect(); //开始连接
+			InetSocketAddress destAddress;
+			NatSession session = getNatSession(localChannel);
+			if (session != null) {
+				if (DEBUG) {
+					Log.d(TAG, "getCachedDestAddress: session = " + session);
+				}
+				int result = ProxyConfig.Instance.filter(session.remoteHost, session.remoteIP, session.remotePort);
+				if (result != Filter.NO_FILTER) {
+					//完成具体的拦截
+					if (DEBUG) {
+						Log.d(TAG, String.format("getCachedDestAddress: %d/%d:[BLOCK] %s=>%s:%d\n", NatSessionManager.getSessionCount(), BaseTunnel.sSessionCount,
+								session.remoteHost,
+								CommonMethods.ipIntToString(session.remoteIP), session.remotePort & 0xFFFF));
+					}
+					localTunnel.sendBlockInformation(result);
+					if (DEBUG) {
+						short portKey = (short) localChannel.socket().getPort();
+						Log.d(TAG, String.format("onAccepted: Error: socket(%s:%d) have no session.", localChannel.socket().getInetAddress()
+								.toString(), portKey));
+					}
+					localTunnel.dispose();
+				} else {
+					destAddress = new InetSocketAddress(localChannel.socket().getInetAddress(), session.remotePort & 0xFFFF);
+					//创建远程tunnel，受vpn protect
+					RemoteTunnel remoteTunnel = TunnelFactory.createRemoteTunnel(destAddress, mProxySelector);
+					//关联兄弟
+					remoteTunnel.setIsHttpsRequest(localTunnel.isHttpsRequest());
+					remoteTunnel.pair(localTunnel);
+					remoteTunnel.protect();
+					remoteTunnel.connect(); //开始连接
+				}
 			} else {
-				localTunnel.sendBlockInformation();
+				if (DEBUG) {
+					Log.d(TAG, String.format("getCachedDestAddress: %d/%d:[BLOCK] %s=>%s:%d\n", NatSessionManager.getSessionCount(), BaseTunnel.sSessionCount,
+							session.remoteHost,
+							CommonMethods.ipIntToString(session.remoteIP), session.remotePort & 0xFFFF));
+				}
+				localTunnel.sendBlockInformation(Filter.FILTER_LIST);
 				if (DEBUG) {
 					short portKey = (short) localChannel.socket().getPort();
 					Log.d(TAG, String.format("onAccepted: Error: socket(%s:%d) have no session.", localChannel.socket().getInetAddress()

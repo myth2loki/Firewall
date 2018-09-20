@@ -1,6 +1,6 @@
 package com.protect.kid.core.filter;
 
-public interface DomainFilter {
+public interface DomainFilter extends Filter {
 	void prepare();
-	boolean needFilter(String domain, int ip, int port);
+	int filter(String domain, int ip, int port);
 }

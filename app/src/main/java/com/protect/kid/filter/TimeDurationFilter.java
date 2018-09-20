@@ -39,22 +39,24 @@ public class TimeDurationFilter implements DomainFilter {
     }
 
     @Override
-    public boolean needFilter(String domain, int ip, int port) {
+    public int filter(String domain, int ip, int port) {
         if (mStartTime < 0) {
-            return false;
+            return NO_FILTER;
         }
         if (isReload) {
             isReload = false;
             prepare();
         }
+        int result = NO_FILTER;
         long duration = System.currentTimeMillis() - mStartTime;
         if (mEnabled) {
-            boolean result = duration <= mDuration;
-            if (DEBUG) {
-                Log.d(TAG, "needFilter: result = " + result);
+            if (duration > mDuration) {
+                result = FILTER_TIME;
             }
-            return result;
+            if (DEBUG) {
+                Log.d(TAG, "filter: result = " + result);
+            }
         }
-        return false;
+        return result;
     }
 }
