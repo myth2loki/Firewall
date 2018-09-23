@@ -48,7 +48,7 @@ public class HtmlBlockingTimeInfoBuilder implements BlockingInfoBuilder {
 			header.put("Content-Length", Integer.toString(result.getBytes().length));
 			response.setHeaders(header);
 			response.setBody(result);
-			response.setStateLine("HTTP/1.1 200 NO_FILTER");
+			response.setStateLine("HTTP/1.1 200 OK");
 			byteBuffer = response.getBuffer();
 		} else {
 			byteBuffer = DefaultBlockingInfoBuilder.get().getBlockingInformation();
