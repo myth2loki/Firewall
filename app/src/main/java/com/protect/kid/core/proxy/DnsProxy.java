@@ -13,7 +13,7 @@ import com.protect.kid.core.filter.Filter;
 import com.protect.kid.core.tcpip.CommonMethods;
 import com.protect.kid.core.tcpip.IPHeader;
 import com.protect.kid.core.tcpip.UDPHeader;
-import com.protect.kid.core.util.VpnServiceHelper;
+import com.protect.kid.core.util.VpnServiceUtil;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -40,7 +40,7 @@ public class DnsProxy implements Runnable {
 	public DnsProxy() throws IOException {
 		mQueryArray = new SparseArray<>();
 		mClient = new DatagramSocket(0);
-		boolean result = VpnServiceHelper.protect(mClient);
+		boolean result = VpnServiceUtil.protect(mClient);
 		if (!result) {
 			throw new IllegalStateException("protect DatagramSocket failed.");
 		}
@@ -304,7 +304,7 @@ public class DnsProxy implements Runnable {
 				udpHeader.setSourcePort(udpHeader.getDestinationPort());
 				udpHeader.setDestinationPort(sourcePort);
 				udpHeader.setTotalLength(8 + dnsPacket.size);
-				VpnServiceHelper.sendUDPPacket(ipHeader, udpHeader);
+				VpnServiceUtil.sendUDPPacket(ipHeader, udpHeader);
 				return true;
 			}
 		}
@@ -403,7 +403,7 @@ public class DnsProxy implements Runnable {
 			udpHeader.setTotalLength(8 + dnsPacket.size);
 		}
 		//输出到请求发起者
-		VpnServiceHelper.sendUDPPacket(ipHeader, udpHeader);
+		VpnServiceUtil.sendUDPPacket(ipHeader, udpHeader);
 	}
 
 	public boolean isStopped() {

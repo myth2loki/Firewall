@@ -20,7 +20,7 @@ import com.protect.kid.core.tcpip.CommonMethods;
 import com.protect.kid.core.tcpip.IPHeader;
 import com.protect.kid.core.tcpip.TCPHeader;
 import com.protect.kid.core.tcpip.UDPHeader;
-import com.protect.kid.core.util.VpnServiceHelper;
+import com.protect.kid.core.util.VpnServiceUtil;
 import com.protect.kid.event.VPNEvent;
 import com.protect.kid.filter.BlackListFilter;
 import com.protect.kid.filter.CustomContentFilter;
@@ -60,7 +60,7 @@ public class IpProtectVpnService extends VpnService implements Runnable {
 
 	public IpProtectVpnService() {
 		ID++;
-		VpnServiceHelper.onVpnServiceCreated(this);
+		VpnServiceUtil.onVpnServiceCreated(this);
 	}
 
 	//启动Vpn工作线程
@@ -175,7 +175,7 @@ public class IpProtectVpnService extends VpnService implements Runnable {
 		if (mVPNThread != null) {
 			mVPNThread.interrupt();
 		}
-		VpnServiceHelper.onVpnServiceDestroy();
+		VpnServiceUtil.onVpnServiceDestroy();
 		super.onDestroy();
 	}
 

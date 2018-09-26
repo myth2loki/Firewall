@@ -7,7 +7,7 @@ import android.util.Log;
 
 import com.protect.kid.BuildConfig;
 import com.protect.kid.constant.AppGlobal;
-import com.protect.kid.core.util.VpnServiceHelper;
+import com.protect.kid.core.util.VpnServiceUtil;
 import com.protect.kid.util.SharedPrefUtil;
 
 public class BootBroadcastReceiver extends BroadcastReceiver {
@@ -23,7 +23,7 @@ public class BootBroadcastReceiver extends BroadcastReceiver {
 			Log.d(TAG, "onReceive: should start = " + isStart);
 		}
 		if (isStart) {
-			VpnServiceHelper.changeVpnRunningStatus(context, true);
+			VpnServiceUtil.changeVpnRunningStatus(context, true);
 		}
 	}
 }

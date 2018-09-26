@@ -6,7 +6,7 @@ import com.protect.kid.BuildConfig;
 import com.protect.kid.core.ProxyConfig;
 import com.protect.kid.core.filter.Filter;
 import com.protect.kid.core.http.HttpResponse;
-import com.protect.kid.core.util.VpnServiceHelper;
+import com.protect.kid.core.util.VpnServiceUtil;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -101,7 +101,7 @@ public abstract class BaseTunnel {
 	}
 
 	public void protect() throws IOException {
-		if (!VpnServiceHelper.protect(mInnerChannel.socket())) {
+		if (!VpnServiceUtil.protect(mInnerChannel.socket())) {
 			throw new IOException("VPN protect socket failed.");
 		}
 	}

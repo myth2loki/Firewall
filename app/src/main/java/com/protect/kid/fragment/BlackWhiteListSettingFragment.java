@@ -31,7 +31,7 @@ import com.protect.kid.core.blackwhite.StringItem;
 import com.protect.kid.core.blackwhite.WhiteContent;
 import com.protect.kid.core.blackwhite.WhiteIP;
 import com.protect.kid.core.logger.Logger;
-import com.protect.kid.core.util.VpnServiceHelper;
+import com.protect.kid.core.util.VpnServiceUtil;
 import com.protect.kid.db.DAOFactory;
 import com.protect.kid.filter.CustomContentFilter;
 import com.protect.kid.filter.CustomIpFilter;
@@ -107,7 +107,7 @@ public class BlackWhiteListSettingFragment extends BaseSettingFragment implement
                         "isWhiteList", isChecked + "");
                 Logger.getInstance(buttonView.getContext())
                         .insert(isWhiteList ? getString(R.string.change_to_white_list) : getString(R.string.change_to_black_list));
-                VpnServiceHelper.restartVpnService(buttonView.getContext(), new Runnable() {
+                VpnServiceUtil.restartVpnService(buttonView.getContext(), new Runnable() {
                     @Override
                     public void run() {
                         buttonView.setEnabled(true);

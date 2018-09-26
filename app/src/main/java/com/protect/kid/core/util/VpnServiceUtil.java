@@ -22,7 +22,7 @@ import com.protect.kid.util.SharedPrefUtil;
 import java.net.DatagramSocket;
 import java.net.Socket;
 
-public class VpnServiceHelper {
+public class VpnServiceUtil {
 	public static final String TAG = "VpnServiceHelper";
 	public static final boolean DEBUG = BuildConfig.DEBUG;
 
@@ -57,7 +57,7 @@ public class VpnServiceHelper {
 		return false;
 	}
 
-	public static boolean vpnRunningStatus() {
+	public static boolean getVpnRunningStatus() {
 		if (sVpnService != null) {
 			return sVpnService.vpnRunningStatus();
 		}
@@ -94,12 +94,12 @@ public class VpnServiceHelper {
 	}
 
 	public static void restartVpnService(final Context context, final Runnable run) {
-		VpnServiceHelper.changeVpnRunningStatus(context, false);
+		VpnServiceUtil.changeVpnRunningStatus(context, false);
 		new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
 			@Override
 			public void run() {
 				NatSessionManager.clearAllSessions();
-				VpnServiceHelper.changeVpnRunningStatus(context, true);
+				VpnServiceUtil.changeVpnRunningStatus(context, true);
 				if (run != null) {
 					run.run();
 				}
@@ -121,8 +121,10 @@ public class VpnServiceHelper {
 		}
 
 		context.startService(new Intent(context, IpProtectVpnService.class));
+		if ("false".equals(SharedPrefUtil.getValue(context, AppGlobal.GLOBAL_PREF_NAME, AppGlobal.IS_PROTECTED, "false"))) {
+			SharedPrefUtil.saveLong(context, AppGlobal.GLOBAL_PREF_NAME, TimeDurationFilter.PROTECT_START_TIME, System.currentTimeMillis());
+			Logger.getInstance(context).insert(context.getString(R.string.start_protect));
+		}
 		SharedPrefUtil.saveValue(context, AppGlobal.GLOBAL_PREF_NAME, AppGlobal.IS_PROTECTED, "true");
-		SharedPrefUtil.saveLong(context, AppGlobal.GLOBAL_PREF_NAME, TimeDurationFilter.PROTECT_START_TIME, System.currentTimeMillis());
-		Logger.getInstance(context).insert(context.getString(R.string.start_protect));
 	}
 }

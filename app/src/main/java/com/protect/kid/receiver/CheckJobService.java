@@ -8,7 +8,7 @@ import android.util.Log;
 
 import com.protect.kid.BuildConfig;
 import com.protect.kid.constant.AppGlobal;
-import com.protect.kid.core.util.VpnServiceHelper;
+import com.protect.kid.core.util.VpnServiceUtil;
 import com.protect.kid.util.SharedPrefUtil;
 
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -25,7 +25,7 @@ public class CheckJobService extends JobService {
             Log.d(TAG, "onReceive: should start = " + isStart);
         }
         if (isStart) {
-            VpnServiceHelper.changeVpnRunningStatus(getApplicationContext(), true);
+            VpnServiceUtil.changeVpnRunningStatus(getApplicationContext(), true);
         }
         return false;
     }

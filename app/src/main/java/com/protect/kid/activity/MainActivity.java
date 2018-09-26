@@ -8,7 +8,7 @@ import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import com.protect.kid.R;
-import com.protect.kid.core.util.VpnServiceHelper;
+import com.protect.kid.core.util.VpnServiceUtil;
 import com.protect.kid.filter.BlackListHelper;
 
 import de.greenrobot.event.EventBus;
@@ -31,14 +31,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 				mSubTitleProtect.setText(isChecked ? R.string.protect_feature_sub_title_started
 						: R.string.protect_feature_sub_title_stopped);
-				VpnServiceHelper.changeVpnRunningStatus(buttonView.getContext(), isChecked);
+				VpnServiceUtil.changeVpnRunningStatus(buttonView.getContext(), isChecked);
 			}
 		});
 		initData();
 	}
 
 	private void initData() {
-		boolean isRunning = VpnServiceHelper.vpnRunningStatus();
+		boolean isRunning = VpnServiceUtil.getVpnRunningStatus();
 		mProtectCheckbox.setChecked(isRunning);
 		mSubTitleProtect.setText(isRunning ? R.string.protect_feature_sub_title_started
 				: R.string.protect_feature_sub_title_stopped);
@@ -85,9 +85,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (requestCode == VpnServiceHelper.START_VPN_SERVICE_REQUEST_CODE) {
+		if (requestCode == VpnServiceUtil.START_VPN_SERVICE_REQUEST_CODE) {
 			if (resultCode == RESULT_OK) {
-				VpnServiceHelper.startVpnService(this);
+				VpnServiceUtil.startVpnService(this);
 				mProtectCheckbox.setChecked(true);
 			} else {
 				mProtectCheckbox.setChecked(false);

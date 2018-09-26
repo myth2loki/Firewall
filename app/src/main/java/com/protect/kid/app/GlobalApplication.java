@@ -8,12 +8,9 @@ import android.content.Context;
 import android.os.Build;
 import android.util.Log;
 
-import com.protect.kid.core.ProxyConfig;
-import com.protect.kid.core.util.VpnServiceHelper;
+import com.protect.kid.core.util.VpnServiceUtil;
 import com.protect.kid.receiver.CheckJobService;
 import com.protect.kid.BuildConfig;
-
-import java.util.Properties;
 
 import cn.jpush.android.api.JPushInterface;
 
@@ -33,8 +30,8 @@ public class GlobalApplication extends Application {
 		initJpush();
 		sInstance = this;
 
-		boolean should = VpnServiceHelper.shouldStartVPNService(this);
-		VpnServiceHelper.changeVpnRunningStatus(this, should);
+		boolean should = VpnServiceUtil.shouldStartVPNService(this);
+		VpnServiceUtil.changeVpnRunningStatus(this, should);
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 			JobScheduler jobScheduler = (JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE);

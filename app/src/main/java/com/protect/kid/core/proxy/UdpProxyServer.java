@@ -9,7 +9,7 @@ import com.protect.kid.core.filter.Filter;
 import com.protect.kid.core.tcpip.CommonMethods;
 import com.protect.kid.core.tcpip.IPHeader;
 import com.protect.kid.core.tcpip.UDPHeader;
-import com.protect.kid.core.util.VpnServiceHelper;
+import com.protect.kid.core.util.VpnServiceUtil;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -28,7 +28,7 @@ public class UdpProxyServer implements Runnable {
 
     public UdpProxyServer() throws IOException {
         mClient = new DatagramSocket();
-        VpnServiceHelper.protect(mClient);
+        VpnServiceUtil.protect(mClient);
     }
 
     public void start() {
@@ -159,7 +159,7 @@ public class UdpProxyServer implements Runnable {
             udpHeader.setDestinationPort(state.mClientPort);
         }
         //输出到请求发起者
-        VpnServiceHelper.sendUDPPacket(ipHeader, udpHeader);
+        VpnServiceUtil.sendUDPPacket(ipHeader, udpHeader);
     }
 
     /**
