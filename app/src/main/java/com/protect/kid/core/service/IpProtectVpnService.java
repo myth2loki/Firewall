@@ -21,7 +21,6 @@ import com.protect.kid.core.tcpip.IPHeader;
 import com.protect.kid.core.tcpip.TCPHeader;
 import com.protect.kid.core.tcpip.UDPHeader;
 import com.protect.kid.core.util.VpnServiceUtil;
-import com.protect.kid.event.VPNEvent;
 import com.protect.kid.filter.BlackListFilter;
 import com.protect.kid.filter.CustomContentFilter;
 import com.protect.kid.filter.CustomIpFilter;
@@ -38,8 +37,6 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-
-import de.greenrobot.event.EventBus;
 
 public class IpProtectVpnService extends VpnService implements Runnable {
 	private static final String TAG = "FirewallVpnService";
@@ -69,7 +66,6 @@ public class IpProtectVpnService extends VpnService implements Runnable {
 		mVPNThread = new Thread(this, "VPNServiceThread");
 		mVPNThread.start();
 		setVpnRunningStatus(true);
-		notifyStatus(new VPNEvent(VPNEvent.Status.STARTING));
 		super.onCreate();
 	}
 
@@ -345,7 +341,6 @@ public class IpProtectVpnService extends VpnService implements Runnable {
 
 		builder.setSession(ProxyConfig.Instance.getSessionName());
 		ParcelFileDescriptor pfdDescriptor = builder.establish();
-		notifyStatus(new VPNEvent(VPNEvent.Status.ESTABLISHED));
 		return pfdDescriptor;
 	}
 
@@ -358,7 +353,6 @@ public class IpProtectVpnService extends VpnService implements Runnable {
 		} catch (Exception e) {
 			//ignore
 		}
-		notifyStatus(new VPNEvent(VPNEvent.Status.UNESTABLISHED));
 		this.mVPNOutputStream = null;
 	}
 
@@ -379,10 +373,6 @@ public class IpProtectVpnService extends VpnService implements Runnable {
 
 		stopSelf();
 		setVpnRunningStatus(false);
-	}
-
-	private void notifyStatus(VPNEvent event) {
-		EventBus.getDefault().post(event);
 	}
 
 	public boolean vpnRunningStatus() {

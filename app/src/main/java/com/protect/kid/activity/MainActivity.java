@@ -11,8 +11,6 @@ import com.protect.kid.R;
 import com.protect.kid.core.util.VpnServiceUtil;
 import com.protect.kid.filter.BlackListHelper;
 
-import de.greenrobot.event.EventBus;
-
 public class MainActivity extends BaseActivity implements View.OnClickListener {
 	private static final String TAG = "MainActivity";
 
@@ -75,7 +73,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 	@Override
 	protected void onStop() {
 		super.onStop();
-		EventBus.getDefault().unregister(this);
 	}
 
 	@Override

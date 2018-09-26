@@ -17,7 +17,6 @@ import com.protect.kid.R;
 
 public class NumberKeyboard extends FrameLayout implements View.OnClickListener {
 
-//	private int mWidth;
 	private int mTextSize;
 
 	private OnKeyboardInputListener mKeyboardInputListener;
@@ -27,7 +26,6 @@ public class NumberKeyboard extends FrameLayout implements View.OnClickListener 
 
 		DisplayMetrics dm = context.getResources().getDisplayMetrics();
 		mTextSize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 12.0f, dm);
-//		init(context);
 	}
 
 	public NumberKeyboard(Context context) {
@@ -70,9 +68,7 @@ public class NumberKeyboard extends FrameLayout implements View.OnClickListener 
 		textView.setClickable(true);
 		textView.setTextColor(Color.WHITE);
 		textView.setTextSize(mTextSize);
-//		textView.setTypeface(Typeface.DEFAULT_BOLD);
 		textView.setBackgroundResource(R.drawable.ripple_rect_round);
-//			textView.setTag(i != 10 ? i : 0);
 		textView.setTag(text);
 		textView.setOnClickListener(this);
 		gridLayout.addView(textView, lp);
@@ -80,11 +76,6 @@ public class NumberKeyboard extends FrameLayout implements View.OnClickListener 
 
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-//		int width = MeasureSpec.getSize(widthMeasureSpec);
-//		int height = MeasureSpec.getSize(heightMeasureSpec);
-//		mWidth = Math.min(width, height);
-//		widthMeasureSpec = MeasureSpec.makeMeasureSpec(mWidth, MeasureSpec.EXACTLY);
-//		heightMeasureSpec = MeasureSpec.makeMeasureSpec(mWidth, MeasureSpec.EXACTLY);
 		removeAllViews();
 		init(getContext());
 		super.onMeasure(widthMeasureSpec, heightMeasureSpec);

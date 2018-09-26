@@ -6,7 +6,6 @@ import android.util.Log;
 
 import com.protect.kid.BuildConfig;
 import com.protect.kid.db.AppCache;
-import com.protect.kid.event.HostUpdateEvent;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -16,7 +15,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.concurrent.TimeUnit;
 
-import de.greenrobot.event.EventBus;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -43,7 +41,6 @@ public class BlackListHelper {
 				.url(HOST_URL)
 				.header(AppCache.KEY_IF_SINCE_MODIFIED_SINCE, AppCache.getIfSinceModifiedSince(context))
 				.build();
-		EventBus.getDefault().post(new HostUpdateEvent(HostUpdateEvent.Status.Updating));
 		if (DEBUG) {
 			Log.d(TAG, "update: request = " + req);
 		}
@@ -53,7 +50,6 @@ public class BlackListHelper {
 				if (DEBUG) {
 					Log.w(TAG, "onFailure: update hosts failed", e);
 				}
-				EventBus.getDefault().post(new HostUpdateEvent(HostUpdateEvent.Status.UpdateFinished));
 			}
 
 			@Override
@@ -80,7 +76,8 @@ public class BlackListHelper {
 						Log.w(TAG, "onResponse: response is invalid, code = " + response.code());
 					}
 				}
-				EventBus.getDefault().post(new HostUpdateEvent(HostUpdateEvent.Status.UpdateFinished));
+				PushBlackContentFilter.reload();
+				PushBlackIpFilter.reload();
 			}
 		});
 	}
