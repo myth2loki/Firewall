@@ -16,6 +16,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.RadioButton;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
@@ -51,6 +52,8 @@ public class TimeSettingFragment extends BaseSettingFragment implements View.OnC
     private Button mTimeRangeDateEndButton;
     private Button mTimeRangeTimeEndButton;
     private int mDuration;
+    private RadioButton mTimeRangeRadioButton;
+    private RadioButton mDurationRadioButton;
 
     @Override
     public String getTitle() {
@@ -108,12 +111,12 @@ public class TimeSettingFragment extends BaseSettingFragment implements View.OnC
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        CheckBox cb = (CheckBox) getView().findViewById(R.id.time_range_check_box);
-        cb.setChecked((mType & 0b01) == TIME_RANGE);
-        cb.setOnCheckedChangeListener(this);
-        cb = (CheckBox) getView().findViewById(R.id.time_duration_check_box);
-        cb.setChecked((mType & 0b10) == TIME_DURATION);
-        cb.setOnCheckedChangeListener(this);
+        mTimeRangeRadioButton = (RadioButton) getView().findViewById(R.id.time_range_radio_button);
+        mTimeRangeRadioButton.setChecked((mType & 0b01) == TIME_RANGE);
+        mTimeRangeRadioButton.setOnCheckedChangeListener(this);
+        mDurationRadioButton = (RadioButton) getView().findViewById(R.id.time_duration_radio_button);
+        mDurationRadioButton.setChecked((mType & 0b10) == TIME_DURATION);
+        mDurationRadioButton.setOnCheckedChangeListener(this);
         ((EditText) getView().findViewById(R.id.time_duration_edit_text)).setText(mDuration == 0 ? "" : mDuration + "");
         if (DEBUG) {
             Log.d(TAG, "onActivityCreated: mType & 0b01 = " + (mType & 0b01));
@@ -167,7 +170,7 @@ public class TimeSettingFragment extends BaseSettingFragment implements View.OnC
                 if ((mType & TIME_RANGE) == TIME_RANGE) {
                     SharedPrefUtil.saveLong(getContext(), AppGlobal.GLOBAL_PREF_NAME, START_TIME, mStartCalendar.getTimeInMillis());
                     SharedPrefUtil.saveLong(getContext(), AppGlobal.GLOBAL_PREF_NAME, END_TIME, mEndCalendar.getTimeInMillis());
-                    TimeRangeFilter.reload();
+//                    TimeRangeFilter.reload();
                     Logger.getInstance(getContext())
                             .insert(getString(R.string.set_time_range_x_to_x,
                                     getDateString(mStartCalendar) + " " + getTimeString(mStartCalendar),
@@ -175,10 +178,12 @@ public class TimeSettingFragment extends BaseSettingFragment implements View.OnC
                 }
                 if ((mType & TIME_DURATION) == TIME_DURATION && mDuration > 0) {
                     SharedPrefUtil.saveInt(getContext(), AppGlobal.GLOBAL_PREF_NAME, DURATION, mDuration);
-                    TimeDurationFilter.reload();
+//                    TimeDurationFilter.reload();
                     Logger.getInstance(getContext())
                             .insert(getString(R.string.set_time_duration_x, mDuration + ""));
                 }
+                TimeRangeFilter.reload();
+                TimeDurationFilter.reload();
                 Toast.makeText(getContext(), R.string.succeeded_to_save_setting, Toast.LENGTH_SHORT).show();
                 break;
         }
@@ -187,12 +192,13 @@ public class TimeSettingFragment extends BaseSettingFragment implements View.OnC
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         switch (buttonView.getId()) {
-            case R.id.time_range_check_box:
+            case R.id.time_range_radio_button:
                 if (mType == 0) {
                     mType = TIME_RANGE;
                 } else {
                     if (isChecked) {
                         mType |= TIME_RANGE;
+                        mDurationRadioButton.setChecked(false);
                     } else {
                         mType &= 0b10;
                     }
@@ -201,12 +207,13 @@ public class TimeSettingFragment extends BaseSettingFragment implements View.OnC
                     Log.d(TAG, "onCheckedChanged: time range type = " + mType);
                 }
                 break;
-            case R.id.time_duration_check_box:
+            case R.id.time_duration_radio_button:
                 if (mType == 0) {
                     mType = TIME_DURATION;
                 } else {
                     if (isChecked) {
                         mType |= TIME_DURATION;
+                        mTimeRangeRadioButton.setChecked(false);
                     } else {
                         mType &= 0b01;
                     }

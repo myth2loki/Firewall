@@ -17,7 +17,7 @@ public class BootBroadcastReceiver extends BroadcastReceiver {
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		String value = SharedPrefUtil.getValue(context, AppGlobal.GLOBAL_PREF_NAME,
-				AppGlobal.IS_PROTECTED, "false");
+				AppGlobal.PREF_IS_PROTECTED, "false");
 		boolean isStart = "true".equals(value);
 		if (DEBUG) {
 			Log.d(TAG, "onReceive: should start = " + isStart);

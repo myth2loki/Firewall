@@ -93,11 +93,14 @@
 
         <!-- Receiver -->
 
-		<receiver android:name = "com.protect.kid.receiver.BootBroadcastReceiver" >
+		<receiver android:name = "com.protect.kid.receiver.RebootReceiver"
+			android:exported="true">
 			<intent-filter >
 				<action android:name = "android.intent.action.BOOT_COMPLETED" />
 			</intent-filter >
 		</receiver >
+		<receiver android:name = "com.protect.kid.receiver.AlarmCheckReceiver"
+			android:exported="true" />
 
 		<receiver
 				android:name = "com.protect.kid.receiver.NoUninstallReceiver"

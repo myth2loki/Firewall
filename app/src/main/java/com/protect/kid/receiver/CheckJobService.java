@@ -18,15 +18,7 @@ public class CheckJobService extends JobService {
 
     @Override
     public boolean onStartJob(JobParameters params) {
-        String value = SharedPrefUtil.getValue(getApplicationContext(), AppGlobal.GLOBAL_PREF_NAME,
-                AppGlobal.IS_PROTECTED, "false");
-        boolean isStart = "true".equals(value);
-        if (DEBUG) {
-            Log.d(TAG, "onReceive: should start = " + isStart);
-        }
-        if (isStart) {
-            VpnServiceUtil.changeVpnRunningStatus(getApplicationContext(), true);
-        }
+        Helper.checkOrProtect(getApplicationContext());
         return false;
     }
 

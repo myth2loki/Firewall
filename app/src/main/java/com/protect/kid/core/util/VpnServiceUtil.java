@@ -82,14 +82,14 @@ public class VpnServiceUtil {
 			if (sVpnService != null) {
 				sVpnService.setVpnRunningStatus(stopStatus);
 			}
-			SharedPrefUtil.saveValue(context, AppGlobal.GLOBAL_PREF_NAME, AppGlobal.IS_PROTECTED, "false");
+			SharedPrefUtil.saveValue(context, AppGlobal.GLOBAL_PREF_NAME, AppGlobal.PREF_IS_PROTECTED, "false");
             SharedPrefUtil.remove(context, AppGlobal.GLOBAL_PREF_NAME, TimeDurationFilter.PROTECT_START_TIME);
 			Logger.getInstance(context).insert(context.getString(R.string.stop_protect));
 		}
 	}
 
 	public static boolean shouldStartVPNService(Context context) {
-		String result = SharedPrefUtil.getValue(context, AppGlobal.GLOBAL_PREF_NAME, AppGlobal.IS_PROTECTED, "false");
+		String result = SharedPrefUtil.getValue(context, AppGlobal.GLOBAL_PREF_NAME, AppGlobal.PREF_IS_PROTECTED, "false");
 		return "true".equals(result);
 	}
 
@@ -121,10 +121,10 @@ public class VpnServiceUtil {
 		}
 
 		context.startService(new Intent(context, IpProtectVpnService.class));
-		if ("false".equals(SharedPrefUtil.getValue(context, AppGlobal.GLOBAL_PREF_NAME, AppGlobal.IS_PROTECTED, "false"))) {
+		if ("false".equals(SharedPrefUtil.getValue(context, AppGlobal.GLOBAL_PREF_NAME, AppGlobal.PREF_IS_PROTECTED, "false"))) {
 			SharedPrefUtil.saveLong(context, AppGlobal.GLOBAL_PREF_NAME, TimeDurationFilter.PROTECT_START_TIME, System.currentTimeMillis());
 			Logger.getInstance(context).insert(context.getString(R.string.start_protect));
 		}
-		SharedPrefUtil.saveValue(context, AppGlobal.GLOBAL_PREF_NAME, AppGlobal.IS_PROTECTED, "true");
+		SharedPrefUtil.saveValue(context, AppGlobal.GLOBAL_PREF_NAME, AppGlobal.PREF_IS_PROTECTED, "true");
 	}
 }
